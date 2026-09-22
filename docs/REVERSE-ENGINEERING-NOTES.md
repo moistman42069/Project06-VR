@@ -35,6 +35,15 @@ Confidence: exact external APK source match — high; Android port name/content
 line — high; exact PC commit/build hash — unproven. A byte-for-byte PC match would
 still require the corresponding PC executable or a same-release asset/code hash.
 
+## Newer Android build search
+
+Checked 2026-09-22: no newer publicly documented Lowfriend APK was found. The
+August 2025 “full mobile port” showcase is an earlier development build; the
+September 10, 2025 Sonic Release APK is the later known public build. The same
+MediaFire file remains linked by later community posts, and no Android patch,
+version tag or replacement APK with a later upload date was located. This is a
+research result, not proof that a private Discord test build cannot exist.
+
 Exact method RVAs, prologues, caller counts, camera/canvas findings and API
 audits are kept under `evidence/`. Those files are generated investigation data;
 large APK, ELF, dump and Unity asset files remain ignored/local.
