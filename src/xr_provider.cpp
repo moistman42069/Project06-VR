@@ -304,7 +304,10 @@ void UNITY_INTERFACE_API stop(UnitySubsystemHandle,void*){LOG("Unity XR lifecycl
 void UNITY_INTERFACE_API destroy(UnitySubsystemHandle,void*){LOG("Unity XR lifecycle shutdown");}
 }
 extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* interfaces){
+    LOG("UnityPluginLoad entered: interfaces=%p",interfaces);
+    if(!interfaces){LOG("Unity interface registry unavailable");return;}
     display=interfaces->Get<IUnityXRDisplayInterface>();graphics=interfaces->Get<IUnityGraphics>();
+    LOG("Unity provider interfaces: display=%p graphics=%p",display,graphics);
     if(!display||!graphics){LOG("Unity XR provider interfaces missing");return;}
     UnityLifecycleProvider life{};life.Initialize=initialize;life.Start=start;life.Stop=stop;life.Shutdown=destroy;
     auto r=display->RegisterLifecycleProvider("P06Quest","P06 Quest Display",&life);LOG("Unity XR provider registration=%d",int(r));

@@ -5,7 +5,7 @@ import subprocess
 import zipfile
 
 root = pathlib.Path(__file__).resolve().parents[1]
-version = '0.1.1'
+version = '0.1.2'
 files = set()
 for folder in ['src', 'tools', 'tests', 'docs']:
     files.update(p for p in (root / folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)

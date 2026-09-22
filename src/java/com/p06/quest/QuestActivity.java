@@ -20,6 +20,7 @@ import java.util.Locale;
 
 public final class QuestActivity extends UnityPlayerActivity {
     private static native void nativePrepare(QuestActivity activity, String settingsDirectory, int logFd);
+    private static native void nativeAttach();
     private java.lang.Process logProcess;
     private ParcelFileDescriptor logDescriptor;
     private FileOutputStream logOutput;
@@ -53,7 +54,7 @@ public final class QuestActivity extends UnityPlayerActivity {
             } catch (Exception fallback) { Log.e("P06Quest", "Cannot create run log", fallback); }
         }
         try {
-            if (logOutput != null) logOutput.write(("P06 Quest candidate 0.1.1\nRun: " + runName + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL + "\nAndroid: " + Build.VERSION.RELEASE + " / API " + Build.VERSION.SDK_INT + "\nPackage: " + getPackageName() + "\nSettings: " + files.getAbsolutePath() + "\nPublic log target: Downloads/P06Quest\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            if (logOutput != null) logOutput.write(("P06 Quest candidate 0.1.2\nRun: " + runName + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL + "\nAndroid: " + Build.VERSION.RELEASE + " / API " + Build.VERSION.SDK_INT + "\nPackage: " + getPackageName() + "\nSettings: " + files.getAbsolutePath() + "\nPublic log target: Downloads/P06Quest\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         } catch (Exception e) { Log.e("P06Quest", "Log header failed", e); }
         final Thread.UncaughtExceptionHandler previousHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((thread, failure) -> {
@@ -61,10 +62,11 @@ public final class QuestActivity extends UnityPlayerActivity {
             if (previousHandler != null) previousHandler.uncaughtException(thread, failure);
             else { Process.killProcess(Process.myPid()); System.exit(10); }
         });
+        PreviousExitReports.capture(this, logOutput);
         // Capture this app's own diagnostic stream for sideload-only testing.
         Thread logger = new Thread(() -> {
             try {
-                logProcess = new ProcessBuilder("logcat", "-v", "threadtime", "--pid=" + Process.myPid(), "P06Quest:I", "Unity:I", "OpenXR-Loader:I", "AndroidRuntime:E", "*:S").redirectErrorStream(true).start();
+                logProcess = new ProcessBuilder("logcat", "-v", "threadtime", "--pid=" + Process.myPid(), "*:V").redirectErrorStream(true).start();
                 try (InputStream in = logProcess.getInputStream()) {
                     byte[] buffer = new byte[4096]; int n;
                     while ((n = in.read(buffer)) != -1) { if (logOutput != null) { logOutput.write(buffer, 0, n); logOutput.flush(); } }
@@ -82,6 +84,7 @@ public final class QuestActivity extends UnityPlayerActivity {
             if (description == 0 || surface == 0) throw new IllegalStateException("Unity resource namespace mismatch");
             writeDiagnostic("Unity description: " + getResources().getString(description));
             super.onCreate(state);
+            nativeAttach();
             writeDiagnostic("UnityPlayerActivity.onCreate completed");
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } catch (Throwable failure) {

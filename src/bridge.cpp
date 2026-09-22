@@ -316,5 +316,18 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm,void*){g_vm=vm;return JNI_VERSIO
 extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativePrepare(JNIEnv* env,jclass,jobject activity,jstring directory,jint fd){
     if(fd>=0)logFd=dup(fd);
     g_activity=env->NewGlobalRef(activity);const char* dir=env->GetStringUTFChars(directory,nullptr);InitOptions(dir);env->ReleaseStringUTFChars(directory,dir);
-    LOG("P06 Quest candidate 0.1.1 / Unity 2022.3.62f1 / ARM64");BeginLoaderHooks();
+    LOG("P06 Quest candidate 0.1.2 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
+    LOG("System library loading is untouched; waiting for Unity activity creation");
+}
+
+extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativeAttach(JNIEnv*,jclass){
+    LOG("Attaching game hooks after Unity activity creation (no loader interception)");
+    auto lib=dlopen("libil2cpp.so",RTLD_NOW|RTLD_NOLOAD);
+    if(!lib){LOG("IL2CPP not loaded after Unity creation: %s",dlerror());return;}
+    // Keep the handle for API bindings. No process-wide dlopen detours are installed.
+    InstallGameHooks(lib);
+    for(const char* name:{"libunity.so","libp06quest.so"}){
+        auto h=dlopen(name,RTLD_NOW|RTLD_NOLOAD);
+        if(h){LOG("Loaded module %s handle=%p",name,h);dlclose(h);}
+    }
 }

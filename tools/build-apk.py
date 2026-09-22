@@ -47,7 +47,7 @@ additions={
     'lib/arm64-v8a/libopenxr_loader.so':(ROOT/'build/vendor/OpenXR-SDK/src/loader/libopenxr_loader.so').read_bytes(),
     'assets/bin/Data/UnitySubsystems/P06Quest/UnitySubsystemsManifest.json':(ROOT/'src/UnitySubsystemsManifest.json').read_bytes(),
 }
-unsigned=OUT/'p06-quest-0.1.1-unsigned.apk'
+unsigned=OUT/'p06-quest-0.1.2-unsigned.apk'
 print('Packaging preserved game payload and Quest plugin',flush=True)
 preserved=[]
 with zipfile.ZipFile(original) as source, zipfile.ZipFile(unsigned,'w',allowZip64=True) as target:
@@ -60,11 +60,11 @@ with zipfile.ZipFile(original) as source, zipfile.ZipFile(unsigned,'w',allowZip6
         if info.file_size>100_000_000:print('Preserved',info.filename,info.file_size,flush=True)
     for name,data in additions.items():
         target.writestr(name,data,compress_type=zipfile.ZIP_STORED)
-aligned=OUT/'p06-quest-0.1.1-aligned.apk'
+aligned=OUT/'p06-quest-0.1.2-aligned.apk'
 run([android/'zipalign.exe','-f','-P','16','4',unsigned,aligned],'zipalign.log')
 keys=ROOT/'keys';keys.mkdir(exist_ok=True);key=keys/'p06quest-development.jks'
 if not key.exists():run([jdk/'keytool.exe','-genkeypair','-keystore',key,'-alias','p06quest','-storepass','android','-keypass','android','-dname','CN=P06 Quest Local Development','-keyalg','RSA','-keysize','2048','-validity','10000'],'key-generation.log')
-apk=OUT/'p06-quest-0.1.1.apk'
+apk=OUT/'p06-quest-0.1.2.apk'
 run([jdk/'java.exe','-jar',android/'lib/apksigner.jar','sign','--ks',key,'--ks-key-alias','p06quest','--ks-pass','pass:android','--key-pass','pass:android','--out',apk,aligned],'apk-signing.log')
 run([jdk/'java.exe','-jar',android/'lib/apksigner.jar','verify','--verbose','--print-certs',apk],'apk-signature-verification.log')
 run([android/'zipalign.exe','-c','-P','16','4',apk],'apk-alignment-verification.log')
@@ -93,5 +93,5 @@ source_files=list((ROOT/'src').rglob('*'))+list((ROOT/'tools').rglob('*.py'))+[R
 source_hash=hashlib.sha256()
 for p in sorted(x for x in source_files if x.is_file()):source_hash.update(p.relative_to(ROOT).as_posix().encode());source_hash.update(p.read_bytes())
 receipt={'apk':apk.name,'apk_sha256':digest(apk),'bytes':apk.stat().st_size,'base_apk_sha256':identity['sha256'],'source_tree_sha256':source_hash.hexdigest(),'native_plugin_sha256':digest(ROOT/'build/libp06quest.so'),'preserved_entries':preserved,'added_or_modified_entries':list(additions),'headset_tested':False}
-(OUT/'p06-quest-0.1.1-receipt.json').write_text(json.dumps(receipt,indent=2),encoding='utf-8')
+(OUT/'p06-quest-0.1.2-receipt.json').write_text(json.dumps(receipt,indent=2),encoding='utf-8')
 print('APK ready:',apk,flush=True);print('SHA256:',receipt['apk_sha256'],flush=True)

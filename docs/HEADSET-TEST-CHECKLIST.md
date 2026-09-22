@@ -1,6 +1,6 @@
 # Quest 3 headset test checklist
 
-For 0.1.1, first check the log reports nonzero Unity resource IDs and
+For 0.1.2, retain any previous-exit trace blocks and first check the log reports nonzero Unity resource IDs and
 `UnityPlayerActivity.onCreate completed`.
 
 Use a fresh launch and retain the corresponding `Downloads/P06Quest` log.
