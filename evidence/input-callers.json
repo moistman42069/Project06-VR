@@ -1,0 +1,2490 @@
+{
+  "CF.GetAxis": [
+    {
+      "caller": "Amy$$StateBrake",
+      "callsite": "0x11a0134"
+    },
+    {
+      "caller": "Aqa_Balancer$$FixedUpdate",
+      "callsite": "0x11a68cc"
+    },
+    {
+      "caller": "Aqa_Balancer$$FixedUpdate",
+      "callsite": "0x11a68e4"
+    },
+    {
+      "caller": "Glider$$InputY",
+      "callsite": "0x11b87ac"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b8d64"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b8d88"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b8f34"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b8fe8"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b91dc"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b9290"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b93ac"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c1fac"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2e1c"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2f38"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11c98c0"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cba74"
+    },
+    {
+      "caller": "Knuckles$$StateBrake",
+      "callsite": "0x11d3374"
+    },
+    {
+      "caller": "Knuckles$$StateClimb",
+      "callsite": "0x11d56d4"
+    },
+    {
+      "caller": "Knuckles$$StateClimb",
+      "callsite": "0x11d5740"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da99c"
+    },
+    {
+      "caller": "MainMenu$$Update",
+      "callsite": "0x11dc980"
+    },
+    {
+      "caller": "MainMenu$$Update",
+      "callsite": "0x11dc990"
+    },
+    {
+      "caller": "MainMenu$$Update",
+      "callsite": "0x11dc9a4"
+    },
+    {
+      "caller": "MainMenu$$Update",
+      "callsite": "0x11dc9b4"
+    },
+    {
+      "caller": "Omega$$StateBrake",
+      "callsite": "0x1202f9c"
+    },
+    {
+      "caller": "Omega$$StateGatlingGun",
+      "callsite": "0x12063e4"
+    },
+    {
+      "caller": "Omega$$StateGatlingGun",
+      "callsite": "0x1206400"
+    },
+    {
+      "caller": "PauseMenu$$Update",
+      "callsite": "0x12100a0"
+    },
+    {
+      "caller": "PauseMenu$$Update",
+      "callsite": "0x12100b0"
+    },
+    {
+      "caller": "PlayerBase$$UpdateCameraTarget",
+      "callsite": "0x1216c48"
+    },
+    {
+      "caller": "PlayerBase$$GetRailInput",
+      "callsite": "0x1219d10"
+    },
+    {
+      "caller": "PlayerBase$$SlopePhysics",
+      "callsite": "0x1221bc0"
+    },
+    {
+      "caller": "PlayerBase$$SlopePhysics",
+      "callsite": "0x1221be0"
+    },
+    {
+      "caller": "PlayerBase$$RotatePlayer",
+      "callsite": "0x12221e0"
+    },
+    {
+      "caller": "PlayerBase$$RotatePlayer",
+      "callsite": "0x12221f0"
+    },
+    {
+      "caller": "PlayerCamera$$RawStickX",
+      "callsite": "0x122726c"
+    },
+    {
+      "caller": "PlayerCamera$$RawStickY",
+      "callsite": "0x1227368"
+    },
+    {
+      "caller": "PlayerCamera$$LateUpdate",
+      "callsite": "0x122d9e4"
+    },
+    {
+      "caller": "PlayerCamera$$LateUpdate",
+      "callsite": "0x122d9fc"
+    },
+    {
+      "caller": "PlayerCamera$$FixedUpdate",
+      "callsite": "0x122dca4"
+    },
+    {
+      "caller": "PlayerCamera$$FixedUpdate",
+      "callsite": "0x122dcec"
+    },
+    {
+      "caller": "Rouge$$StateBrake",
+      "callsite": "0x124bb20"
+    },
+    {
+      "caller": "Rouge$$StateClimb",
+      "callsite": "0x124df90"
+    },
+    {
+      "caller": "Rouge$$StateClimb",
+      "callsite": "0x124e028"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1254390"
+    },
+    {
+      "caller": "Shadow$$StateBrake",
+      "callsite": "0x1273dcc"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127ec28"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127eef8"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127fa70"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127fab0"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x128004c"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x12804f0"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x128084c"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x12825cc"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1283e60"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1283f88"
+    },
+    {
+      "caller": "Bike$$TightenSteer",
+      "callsite": "0x1284e90"
+    },
+    {
+      "caller": "Blaze$$StateBrake",
+      "callsite": "0x12876b8"
+    },
+    {
+      "caller": "Silver$$StateBrake",
+      "callsite": "0x129969c"
+    },
+    {
+      "caller": "Silver$$DoUpheave",
+      "callsite": "0x129b6ec"
+    },
+    {
+      "caller": "Silver$$DoUpheave",
+      "callsite": "0x129b708"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a38c0"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5698"
+    },
+    {
+      "caller": "SnowBoard$$StateRampJump",
+      "callsite": "0x12af298"
+    },
+    {
+      "caller": "SnowBoard$$FixedUpdate",
+      "callsite": "0x12afa2c"
+    },
+    {
+      "caller": "SnowBoard$$FixedUpdate",
+      "callsite": "0x12afa40"
+    },
+    {
+      "caller": "SnowBoard$$UpdateSound",
+      "callsite": "0x12b085c"
+    },
+    {
+      "caller": "SnowBoard$$UpdateSound",
+      "callsite": "0x12b08e0"
+    },
+    {
+      "caller": "SnowBoard$$UpdateSound",
+      "callsite": "0x12b0a94"
+    },
+    {
+      "caller": "SnowBoard$$UpdateSound",
+      "callsite": "0x12b0d30"
+    },
+    {
+      "caller": "SnowBoard$$UpdateAnimations",
+      "callsite": "0x12b16c4"
+    },
+    {
+      "caller": "SonicFast$$VerticalDir",
+      "callsite": "0x12b9420"
+    },
+    {
+      "caller": "SonicFast$$HorizontalDir",
+      "callsite": "0x12baf38"
+    },
+    {
+      "caller": "SonicFast$$UpdateMesh",
+      "callsite": "0x12bbaac"
+    },
+    {
+      "caller": "SonicFast$$UpdateMesh",
+      "callsite": "0x12bbac4"
+    },
+    {
+      "caller": "SonicNew$$StateBrake",
+      "callsite": "0x12becf8"
+    },
+    {
+      "caller": "SonicNew$$StateWaterSlide",
+      "callsite": "0x12c5d80"
+    },
+    {
+      "caller": "SonicNew$$UpdateMesh",
+      "callsite": "0x12ca3cc"
+    },
+    {
+      "caller": "SonicNew$$UpdateMesh",
+      "callsite": "0x12ca3e4"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc1e8"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cdf14"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce79c"
+    },
+    {
+      "caller": "Tails$$StateBrake",
+      "callsite": "0x12deaac"
+    },
+    {
+      "caller": "TitleScreen$$Update",
+      "callsite": "0x12ea56c"
+    },
+    {
+      "caller": "TitleScreen$$Update",
+      "callsite": "0x12ea57c"
+    },
+    {
+      "caller": "TitleScreen$$Update",
+      "callsite": "0x12ea590"
+    },
+    {
+      "caller": "TitleScreen$$Update",
+      "callsite": "0x12ea5a0"
+    },
+    {
+      "caller": "ControlFreak2.Demos.Cameras.SimpleFollowCam$$Update",
+      "callsite": "0x1409a70"
+    },
+    {
+      "caller": "ControlFreak2.Demos.Characters.DualStickShooterCharaMotor$$Update",
+      "callsite": "0x140a468"
+    },
+    {
+      "caller": "ControlFreak2.Demos.Characters.DualStickShooterCharaMotor$$Update",
+      "callsite": "0x140a49c"
+    },
+    {
+      "caller": "ControlFreak2.Demos.Characters.DualStickShooterCharaMotor$$Update",
+      "callsite": "0x140a4d8"
+    },
+    {
+      "caller": "ControlFreak2.Demos.Characters.DualStickShooterCharaMotor$$Update",
+      "callsite": "0x140a50c"
+    },
+    {
+      "caller": "ControlFreak2.DebugUtils.AxisDebugger$$Update",
+      "callsite": "0x140c258"
+    },
+    {
+      "caller": "ControlFreak2.DebugUtils.AxisDebugger$$Update",
+      "callsite": "0x140c270"
+    }
+  ],
+  "CF.GetButton": [
+    {
+      "caller": "Amy$$StateJump",
+      "callsite": "0x11a0808"
+    },
+    {
+      "caller": "Amy$$StateJump",
+      "callsite": "0x11a0874"
+    },
+    {
+      "caller": "Amy$$StateHammerAttack",
+      "callsite": "0x11a1964"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a44ac"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a44f8"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b89fc"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b8ab8"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b8c6c"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b8e98"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c20b8"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c21c0"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2254"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2328"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2534"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2680"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c27cc"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2868"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c2d30"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c3304"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c3324"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c334c"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c3414"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c3734"
+    },
+    {
+      "caller": "Hover$$FixedUpdate",
+      "callsite": "0x11c4794"
+    },
+    {
+      "caller": "Hover$$FixedUpdate",
+      "callsite": "0x11c47c8"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11c9904"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cab94"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cb120"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cb8b0"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cbd40"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cbe20"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cbe40"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cbe68"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cbf54"
+    },
+    {
+      "caller": "Knuckles$$StateJump",
+      "callsite": "0x11d3a74"
+    },
+    {
+      "caller": "Knuckles$$StateJump",
+      "callsite": "0x11d3ae0"
+    },
+    {
+      "caller": "Knuckles$$StateGlide",
+      "callsite": "0x11d4ddc"
+    },
+    {
+      "caller": "Knuckles$$StateScrewdriver",
+      "callsite": "0x11d8270"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da788"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da7e0"
+    },
+    {
+      "caller": "Omega$$StateJump",
+      "callsite": "0x1203b18"
+    },
+    {
+      "caller": "Omega$$StateJump",
+      "callsite": "0x1203b84"
+    },
+    {
+      "caller": "Omega$$StateHover",
+      "callsite": "0x1204670"
+    },
+    {
+      "caller": "Omega$$StateOmegaLauncher",
+      "callsite": "0x1205c34"
+    },
+    {
+      "caller": "Omega$$StateGatlingGun",
+      "callsite": "0x1206984"
+    },
+    {
+      "caller": "Omega$$FixedUpdate",
+      "callsite": "0x1207c90"
+    },
+    {
+      "caller": "PlayerCamera$$CameraNormalUpdate",
+      "callsite": "0x1227740"
+    },
+    {
+      "caller": "PlayerCamera$$CameraNormalUpdate",
+      "callsite": "0x12277d8"
+    },
+    {
+      "caller": "PlayerCamera$$Update",
+      "callsite": "0x122c6ec"
+    },
+    {
+      "caller": "PlayerCamera$$Update",
+      "callsite": "0x122c728"
+    },
+    {
+      "caller": "PlayerCamera$$Update",
+      "callsite": "0x122c7e0"
+    },
+    {
+      "caller": "PlayerCamera$$LateUpdate",
+      "callsite": "0x122db00"
+    },
+    {
+      "caller": "PlayerCamera$$FixedUpdate",
+      "callsite": "0x122dd28"
+    },
+    {
+      "caller": "PlayerCamera$$FixedUpdate",
+      "callsite": "0x122dd50"
+    },
+    {
+      "caller": "Princess$$StateJump",
+      "callsite": "0x12384ec"
+    },
+    {
+      "caller": "Princess$$StateJump",
+      "callsite": "0x1238558"
+    },
+    {
+      "caller": "Princess$$StateSlide",
+      "callsite": "0x123b0e8"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d7cc"
+    },
+    {
+      "caller": "Rouge$$StateJump",
+      "callsite": "0x124c220"
+    },
+    {
+      "caller": "Rouge$$StateJump",
+      "callsite": "0x124c28c"
+    },
+    {
+      "caller": "Rouge$$StateGlide",
+      "callsite": "0x124d610"
+    },
+    {
+      "caller": "Rouge$$StateBombScatter",
+      "callsite": "0x1251e74"
+    },
+    {
+      "caller": "Rouge$$StateBombSnipe",
+      "callsite": "0x12526a0"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253a28"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253eec"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253f3c"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1254320"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x12549c0"
+    },
+    {
+      "caller": "Shadow$$StateJump",
+      "callsite": "0x1274824"
+    },
+    {
+      "caller": "Shadow$$StateJump",
+      "callsite": "0x1274890"
+    },
+    {
+      "caller": "Shadow$$StateJumpDash",
+      "callsite": "0x1275784"
+    },
+    {
+      "caller": "Shadow$$StateJumpDashSTH",
+      "callsite": "0x1275f74"
+    },
+    {
+      "caller": "Shadow$$StateHomingStart",
+      "callsite": "0x127679c"
+    },
+    {
+      "caller": "Shadow$$StateHomingStart",
+      "callsite": "0x1276850"
+    },
+    {
+      "caller": "Shadow$$StateHoming",
+      "callsite": "0x1276cf8"
+    },
+    {
+      "caller": "Shadow$$StateHoming",
+      "callsite": "0x1276e68"
+    },
+    {
+      "caller": "Shadow$$StateChaosAttack",
+      "callsite": "0x1277e60"
+    },
+    {
+      "caller": "Shadow$$StateChaosAttack",
+      "callsite": "0x1277eb8"
+    },
+    {
+      "caller": "Shadow$$StateTrickJump",
+      "callsite": "0x1278e48"
+    },
+    {
+      "caller": "Shadow$$StateTrickJump",
+      "callsite": "0x1278eb4"
+    },
+    {
+      "caller": "Shadow$$StateChaosSpear",
+      "callsite": "0x1279a5c"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f0bc"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f41c"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127fd64"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x1280238"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1282614"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1282ba8"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1282c48"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1282dcc"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1282e8c"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1283044"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1283104"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x128324c"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1283828"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x12838b8"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1283d3c"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1283d78"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1284164"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x1284244"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x12842a8"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x12842c8"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x12842f4"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x12843f0"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x128468c"
+    },
+    {
+      "caller": "Bike$$FixedUpdate",
+      "callsite": "0x12850b8"
+    },
+    {
+      "caller": "Bike$$FixedUpdate",
+      "callsite": "0x12850e0"
+    },
+    {
+      "caller": "Bike$$FixedUpdate",
+      "callsite": "0x12852a4"
+    },
+    {
+      "caller": "Bike$$FixedUpdate",
+      "callsite": "0x12852cc"
+    },
+    {
+      "caller": "Bike$$FixedUpdate",
+      "callsite": "0x12853dc"
+    },
+    {
+      "caller": "Bike$$FixedUpdate",
+      "callsite": "0x1285410"
+    },
+    {
+      "caller": "Blaze$$StateJump",
+      "callsite": "0x1288110"
+    },
+    {
+      "caller": "Blaze$$StateJump",
+      "callsite": "0x128817c"
+    },
+    {
+      "caller": "Blaze$$StateAccelJump",
+      "callsite": "0x1288eb4"
+    },
+    {
+      "caller": "Blaze$$StateAccelJump",
+      "callsite": "0x12892ec"
+    },
+    {
+      "caller": "Blaze$$StateAccelJump",
+      "callsite": "0x128939c"
+    },
+    {
+      "caller": "Blaze$$StateSpinningClaw",
+      "callsite": "0x128b0e8"
+    },
+    {
+      "caller": "Blaze$$StateSpinningClaw",
+      "callsite": "0x128b110"
+    },
+    {
+      "caller": "Blaze$$StateSpinningClaw",
+      "callsite": "0x128b170"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d2e8"
+    },
+    {
+      "caller": "Silver$$StateGround",
+      "callsite": "0x1298d58"
+    },
+    {
+      "caller": "Silver$$StateJump",
+      "callsite": "0x1299f68"
+    },
+    {
+      "caller": "Silver$$StateJump",
+      "callsite": "0x1299fd4"
+    },
+    {
+      "caller": "Silver$$StateLevitate",
+      "callsite": "0x129ab84"
+    },
+    {
+      "caller": "Silver$$StateUpheave",
+      "callsite": "0x129af78"
+    },
+    {
+      "caller": "Silver$$StateUpheaveSmash",
+      "callsite": "0x129da84"
+    },
+    {
+      "caller": "Silver$$StateUpheaveSmash",
+      "callsite": "0x129daf0"
+    },
+    {
+      "caller": "Silver$$StateHotspot",
+      "callsite": "0x129e09c"
+    },
+    {
+      "caller": "Silver$$StatePsychoSmash",
+      "callsite": "0x129e8b0"
+    },
+    {
+      "caller": "Silver$$StateGrabAll",
+      "callsite": "0x129fddc"
+    },
+    {
+      "caller": "Silver$$StateGrabAll",
+      "callsite": "0x12a0044"
+    },
+    {
+      "caller": "Silver$$StateDash",
+      "callsite": "0x12a0970"
+    },
+    {
+      "caller": "Silver$$StateDash",
+      "callsite": "0x12a09a8"
+    },
+    {
+      "caller": "Silver$$StateDash",
+      "callsite": "0x12a0a08"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a3f00"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4198"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4384"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a43cc"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4490"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4b40"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4b88"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4bcc"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4c68"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4d38"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4d78"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5020"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a50bc"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5448"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a54e4"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5758"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a57a0"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a596c"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a59ac"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5a54"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5b70"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5bb8"
+    },
+    {
+      "caller": "SnowBoard$$Update",
+      "callsite": "0x12b0254"
+    },
+    {
+      "caller": "SnowBoard$$Update",
+      "callsite": "0x12b05a8"
+    },
+    {
+      "caller": "SnowBoard$$UpdateSound",
+      "callsite": "0x12b0890"
+    },
+    {
+      "caller": "SnowBoard$$UpdateSound",
+      "callsite": "0x12b0d64"
+    },
+    {
+      "caller": "SnowBoard$$UpdateSound",
+      "callsite": "0x12b0f2c"
+    },
+    {
+      "caller": "SnowBoard$$UpdateAnimations",
+      "callsite": "0x12b161c"
+    },
+    {
+      "caller": "SonicFast$$StateJump",
+      "callsite": "0x12b80f8"
+    },
+    {
+      "caller": "SonicFast$$StateJump",
+      "callsite": "0x12b8164"
+    },
+    {
+      "caller": "SonicFast$$StateSlide",
+      "callsite": "0x12b95e4"
+    },
+    {
+      "caller": "SonicNew$$StateJump",
+      "callsite": "0x12bf774"
+    },
+    {
+      "caller": "SonicNew$$StateJump",
+      "callsite": "0x12bf7e0"
+    },
+    {
+      "caller": "SonicNew$$StateTrickJump",
+      "callsite": "0x12c3a9c"
+    },
+    {
+      "caller": "SonicNew$$StateTrickJump",
+      "callsite": "0x12c3b08"
+    },
+    {
+      "caller": "SonicNew$$StateGunDrive",
+      "callsite": "0x12c7564"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cbf78"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc5a8"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc8ac"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cce00"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cdaa4"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce04c"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce420"
+    },
+    {
+      "caller": "Tails$$StateJump",
+      "callsite": "0x12df19c"
+    },
+    {
+      "caller": "Tails$$StateJump",
+      "callsite": "0x12df208"
+    },
+    {
+      "caller": "Tails$$StateDummyRingBomb",
+      "callsite": "0x12e02ec"
+    },
+    {
+      "caller": "Tails$$StateTailSwipe",
+      "callsite": "0x12e1660"
+    },
+    {
+      "caller": "Tails$$StateTailSwipe",
+      "callsite": "0x12e16f8"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e2dfc"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e3054"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e3220"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e371c"
+    },
+    {
+      "caller": "ControlFreak2.Demos.Guns.GunActivator$$Update",
+      "callsite": "0x140b4c8"
+    }
+  ],
+  "CF.GetButtonDown": [
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a4020"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a4064"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a40ec"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a4194"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a41d4"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a42c4"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a4304"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a4384"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a43e8"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a46ac"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a4748"
+    },
+    {
+      "caller": "Amy$$Update",
+      "callsite": "0x11a47bc"
+    },
+    {
+      "caller": "Aqa_Balancer$$Update",
+      "callsite": "0x11a7130"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b94a8"
+    },
+    {
+      "caller": "Glider$$Update",
+      "callsite": "0x11b970c"
+    },
+    {
+      "caller": "GoldMedalScreen$$Update",
+      "callsite": "0x11bbe74"
+    },
+    {
+      "caller": "GoldMedalScreen$$Update",
+      "callsite": "0x11bbe9c"
+    },
+    {
+      "caller": "GoldMedalScreen$$Update",
+      "callsite": "0x11bbec4"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c3144"
+    },
+    {
+      "caller": "Hover$$Update",
+      "callsite": "0x11c3560"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cbcc0"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cbfb8"
+    },
+    {
+      "caller": "Jeep$$Update",
+      "callsite": "0x11cc1a8"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da424"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da4a0"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da52c"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da638"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da8f4"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11da974"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11daa94"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dab20"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dab50"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dab78"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dac4c"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dac84"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dacb4"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dad7c"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11dae28"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11daeb4"
+    },
+    {
+      "caller": "Knuckles$$Update",
+      "callsite": "0x11daf38"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3514"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e353c"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3600"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e362c"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3684"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e36ac"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3778"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e37a0"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e380c"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e38a8"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e38e8"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3948"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3970"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3a8c"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3b20"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3bb8"
+    },
+    {
+      "caller": "MainMenu$$StateMainMenu",
+      "callsite": "0x11e3c10"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4610"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4638"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4794"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4838"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4860"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4928"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4950"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e49b0"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e49d8"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4a98"
+    },
+    {
+      "caller": "MainMenu$$StateActTrial",
+      "callsite": "0x11e4e44"
+    },
+    {
+      "caller": "MainMenu$$StateGoldMedalResults",
+      "callsite": "0x11e56b0"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasAudio",
+      "callsite": "0x11e5a18"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasAudio",
+      "callsite": "0x11e5ab4"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasAudio",
+      "callsite": "0x11e5adc"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasAudio",
+      "callsite": "0x11e5bdc"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasAudio",
+      "callsite": "0x11e5c04"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasAudio",
+      "callsite": "0x11e5c60"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasAudio",
+      "callsite": "0x11e5d58"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasGame",
+      "callsite": "0x11e6890"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasGame",
+      "callsite": "0x11e68b8"
+    },
+    {
+      "caller": "MainMenu$$StateExtrasGame",
+      "callsite": "0x11e6acc"
+    },
+    {
+      "caller": "MainMenu$$StateOptions",
+      "callsite": "0x11e7104"
+    },
+    {
+      "caller": "MainMenu$$StateOptions",
+      "callsite": "0x11e712c"
+    },
+    {
+      "caller": "MainMenu$$StateOptions",
+      "callsite": "0x11e71b4"
+    },
+    {
+      "caller": "MainMenu$$StateVideoTab",
+      "callsite": "0x11e7cd4"
+    },
+    {
+      "caller": "MainMenu$$StateVideoTab",
+      "callsite": "0x11e7e84"
+    },
+    {
+      "caller": "MainMenu$$StateVideoTab",
+      "callsite": "0x11e7eac"
+    },
+    {
+      "caller": "MainMenu$$StateGameTab",
+      "callsite": "0x11e8a8c"
+    },
+    {
+      "caller": "MainMenu$$StateAudioTab",
+      "callsite": "0x11e9424"
+    },
+    {
+      "caller": "MainMenu$$StateDataTab",
+      "callsite": "0x11e99bc"
+    },
+    {
+      "caller": "MainMenu$$StateDataTab",
+      "callsite": "0x11e99e4"
+    },
+    {
+      "caller": "MainMenu$$StateDataTab",
+      "callsite": "0x11e9af4"
+    },
+    {
+      "caller": "MainMenu$$StateDataTab",
+      "callsite": "0x11e9ba4"
+    },
+    {
+      "caller": "MainMenu$$StateDataTab",
+      "callsite": "0x11e9bcc"
+    },
+    {
+      "caller": "MainMenu$$StateFileSelect",
+      "callsite": "0x11e9dd4"
+    },
+    {
+      "caller": "MainMenu$$StateUIConfig",
+      "callsite": "0x11ea06c"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x120863c"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x12086c0"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x12087b8"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x12088b8"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x12089d8"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x1208a68"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x1208bd0"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x1208efc"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x1208fac"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x120904c"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x1209274"
+    },
+    {
+      "caller": "PauseMenu$$StateIdle",
+      "callsite": "0x1210944"
+    },
+    {
+      "caller": "PauseMenu$$StateIdle",
+      "callsite": "0x121096c"
+    },
+    {
+      "caller": "PauseMenu$$StateIdle",
+      "callsite": "0x12109ec"
+    },
+    {
+      "caller": "PauseMenu$$StateIdle",
+      "callsite": "0x1210a14"
+    },
+    {
+      "caller": "PauseMenu$$StateStartOverOptions",
+      "callsite": "0x1210f24"
+    },
+    {
+      "caller": "PauseMenu$$StateStartOverOptions",
+      "callsite": "0x1210fcc"
+    },
+    {
+      "caller": "PauseMenu$$StateStartOverOptions",
+      "callsite": "0x1211054"
+    },
+    {
+      "caller": "PauseMenu$$StateStartOverOptions",
+      "callsite": "0x121107c"
+    },
+    {
+      "caller": "PlayerBase$$Update",
+      "callsite": "0x121ea20"
+    },
+    {
+      "caller": "PlayerBase$$Update",
+      "callsite": "0x121eb50"
+    },
+    {
+      "caller": "PlayerBase$$Update",
+      "callsite": "0x121ec28"
+    },
+    {
+      "caller": "PlayerBase$$Update",
+      "callsite": "0x121ecbc"
+    },
+    {
+      "caller": "PlayerCamera$$UpdateCameraForward",
+      "callsite": "0x122cde0"
+    },
+    {
+      "caller": "PlayVideo$$Update",
+      "callsite": "0x1232f88"
+    },
+    {
+      "caller": "PlayVideo$$Update",
+      "callsite": "0x1232fb0"
+    },
+    {
+      "caller": "Pole$$Update",
+      "callsite": "0x12357f4"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d398"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d418"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d484"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d558"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d5fc"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d648"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d6e0"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d75c"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d7f0"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d834"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d8f4"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123d978"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123db34"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123dbe8"
+    },
+    {
+      "caller": "ResultsScreen$$StateA",
+      "callsite": "0x1245598"
+    },
+    {
+      "caller": "ResultsScreen$$StateA",
+      "callsite": "0x12455c0"
+    },
+    {
+      "caller": "ResultsScreen$$StateB",
+      "callsite": "0x12458f8"
+    },
+    {
+      "caller": "ResultsScreen$$StateB",
+      "callsite": "0x1245920"
+    },
+    {
+      "caller": "ResultsScreen$$StateC",
+      "callsite": "0x1245ce4"
+    },
+    {
+      "caller": "ResultsScreen$$StateC",
+      "callsite": "0x1245d0c"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253a84"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253c2c"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253d28"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x125406c"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1254284"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1254368"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1254454"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x12544d8"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x12546d8"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x125484c"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x12548d0"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127e940"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127e9d0"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127ea44"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127eacc"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127eb88"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127ec94"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127eccc"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127ed7c"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127ee30"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127eeb8"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127ef5c"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127efd0"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f078"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f0e0"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f110"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f1c0"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f274"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f43c"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f4a8"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f568"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f60c"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f6b8"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f738"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f7b8"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f840"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f878"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f928"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127f9dc"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127fb78"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127fbf8"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127fce8"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127fefc"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x127ffcc"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x12800a4"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x12801b4"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x1280330"
+    },
+    {
+      "caller": "Shadow$$Update",
+      "callsite": "0x128051c"
+    },
+    {
+      "caller": "Bike$$Update",
+      "callsite": "0x12840ec"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128cbe4"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128cc60"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128ccb4"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128cd3c"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128cdf8"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128ce88"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128cf00"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128cf38"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128cff0"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d064"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d09c"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d15c"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d19c"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d264"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d314"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d380"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d3b8"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d440"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d560"
+    },
+    {
+      "caller": "Blaze$$Update",
+      "callsite": "0x128d62c"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a3a20"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a3c58"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a3ce0"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a3dcc"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a3fbc"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a40c0"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a429c"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a44f8"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a45d0"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4678"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4740"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a489c"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a49fc"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4e6c"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4ef0"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5174"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5230"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a52c8"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a56c4"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a57e4"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5824"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5874"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a58f8"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5b08"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a5c08"
+    },
+    {
+      "caller": "SnowBoard$$Update",
+      "callsite": "0x12b0534"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bc790"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bc830"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bc8b4"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bc93c"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bc9dc"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bca50"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bcb20"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bcb94"
+    },
+    {
+      "caller": "SonicFast$$Update",
+      "callsite": "0x12bcc48"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cbfec"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc07c"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc310"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc384"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc444"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc4bc"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc848"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc90c"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc984"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cca20"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ccba8"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ccc28"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cccb8"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ccd24"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ccd98"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cce24"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cce54"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cced4"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ccf64"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ccfe4"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd078"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd154"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd1dc"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd294"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd2fc"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd37c"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd3fc"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd5c4"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd644"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd6bc"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd800"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd8d0"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cdbb4"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cdc24"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cde44"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce250"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce2b8"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce2f4"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce3ac"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce628"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce6a4"
+    },
+    {
+      "caller": "SplashScreens$$Update",
+      "callsite": "0x12d30c4"
+    },
+    {
+      "caller": "SplashScreens$$Update",
+      "callsite": "0x12d3244"
+    },
+    {
+      "caller": "SplashScreens$$Update",
+      "callsite": "0x12d3294"
+    },
+    {
+      "caller": "SplashScreens$$Update",
+      "callsite": "0x12d32b4"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e2e50"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e2ec4"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e3110"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e3174"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e3250"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e3374"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e379c"
+    },
+    {
+      "caller": "Tarzan$$Update",
+      "callsite": "0x12e63e4"
+    },
+    {
+      "caller": "TitleScreen$$StateIdle",
+      "callsite": "0x12ea7ec"
+    },
+    {
+      "caller": "TitleScreen$$StateMenu",
+      "callsite": "0x12eab54"
+    },
+    {
+      "caller": "TitleScreen$$StateStarter",
+      "callsite": "0x12eb5d4"
+    },
+    {
+      "caller": "TitleScreen$$StateStarter",
+      "callsite": "0x12eb6bc"
+    },
+    {
+      "caller": "TitleScreen$$StateStarter",
+      "callsite": "0x12eb8fc"
+    },
+    {
+      "caller": "TitleScreen$$StateStarter",
+      "callsite": "0x12eba6c"
+    },
+    {
+      "caller": "UI$$Update",
+      "callsite": "0x12f4848"
+    },
+    {
+      "caller": "UpDownReel$$Update",
+      "callsite": "0x12fd0a8"
+    },
+    {
+      "caller": "ChainJump$$Update",
+      "callsite": "0x134ec5c"
+    },
+    {
+      "caller": "ChainJump$$Update",
+      "callsite": "0x134f0c8"
+    },
+    {
+      "caller": "Eagle$$Update",
+      "callsite": "0x1373ca0"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x1408f5c"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x1408f94"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x1408fcc"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x1409004"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x140903c"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x1409074"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x14090ac"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x14090e4"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x140911c"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x1409154"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x140918c"
+    },
+    {
+      "caller": "ControlFreak2.Demos.SwipeSlasher.SwipeSlasherUserControl$$Update",
+      "callsite": "0x14091c4"
+    },
+    {
+      "caller": "ControlFreak2.Demos.RPG.CharacterAction$$Update",
+      "callsite": "0x14092a0"
+    }
+  ],
+  "CF.GetButtonUp": [
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x1208770"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x1208b80"
+    },
+    {
+      "caller": "Omega$$Update",
+      "callsite": "0x12093d0"
+    },
+    {
+      "caller": "Princess$$Update",
+      "callsite": "0x123da80"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253bc0"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1253dd4"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x1254118"
+    },
+    {
+      "caller": "Rouge$$Update",
+      "callsite": "0x125495c"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4210"
+    },
+    {
+      "caller": "Silver$$Update",
+      "callsite": "0x12a4410"
+    },
+    {
+      "caller": "SnowBoard$$Update",
+      "callsite": "0x12b02a4"
+    },
+    {
+      "caller": "SnowBoard$$Update",
+      "callsite": "0x12b05f8"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc268"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cc7c8"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cd9b0"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12cdfc0"
+    },
+    {
+      "caller": "SonicNew$$Update",
+      "callsite": "0x12ce12c"
+    },
+    {
+      "caller": "Tails$$Update",
+      "callsite": "0x12e2ff4"
+    }
+  ]
+}

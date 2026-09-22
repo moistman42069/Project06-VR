@@ -1,0 +1,56 @@
+122dc1c: bl #0x10bd824 unknown
+122dc28: bl #0x10bd824 unknown
+122dc34: bl #0x10bd824 unknown
+122dc40: bl #0x10bd824 unknown
+122dc4c: bl #0x10bd824 unknown
+122dc84: bl #0x12d831c (19759900, 'StateMachine$$UpdateStateMachine')
+122dc98: bl #0x10bd928 unknown
+122dca4: bl #0x13dab04 (20818692, 'ControlFreak2.CF2Input$$GetAxis')
+122dcb0: bl #0x24f44dc (38749404, 'UnityEngine.Time$$get_fixedDeltaTime')
+122dcec: bl #0x13dab04 (20818692, 'ControlFreak2.CF2Input$$GetAxis')
+122dcf8: bl #0x24f44dc (38749404, 'UnityEngine.Time$$get_fixedDeltaTime')
+122dd28: bl #0x13db074 (20820084, 'ControlFreak2.CF2Input$$GetButton')
+122dd3c: bl #0x10bd928 unknown
+122dd50: bl #0x13db074 (20820084, 'ControlFreak2.CF2Input$$GetButton')
+122dd60: bl #0x12271e0 (19034592, 'PlayerCamera$$RawStickX')
+122dd6c: bl #0x24f44dc (38749404, 'UnityEngine.Time$$get_fixedDeltaTime')
+122dda4: bl #0x12272dc (19034844, 'PlayerCamera$$RawStickY')
+122ddb0: bl #0x24f44dc (38749404, 'UnityEngine.Time$$get_fixedDeltaTime')
+122ddf4: b #0x122df14 (19061732, 'PlayerCamera$$FixedUpdate')
+122de0c: b #0x122df10 (19061732, 'PlayerCamera$$FixedUpdate')
+122de28: b #0x122dde0 (19061732, 'PlayerCamera$$FixedUpdate')
+122de44: bl #0x24ea7ec (38709228, 'UnityEngine.Component$$get_transform')
+122de50: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122de6c: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122de90: bl #0x10bd824 unknown
+122debc: bl #0x10bd928 unknown
+122def4: b #0x122e0c0 (19061732, 'PlayerCamera$$FixedUpdate')
+122df00: b #0x122df10 (19061732, 'PlayerCamera$$FixedUpdate')
+122df20: bl #0x24ea7ec (38709228, 'UnityEngine.Component$$get_transform')
+122df2c: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122df48: bl #0x24f44dc (38749404, 'UnityEngine.Time$$get_fixedDeltaTime')
+122df68: bl #0x24ea7ec (38709228, 'UnityEngine.Component$$get_transform')
+122df74: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122dfd4: bl #0x24ea7ec (38709228, 'UnityEngine.Component$$get_transform')
+122dfe0: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122dffc: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122e020: bl #0x10bd824 unknown
+122e04c: bl #0x10bd928 unknown
+122e084: b #0x122e1ac (19061732, 'PlayerCamera$$FixedUpdate')
+122e09c: bl #0x10bd824 unknown
+122e0d4: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122e0ec: bl #0x24ea7ec (38709228, 'UnityEngine.Component$$get_transform')
+122e0f8: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122e11c: bl #0x10bd824 unknown
+122e140: bl #0x10bd928 unknown
+122e16c: bl #0x122a928 (19048744, 'PlayerCamera$$CameraCollision')
+122e170: b #0x122dde0 (19061732, 'PlayerCamera$$FixedUpdate')
+122e188: bl #0x10bd824 unknown
+122e1c0: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122e1d8: bl #0x24ea7ec (38709228, 'UnityEngine.Component$$get_transform')
+122e1e4: bl #0x24f6b34 (38759220, 'UnityEngine.Transform$$get_position')
+122e208: bl #0x10bd824 unknown
+122e22c: bl #0x10bd928 unknown
+122e258: bl #0x122ae84 (19050116, 'PlayerCamera$$CameraPush')
+122e25c: b #0x122dde0 (19061732, 'PlayerCamera$$FixedUpdate')
+122e260: bl #0x10bda40 unknown

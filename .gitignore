@@ -1,0 +1,23 @@
+vendor/
+original/
+out/
+build/
+keys/
+evidence/dump/
+evidence/dexdump.txt
+__pycache__/
+
+# Local investigation, build and test clutter.
+reports/*
+!reports/README.md
+baseline/*
+!baseline/README.md
+plans/*
+!plans/README.md
+installer/*
+!installer/README.md
+
+# Local repository metadata and generated test state.
+out/menu-test-state/
+.vs/
+*.user

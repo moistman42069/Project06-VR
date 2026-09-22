@@ -1,0 +1,23 @@
+11dc8dc: bl #0x10bd824 unknown
+11dc8e8: bl #0x10bd824 unknown
+11dc8f4: bl #0x10bd824 unknown
+11dc900: bl #0x10bd824 unknown
+11dc90c: bl #0x10bd824 unknown
+11dc94c: bl #0x12d831c (19759900, 'StateMachine$$UpdateStateMachine')
+11dc954: bl #0x11dcae0 (18729696, 'MainMenu$$UpdateMeshes')
+11dc95c: bl #0x11dcf00 (18730752, 'MainMenu$$UpdateUI')
+11dc964: bl #0x11e30a4 (18755748, 'MainMenu$$UpdateMusic')
+11dc974: bl #0x10bd928 unknown
+11dc980: bl #0x13dab04 (20818692, 'ControlFreak2.CF2Input$$GetAxis')
+11dc990: bl #0x13dab04 (20818692, 'ControlFreak2.CF2Input$$GetAxis')
+11dc9a4: bl #0x13dab04 (20818692, 'ControlFreak2.CF2Input$$GetAxis')
+11dc9b4: bl #0x13dab04 (20818692, 'ControlFreak2.CF2Input$$GetAxis')
+11dc9e8: bl #0x24f4414 (38749204, 'UnityEngine.Time$$get_time')
+11dc9f0: b #0x11dca48 (18729136, 'MainMenu$$Update')
+11dc9f8: bl #0x24f4414 (38749204, 'UnityEngine.Time$$get_time')
+11dca38: bl #0x24f4414 (38749204, 'UnityEngine.Time$$get_time')
+11dca64: bl #0x24f4414 (38749204, 'UnityEngine.Time$$get_time')
+11dca6c: b #0x11dcac4 (18729136, 'MainMenu$$Update')
+11dca74: bl #0x24f4414 (38749204, 'UnityEngine.Time$$get_time')
+11dcab4: bl #0x24f4414 (38749204, 'UnityEngine.Time$$get_time')
+11dcadc: bl #0x10bda40 unknown

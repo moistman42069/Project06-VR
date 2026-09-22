@@ -1,0 +1,264 @@
+[
+  {
+    "file": "level0",
+    "type": "Camera",
+    "id": 364,
+    "name": "Camera",
+    "layer": 0,
+    "active": true,
+    "enabled": 1,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 4193847
+    },
+    "m_Depth": 0.0,
+    "m_RenderingPath": 3,
+    "m_TargetTexture": {
+      "m_FileID": 0,
+      "m_PathID": 0
+    }
+  },
+  {
+    "file": "level0",
+    "type": "Canvas",
+    "id": 650,
+    "name": "Canvas",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "level0",
+    "type": "Canvas",
+    "id": 651,
+    "name": "CF2-Gamepad-Notifier",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "level0",
+    "type": "Canvas",
+    "id": 652,
+    "name": "CF2-Canvas",
+    "layer": 0,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "level2",
+    "type": "Camera",
+    "id": 3236,
+    "name": "Main Camera",
+    "layer": 0,
+    "active": true,
+    "enabled": 1,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 4193847
+    },
+    "m_Depth": 0.0,
+    "m_RenderingPath": 3,
+    "m_TargetTexture": {
+      "m_FileID": 0,
+      "m_PathID": 0
+    }
+  },
+  {
+    "file": "level2",
+    "type": "Camera",
+    "id": 3237,
+    "name": "Model Camera",
+    "layer": 0,
+    "active": true,
+    "enabled": 1,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 256
+    },
+    "m_Depth": 1.0,
+    "m_RenderingPath": 3,
+    "m_TargetTexture": {
+      "m_FileID": 2,
+      "m_PathID": 140
+    }
+  },
+  {
+    "file": "level2",
+    "type": "Canvas",
+    "id": 4537,
+    "name": "Canvas",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "level2",
+    "type": "Canvas",
+    "id": 4538,
+    "name": "CF2-Gamepad-Notifier",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "level2",
+    "type": "Canvas",
+    "id": 4539,
+    "name": "CF2-Canvas",
+    "layer": 0,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "level6",
+    "type": "Canvas",
+    "id": 24667,
+    "name": "CF2-Gamepad-Notifier",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "level6",
+    "type": "Canvas",
+    "id": 24668,
+    "name": "CF2-Canvas",
+    "layer": 0,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "resources.assets",
+    "type": "Camera",
+    "id": 37485,
+    "name": "EffectsCamera",
+    "layer": 22,
+    "active": false,
+    "enabled": 1,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 4194304
+    },
+    "m_Depth": 1.0,
+    "m_RenderingPath": 3,
+    "m_TargetTexture": {
+      "m_FileID": 0,
+      "m_PathID": 0
+    }
+  },
+  {
+    "file": "resources.assets",
+    "type": "Camera",
+    "id": 37486,
+    "name": "PlayerCamera",
+    "layer": 0,
+    "active": true,
+    "enabled": 0,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 1639971607
+    },
+    "m_Depth": 0.0,
+    "m_RenderingPath": 3,
+    "m_TargetTexture": {
+      "m_FileID": 0,
+      "m_PathID": 0
+    }
+  },
+  {
+    "file": "resources.assets",
+    "type": "Camera",
+    "id": 37487,
+    "name": "OutlineCamera",
+    "layer": 0,
+    "active": true,
+    "enabled": 1,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 1639972631
+    },
+    "m_Depth": 2.0,
+    "m_RenderingPath": 1,
+    "m_TargetTexture": {
+      "m_FileID": 0,
+      "m_PathID": 0
+    }
+  },
+  {
+    "file": "resources.assets",
+    "type": "Camera",
+    "id": 37488,
+    "name": "Camera",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 32
+    },
+    "m_Depth": 0.0,
+    "m_RenderingPath": 1,
+    "m_TargetTexture": {
+      "m_FileID": 0,
+      "m_PathID": 7163
+    }
+  },
+  {
+    "file": "resources.assets",
+    "type": "Camera",
+    "id": 37489,
+    "name": "SkyboxCamera",
+    "layer": 0,
+    "active": false,
+    "enabled": 1,
+    "m_TargetEye": 3,
+    "m_CullingMask": {
+      "m_Bits": 1024
+    },
+    "m_Depth": -1.0,
+    "m_RenderingPath": 3,
+    "m_TargetTexture": {
+      "m_FileID": 0,
+      "m_PathID": 0
+    }
+  },
+  {
+    "file": "resources.assets",
+    "type": "Canvas",
+    "id": 54097,
+    "name": "UI_E3",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  },
+  {
+    "file": "resources.assets",
+    "type": "Canvas",
+    "id": 54098,
+    "name": "UI_Retail",
+    "layer": 5,
+    "active": true,
+    "enabled": 1,
+    "m_RenderMode": 0,
+    "m_PlaneDistance": 100.0
+  }
+]

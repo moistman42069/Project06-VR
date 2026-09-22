@@ -1,0 +1,38 @@
+[
+  {
+    "name": "TitleStart",
+    "method": "TitleScreen.private void Start()",
+    "rva": "0x12ea3fc",
+    "prologue": "fe0f1df8f65701a9f44f02a9f6b800b0"
+  },
+  {
+    "name": "Axis",
+    "method": "CF2Input.public static float GetAxis(string axisName)",
+    "rva": "0x13dab04",
+    "prologue": "fe57bea9f44f01a974b100d015a300f0"
+  },
+  {
+    "name": "AxisRaw",
+    "method": "CF2Input.public static float GetAxisRaw(string axisName)",
+    "rva": "0x13dadbc",
+    "prologue": "fe57bea9f44f01a974b100d015a300f0"
+  },
+  {
+    "name": "Held",
+    "method": "CF2Input.public static bool GetButton(string axisName)",
+    "rva": "0x13db074",
+    "prologue": "fe57bea9f44f01a974b100b015a300d0"
+  },
+  {
+    "name": "Down",
+    "method": "CF2Input.public static bool GetButtonDown(string axisName)",
+    "rva": "0x13db318",
+    "prologue": "fe57bea9f44f01a974b100b015a300d0"
+  },
+  {
+    "name": "Up",
+    "method": "CF2Input.public static bool GetButtonUp(string axisName)",
+    "rva": "0x13db5c8",
+    "prologue": "fe57bea9f44f01a974b100b015a300d0"
+  }
+]

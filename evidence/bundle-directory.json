@@ -1,0 +1,567 @@
+[
+  {
+    "name": "globalgamemanagers",
+    "offset": 0,
+    "size": 2701756
+  },
+  {
+    "name": "Resources/unity_builtin_extra",
+    "offset": 2701756,
+    "size": 509296
+  },
+  {
+    "name": "globalgamemanagers.assets",
+    "offset": 3211052,
+    "size": 194632
+  },
+  {
+    "name": "sharedassets0.assets",
+    "offset": 3405684,
+    "size": 849206
+  },
+  {
+    "name": "globalgamemanagers.assets.resS",
+    "offset": 4254890,
+    "size": 4618960
+  },
+  {
+    "name": "sharedassets0.assets.resS",
+    "offset": 8873850,
+    "size": 24117360
+  },
+  {
+    "name": "level0",
+    "offset": 32991210,
+    "size": 247000
+  },
+  {
+    "name": "sharedassets1.assets",
+    "offset": 33238210,
+    "size": 622
+  },
+  {
+    "name": "level1",
+    "offset": 33238832,
+    "size": 2204
+  },
+  {
+    "name": "sharedassets2.assets",
+    "offset": 33241036,
+    "size": 693460
+  },
+  {
+    "name": "sharedassets2.assets.resS",
+    "offset": 33934496,
+    "size": 57564928
+  },
+  {
+    "name": "level2",
+    "offset": 91499424,
+    "size": 1006536
+  },
+  {
+    "name": "sharedassets3.assets",
+    "offset": 92505960,
+    "size": 23424
+  },
+  {
+    "name": "level3",
+    "offset": 92529384,
+    "size": 6296
+  },
+  {
+    "name": "sharedassets4.assets",
+    "offset": 92535680,
+    "size": 44308
+  },
+  {
+    "name": "sharedassets4.assets.resS",
+    "offset": 92579988,
+    "size": 6029312
+  },
+  {
+    "name": "level4",
+    "offset": 98609300,
+    "size": 22696
+  },
+  {
+    "name": "sharedassets5.assets",
+    "offset": 98631996,
+    "size": 121816
+  },
+  {
+    "name": "sharedassets5.assets.resS",
+    "offset": 98753812,
+    "size": 40787968
+  },
+  {
+    "name": "level5",
+    "offset": 139541780,
+    "size": 9512
+  },
+  {
+    "name": "sharedassets6.assets",
+    "offset": 139551292,
+    "size": 50871608
+  },
+  {
+    "name": "sharedassets6.assets.resS",
+    "offset": 190422900,
+    "size": 128452256
+  },
+  {
+    "name": "level6",
+    "offset": 318875156,
+    "size": 22420032
+  },
+  {
+    "name": "sharedassets7.assets",
+    "offset": 341295188,
+    "size": 43820308
+  },
+  {
+    "name": "sharedassets7.assets.resS",
+    "offset": 385115496,
+    "size": 8994176
+  },
+  {
+    "name": "level7",
+    "offset": 394109672,
+    "size": 26082912
+  },
+  {
+    "name": "sharedassets8.assets",
+    "offset": 420192584,
+    "size": 32368892
+  },
+  {
+    "name": "sharedassets8.assets.resS",
+    "offset": 452561476,
+    "size": 95819904
+  },
+  {
+    "name": "level8",
+    "offset": 548381380,
+    "size": 17853560
+  },
+  {
+    "name": "sharedassets9.assets",
+    "offset": 566234940,
+    "size": 17380308
+  },
+  {
+    "name": "sharedassets9.assets.resS",
+    "offset": 583615248,
+    "size": 55081856
+  },
+  {
+    "name": "level9",
+    "offset": 638697104,
+    "size": 20699352
+  },
+  {
+    "name": "sharedassets10.assets",
+    "offset": 659396456,
+    "size": 12772916
+  },
+  {
+    "name": "sharedassets10.assets.resS",
+    "offset": 672169372,
+    "size": 28211232
+  },
+  {
+    "name": "level10",
+    "offset": 700380604,
+    "size": 24255752
+  },
+  {
+    "name": "sharedassets11.assets",
+    "offset": 724636356,
+    "size": 31300868
+  },
+  {
+    "name": "sharedassets11.assets.resS",
+    "offset": 755937224,
+    "size": 50649376
+  },
+  {
+    "name": "level11",
+    "offset": 806586600,
+    "size": 22965792
+  },
+  {
+    "name": "sharedassets12.assets",
+    "offset": 829552392,
+    "size": 31998140
+  },
+  {
+    "name": "sharedassets12.assets.resS",
+    "offset": 861550532,
+    "size": 38391680
+  },
+  {
+    "name": "level12",
+    "offset": 899942212,
+    "size": 30046496
+  },
+  {
+    "name": "sharedassets13.assets",
+    "offset": 929988708,
+    "size": 107348
+  },
+  {
+    "name": "sharedassets13.assets.resS",
+    "offset": 930096056,
+    "size": 1747680
+  },
+  {
+    "name": "level13",
+    "offset": 931843736,
+    "size": 7389960
+  },
+  {
+    "name": "sharedassets14.assets",
+    "offset": 939233696,
+    "size": 28324540
+  },
+  {
+    "name": "sharedassets14.assets.resS",
+    "offset": 967558236,
+    "size": 1281600
+  },
+  {
+    "name": "level14",
+    "offset": 968839836,
+    "size": 27789832
+  },
+  {
+    "name": "sharedassets15.assets",
+    "offset": 996629668,
+    "size": 22206316
+  },
+  {
+    "name": "sharedassets15.assets.resS",
+    "offset": 1018835984,
+    "size": 36584928
+  },
+  {
+    "name": "level15",
+    "offset": 1055420912,
+    "size": 26470960
+  },
+  {
+    "name": "sharedassets16.assets",
+    "offset": 1081891872,
+    "size": 13518388
+  },
+  {
+    "name": "sharedassets16.assets.resS",
+    "offset": 1095410260,
+    "size": 6252240
+  },
+  {
+    "name": "level16",
+    "offset": 1101662500,
+    "size": 24306256
+  },
+  {
+    "name": "sharedassets17.assets",
+    "offset": 1125968756,
+    "size": 41088460
+  },
+  {
+    "name": "sharedassets17.assets.resS",
+    "offset": 1167057216,
+    "size": 111486464
+  },
+  {
+    "name": "level17",
+    "offset": 1278543680,
+    "size": 22541952
+  },
+  {
+    "name": "sharedassets18.assets",
+    "offset": 1301085632,
+    "size": 50051004
+  },
+  {
+    "name": "sharedassets18.assets.resS",
+    "offset": 1351136636,
+    "size": 56793488
+  },
+  {
+    "name": "level18",
+    "offset": 1407930124,
+    "size": 18192928
+  },
+  {
+    "name": "sharedassets19.assets",
+    "offset": 1426123052,
+    "size": 38700116
+  },
+  {
+    "name": "sharedassets19.assets.resS",
+    "offset": 1464823168,
+    "size": 81620336
+  },
+  {
+    "name": "level19",
+    "offset": 1546443504,
+    "size": 17838864
+  },
+  {
+    "name": "sharedassets20.assets",
+    "offset": 1564282368,
+    "size": 20920764
+  },
+  {
+    "name": "sharedassets20.assets.resS",
+    "offset": 1585203132,
+    "size": 32509664
+  },
+  {
+    "name": "level20",
+    "offset": 1617712796,
+    "size": 9373176
+  },
+  {
+    "name": "sharedassets21.assets",
+    "offset": 1627085972,
+    "size": 31438764
+  },
+  {
+    "name": "sharedassets21.assets.resS",
+    "offset": 1658524736,
+    "size": 103784720
+  },
+  {
+    "name": "level21",
+    "offset": 1762309456,
+    "size": 28949376
+  },
+  {
+    "name": "sharedassets22.assets",
+    "offset": 1791258832,
+    "size": 12494508
+  },
+  {
+    "name": "sharedassets22.assets.resS",
+    "offset": 1803753340,
+    "size": 35454416
+  },
+  {
+    "name": "level22",
+    "offset": 1839207756,
+    "size": 6959856
+  },
+  {
+    "name": "sharedassets23.assets",
+    "offset": 1846167612,
+    "size": 31199596
+  },
+  {
+    "name": "sharedassets23.assets.resS",
+    "offset": 1877367208,
+    "size": 33825184
+  },
+  {
+    "name": "level23",
+    "offset": 1911192392,
+    "size": 21691800
+  },
+  {
+    "name": "sharedassets24.assets",
+    "offset": 1932884192,
+    "size": 12170612
+  },
+  {
+    "name": "sharedassets24.assets.resS",
+    "offset": 1945054804,
+    "size": 16601040
+  },
+  {
+    "name": "level24",
+    "offset": 1961655844,
+    "size": 24347512
+  },
+  {
+    "name": "sharedassets25.assets",
+    "offset": 1986003356,
+    "size": 44231868
+  },
+  {
+    "name": "sharedassets25.assets.resS",
+    "offset": 2030235224,
+    "size": 101056016
+  },
+  {
+    "name": "level25",
+    "offset": 2131291240,
+    "size": 22500352
+  },
+  {
+    "name": "sharedassets26.assets",
+    "offset": 2153791592,
+    "size": 31296820
+  },
+  {
+    "name": "sharedassets26.assets.resS",
+    "offset": 2185088412,
+    "size": 30233552
+  },
+  {
+    "name": "level26",
+    "offset": 2215321964,
+    "size": 21786312
+  },
+  {
+    "name": "sharedassets27.assets",
+    "offset": 2237108276,
+    "size": 48406076
+  },
+  {
+    "name": "level27",
+    "offset": 2285514352,
+    "size": 12147104
+  },
+  {
+    "name": "sharedassets28.assets",
+    "offset": 2297661456,
+    "size": 1281976
+  },
+  {
+    "name": "sharedassets28.assets.resS",
+    "offset": 2298943432,
+    "size": 3757664
+  },
+  {
+    "name": "level28",
+    "offset": 2302701096,
+    "size": 13331152
+  },
+  {
+    "name": "sharedassets29.assets",
+    "offset": 2316032248,
+    "size": 2590728
+  },
+  {
+    "name": "sharedassets29.assets.resS",
+    "offset": 2318622976,
+    "size": 415328
+  },
+  {
+    "name": "level29",
+    "offset": 2319038304,
+    "size": 3958696
+  },
+  {
+    "name": "sharedassets30.assets",
+    "offset": 2322997000,
+    "size": 384480
+  },
+  {
+    "name": "sharedassets30.assets.resS",
+    "offset": 2323381480,
+    "size": 3102400
+  },
+  {
+    "name": "level30",
+    "offset": 2326483880,
+    "size": 12827288
+  },
+  {
+    "name": "sharedassets31.assets",
+    "offset": 2339311168,
+    "size": 13552000
+  },
+  {
+    "name": "sharedassets31.assets.resS",
+    "offset": 2352863168,
+    "size": 6370048
+  },
+  {
+    "name": "level31",
+    "offset": 2359233216,
+    "size": 5846264
+  },
+  {
+    "name": "sharedassets32.assets",
+    "offset": 2365079480,
+    "size": 537
+  },
+  {
+    "name": "level32",
+    "offset": 2365080017,
+    "size": 5816
+  },
+  {
+    "name": "sharedassets33.assets",
+    "offset": 2365085833,
+    "size": 145728
+  },
+  {
+    "name": "sharedassets33.assets.resS",
+    "offset": 2365231561,
+    "size": 26463792
+  },
+  {
+    "name": "level33",
+    "offset": 2391695353,
+    "size": 149384
+  },
+  {
+    "name": "sharedassets34.assets",
+    "offset": 2391844737,
+    "size": 14324
+  },
+  {
+    "name": "sharedassets34.assets.resS",
+    "offset": 2391859061,
+    "size": 524288
+  },
+  {
+    "name": "level34",
+    "offset": 2392383349,
+    "size": 6200
+  },
+  {
+    "name": "sharedassets35.assets",
+    "offset": 2392389549,
+    "size": 46836
+  },
+  {
+    "name": "sharedassets35.assets.resS",
+    "offset": 2392436385,
+    "size": 4369632
+  },
+  {
+    "name": "level35",
+    "offset": 2396806017,
+    "size": 54844
+  },
+  {
+    "name": "sharedassets36.assets",
+    "offset": 2396860861,
+    "size": 21784
+  },
+  {
+    "name": "sharedassets36.assets.resS",
+    "offset": 2396882645,
+    "size": 874496
+  },
+  {
+    "name": "level36",
+    "offset": 2397757141,
+    "size": 22116
+  },
+  {
+    "name": "resources.assets",
+    "offset": 2397779257,
+    "size": 144624640
+  },
+  {
+    "name": "resources.assets.resS",
+    "offset": 2542403897,
+    "size": 798478368
+  }
+]

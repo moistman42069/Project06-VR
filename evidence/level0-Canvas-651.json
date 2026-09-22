@@ -1,0 +1,24 @@
+{
+  "m_GameObject": {
+    "m_FileID": 0,
+    "m_PathID": 339
+  },
+  "m_Enabled": 1,
+  "m_RenderMode": 0,
+  "m_Camera": {
+    "m_FileID": 0,
+    "m_PathID": 0
+  },
+  "m_PlaneDistance": 100.0,
+  "m_PixelPerfect": false,
+  "m_ReceivesEvents": true,
+  "m_OverrideSorting": false,
+  "m_OverridePixelPerfect": false,
+  "m_SortingBucketNormalizedSize": 0.0,
+  "m_VertexColorAlwaysGammaSpace": false,
+  "m_AdditionalShaderChannelsFlag": 25,
+  "m_UpdateRectTransformForStandalone": 0,
+  "m_SortingLayerID": 0,
+  "m_SortingOrder": 100,
+  "m_TargetDisplay": 0
+}
