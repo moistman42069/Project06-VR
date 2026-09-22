@@ -18,14 +18,22 @@ bundle version `5.0`, with package `com.NightsofKronos.SonictheHedgehog` and
 build GUID `adb29565b76047428e20270a1f49a1ed`. These are the APK's own build
 identifiers; `5.0` must not be presented as a confirmed PC release number.
 
-There is currently no evidence that maps this APK to an exact PC executable,
-PC tag or Project06OSP commit. The public Project06OSP repository is an
-AssetRipper/decompilation source snapshot whose current `main` commit is dated
-2023-11-13; it does not provide a matching Android build manifest or a reliable
-cross-platform version table. The safest description is therefore: **the APK is
-an Android P-06 5.0 build, with no verified one-to-one PC equivalent**. A precise
-equivalence would require a PC executable/build manifest or matching gameplay
-asset and code hashes from the same release.
+The file has now been source-matched externally. The exact filename
+`p-06RELEASE64.apk` and the 1.65 GB MediaFire listing match the APK link on the
+Sonic P-06 fan page; that listing says it was uploaded on 2025-09-10. The same
+date matches Lowfriend's video titled **SONIC P-06 ANDROID PORT. SONIC RELEASE**.
+The available gameplay descriptions identify this Android port as the Sonic-only
+release line, rather than the later all-campaign PC package.
+
+The closest PC content equivalent is therefore **Project '06 — Sonic Release**
+(the PC Sonic trial release), whose announcement describes the ten Sonic/Tails
+stages. It is not safe to label the APK as PC Silver Release v1.45: that is the
+later PC package containing Sonic, Shadow and Silver campaigns. The Android file's
+internal `5.0` is its Android/Unity package version, not a PC release number.
+
+Confidence: exact external APK source match — high; Android port name/content
+line — high; exact PC commit/build hash — unproven. A byte-for-byte PC match would
+still require the corresponding PC executable or a same-release asset/code hash.
 
 Exact method RVAs, prologues, caller counts, camera/canvas findings and API
 audits are kept under `evidence/`. Those files are generated investigation data;
