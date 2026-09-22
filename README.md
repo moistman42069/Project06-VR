@@ -14,6 +14,12 @@ with the current handoff in [docs/ACTIVE-WORK-CHECKPOINT.md](docs/ACTIVE-WORK-CH
 The repository is intentionally arranged so a tested candidate can become a
 release without moving the source, evidence or build scripts.
 
+The public repository contains source, documentation and small reviewable APK
+evidence. The original game, extracted Unity payload, SDK/toolchain binaries,
+development key, logs and the 1.76 GB candidate APK stay local and ignored. The
+`out/` path below refers to a local build produced from this tree; it is not a
+GitHub download link until a tested release is deliberately published.
+
 ## Install and play
 
 Sideload `out/p06-quest-0.1.0.apk` using your existing Quest sideload method.
