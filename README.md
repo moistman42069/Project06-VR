@@ -20,6 +20,16 @@ development key, logs and the 1.76 GB candidate APK stay local and ignored. The
 `out/` path below refers to a local build produced from this tree; it is not a
 GitHub download link until a tested release is deliberately published.
 
+### Base build provenance
+
+This project uses the newest publicly documented Android build located during
+research: `p-06RELEASE64.apk`, uploaded September 10, 2025 and associated with
+Lowfriend's Sonic Release Android port. The exact source listing is the
+[MediaFire APK page](https://www.mediafire.com/file/tgiales231mf4v0/p-06RELEASE64.apk/file),
+with the release context in the [Lowfriend video](https://www.youtube.com/watch?v=crjt6Sth97Q).
+No later public APK, patch or version tag was found as of September 22, 2026;
+a private or unindexed Discord test build could still exist.
+
 ## Install and play
 
 Sideload `out/p06-quest-0.1.0.apk` using your existing Quest sideload method.

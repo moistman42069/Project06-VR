@@ -25,6 +25,10 @@ date matches Lowfriend's video titled **SONIC P-06 ANDROID PORT. SONIC RELEASE**
 The available gameplay descriptions identify this Android port as the Sonic-only
 release line, rather than the later all-campaign PC package.
 
+Provenance links: [MediaFire APK listing](https://www.mediafire.com/file/tgiales231mf4v0/p-06RELEASE64.apk/file),
+[Lowfriend release video](https://www.youtube.com/watch?v=crjt6Sth97Q), and
+[Android/PC overview](https://sonic-fangames.com/sonic-p-06/).
+
 The closest PC content equivalent is therefore **Project '06 — Sonic Release**
 (the PC Sonic trial release), whose announcement describes the ten Sonic/Tails
 stages. It is not safe to label the APK as PC Silver Release v1.45: that is the
