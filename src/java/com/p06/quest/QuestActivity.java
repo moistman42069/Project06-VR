@@ -53,8 +53,14 @@ public final class QuestActivity extends UnityPlayerActivity {
             } catch (Exception fallback) { Log.e("P06Quest", "Cannot create run log", fallback); }
         }
         try {
-            if (logOutput != null) logOutput.write(("P06 Quest candidate 0.1.0\nRun: " + runName + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL + "\nAndroid: " + Build.VERSION.RELEASE + " / API " + Build.VERSION.SDK_INT + "\nPackage: " + getPackageName() + "\nSettings: " + files.getAbsolutePath() + "\nPublic log target: Downloads/P06Quest\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            if (logOutput != null) logOutput.write(("P06 Quest candidate 0.1.1\nRun: " + runName + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL + "\nAndroid: " + Build.VERSION.RELEASE + " / API " + Build.VERSION.SDK_INT + "\nPackage: " + getPackageName() + "\nSettings: " + files.getAbsolutePath() + "\nPublic log target: Downloads/P06Quest\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         } catch (Exception e) { Log.e("P06Quest", "Log header failed", e); }
+        final Thread.UncaughtExceptionHandler previousHandler = Thread.getDefaultUncaughtExceptionHandler();
+        Thread.setDefaultUncaughtExceptionHandler((thread, failure) -> {
+            writeDiagnostic("Uncaught Java exception on " + thread.getName() + "\n" + Log.getStackTraceString(failure));
+            if (previousHandler != null) previousHandler.uncaughtException(thread, failure);
+            else { Process.killProcess(Process.myPid()); System.exit(10); }
+        });
         // Capture this app's own diagnostic stream for sideload-only testing.
         Thread logger = new Thread(() -> {
             try {
@@ -66,11 +72,33 @@ public final class QuestActivity extends UnityPlayerActivity {
             } catch (Exception e) { Log.e("P06Quest", "Diagnostic capture unavailable", e); }
         }, "P06 diagnostics");
         logger.setDaemon(true); logger.start();
-        System.loadLibrary("openxr_loader");
-        System.loadLibrary("p06quest");
-        nativePrepare(this, files.getAbsolutePath(), nativeFd);
-        super.onCreate(state);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        try {
+            System.loadLibrary("openxr_loader");
+            System.loadLibrary("p06quest");
+            nativePrepare(this, files.getAbsolutePath(), nativeFd);
+            int description = getResources().getIdentifier("game_view_content_description", "string", getPackageName());
+            int surface = getResources().getIdentifier("unitySurfaceView", "id", getPackageName());
+            writeDiagnostic("Unity resource preflight: description=0x" + Integer.toHexString(description) + " surface=0x" + Integer.toHexString(surface));
+            if (description == 0 || surface == 0) throw new IllegalStateException("Unity resource namespace mismatch");
+            writeDiagnostic("Unity description: " + getResources().getString(description));
+            super.onCreate(state);
+            writeDiagnostic("UnityPlayerActivity.onCreate completed");
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } catch (Throwable failure) {
+            writeDiagnostic("Startup failure\n" + Log.getStackTraceString(failure));
+            throw failure;
+        }
+    }
+
+    private void writeDiagnostic(String text) {
+        Log.i("P06Quest", text);
+        try {
+            if (logOutput != null) {
+                logOutput.write((text + "\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                logOutput.flush();
+                logOutput.getFD().sync();
+            }
+        } catch (Exception e) { Log.e("P06Quest", "Direct diagnostic write failed", e); }
     }
 
     @Override protected void onDestroy() {

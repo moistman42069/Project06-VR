@@ -1,14 +1,15 @@
 # Project 06 Quest VR
 
 Standalone ARM64 Quest 3 VR project for Sonic Project 06. The current tree contains
-an experimental, locally built candidate, **not yet tested in a headset**. Signing, alignment, payload integrity,
+an experimental replacement candidate, **0.1.1, awaiting headset retest**.
+Candidate 0.1.0 failed during Android activity startup; the diagnosed resource
+namespace mismatch is corrected in 0.1.1. Signing, alignment, payload integrity,
 native compilation, input-menu tests and view-math tests are build evidence;
 they do not prove startup, correct stereo, HUD appearance or playable performance.
 
 ## Project status
 
-This is a working pre-release repository. There are no releases yet. The first
-headset result will determine whether candidate 0.1.0 is promoted into
+This is a working pre-release repository. There are no releases yet. Headset acceptance is required before a candidate is promoted into
 `releases/`. Future work is tracked in [docs/PROJECT-PLAN.md](docs/PROJECT-PLAN.md),
 with the current handoff in [docs/ACTIVE-WORK-CHECKPOINT.md](docs/ACTIVE-WORK-CHECKPOINT.md).
 The repository is intentionally arranged so a tested candidate can become a
@@ -32,7 +33,9 @@ a private or unindexed Discord test build could still exist.
 
 ## Install and play
 
-Sideload `out/p06-quest-0.1.0.apk` using your existing Quest sideload method.
+Sideload `out/p06-quest-0.1.1.apk` using your existing Quest sideload method.
+This replacement uses the same signing key and a higher version code; install it
+over 0.1.0 to retain settings. See [startup diagnosis](docs/STARTUP-CRASH-20260922.md).
 Launch **Project 06 Quest** from Unknown Sources. Package `com.p06.quest` installs
 alongside the original Android game; its saves/settings are separate.
 
@@ -77,6 +80,8 @@ Each launch creates `Downloads/P06Quest/P06Quest-<date>-<time>.log` through Andr
 MediaStore. Send the log from the failed/problematic run, even if the game never
 gets past startup. It includes device/build information, loader/hook results,
 OpenXR session/frame failures, controller transitions and game-input query counts.
+Startup Java exceptions are written directly to the run log before rethrowing;
+resource lookup IDs and activity startup completion are recorded.
 Unity/app error output is collected where Android permits it. A minimal native
 crash recorder includes signal and register addresses; it is not a full crash dump.
 
@@ -124,6 +129,6 @@ Native dependencies included at these revisions:
 - Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
 - dhepper/font8x8 basic font, public domain; notice in its header.
 
-`out/package-receipt.json` identifies the exact APK, native plugin and mod source
+`out/p06-quest-0.1.1-receipt.json` identifies the exact APK, native plugin and mod source
 tree and records preserved game entries. The original APK and MCC workspace were
-not modified. No headset installation or acceptance has occurred.
+not modified. The user tested 0.1.0 and reported startup failure; 0.1.1 is not yet headset accepted.

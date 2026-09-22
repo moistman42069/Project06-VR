@@ -1,6 +1,6 @@
 {
   "name": "P06Quest",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "libraryName": "p06quest",
   "displays": [{ "id": "P06 Quest Display", "supportedMirrorBlitReservedModes": [] }],
   "inputs": []

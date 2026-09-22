@@ -1,6 +1,7 @@
 """Build and sign the standalone Quest candidate without touching installed apps."""
 import argparse, hashlib, json, os, pathlib, shutil, subprocess, sys, zipfile
 from apk_manifest import patch_manifest
+from apk_resources import patch_resources, packages, TARGET
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 os.chdir(ROOT)
@@ -34,16 +35,19 @@ class_files=list((classes/'com/p06/quest').glob('*.class'))
 assert class_files
 run([jdk/'java.exe','-cp',android/'lib/d8.jar','com.android.tools.r8.D8','--release','--min-api','29','--lib',platform,'--classpath',classes,'--output',dex,*class_files],'d8.log')
 manifest=None
-with zipfile.ZipFile(original) as z:manifest=patch_manifest(z.read('AndroidManifest.xml'))
+with zipfile.ZipFile(original) as z:
+    manifest=patch_manifest(z.read('AndroidManifest.xml'))
+    resources=patch_resources(z.read('resources.arsc'))
 (OUT/'AndroidManifest.xml').write_bytes(manifest)
 additions={
     'AndroidManifest.xml':manifest,
+    'resources.arsc':resources,
     'classes2.dex':(dex/'classes.dex').read_bytes(),
     'lib/arm64-v8a/libp06quest.so':(ROOT/'build/libp06quest.so').read_bytes(),
     'lib/arm64-v8a/libopenxr_loader.so':(ROOT/'build/vendor/OpenXR-SDK/src/loader/libopenxr_loader.so').read_bytes(),
     'assets/bin/Data/UnitySubsystems/P06Quest/UnitySubsystemsManifest.json':(ROOT/'src/UnitySubsystemsManifest.json').read_bytes(),
 }
-unsigned=OUT/'p06-quest-0.1.0-unsigned.apk'
+unsigned=OUT/'p06-quest-0.1.1-unsigned.apk'
 print('Packaging preserved game payload and Quest plugin',flush=True)
 preserved=[]
 with zipfile.ZipFile(original) as source, zipfile.ZipFile(unsigned,'w',allowZip64=True) as target:
@@ -56,17 +60,20 @@ with zipfile.ZipFile(original) as source, zipfile.ZipFile(unsigned,'w',allowZip6
         if info.file_size>100_000_000:print('Preserved',info.filename,info.file_size,flush=True)
     for name,data in additions.items():
         target.writestr(name,data,compress_type=zipfile.ZIP_STORED)
-aligned=OUT/'p06-quest-0.1.0-aligned.apk'
+aligned=OUT/'p06-quest-0.1.1-aligned.apk'
 run([android/'zipalign.exe','-f','-P','16','4',unsigned,aligned],'zipalign.log')
 keys=ROOT/'keys';keys.mkdir(exist_ok=True);key=keys/'p06quest-development.jks'
 if not key.exists():run([jdk/'keytool.exe','-genkeypair','-keystore',key,'-alias','p06quest','-storepass','android','-keypass','android','-dname','CN=P06 Quest Local Development','-keyalg','RSA','-keysize','2048','-validity','10000'],'key-generation.log')
-apk=OUT/'p06-quest-0.1.0.apk'
+apk=OUT/'p06-quest-0.1.1.apk'
 run([jdk/'java.exe','-jar',android/'lib/apksigner.jar','sign','--ks',key,'--ks-key-alias','p06quest','--ks-pass','pass:android','--key-pass','pass:android','--out',apk,aligned],'apk-signing.log')
 run([jdk/'java.exe','-jar',android/'lib/apksigner.jar','verify','--verbose','--print-certs',apk],'apk-signature-verification.log')
 run([android/'zipalign.exe','-c','-P','16','4',apk],'apk-alignment-verification.log')
 run([android/'aapt2.exe','dump','xmltree','--file','AndroidManifest.xml',apk],'packaged-manifest.txt')
+run([android/'aapt2.exe','dump','resources',apk],'packaged-resources.txt')
 run([android/'dexdump.exe',dex/'classes.dex'],'quest-dexdump.txt')
 with zipfile.ZipFile(apk) as final:
+    assert packages(final.read('resources.arsc'))[0][1:] == (0x7f, TARGET)
+    assert final.testzip() is None, 'APK payload CRC failure'
     assert len(final.namelist())==len(set(final.namelist()))
     for item in preserved:
         info=final.getinfo(item['name']);assert (info.CRC,info.file_size)==(item['crc32'],item['size'])
@@ -78,9 +85,13 @@ for text in ['com.p06.quest.QuestActivity','com.p06.quest','Project 06 Quest','a
 dex_text=(OUT/'quest-dexdump.txt').read_text(encoding='utf-8',errors='replace')
 assert "Class descriptor  : 'Lcom/p06/quest/QuestActivity;'" in dex_text
 assert "Class descriptor  : 'Lcom/unity3d/player/UnityPlayerActivity;'" not in dex_text,'Compile-time stub leaked into APK'
-source_files=list((ROOT/'src').rglob('*'))+[ROOT/'CMakeLists.txt']
+resource_text=(OUT/'packaged-resources.txt').read_text(encoding='utf-8',errors='replace')
+assert 'Package name=com.p06.quest id=7f' in resource_text
+for entry in ['0x7f040006 string/game_view_content_description','0x7f020000 id/unitySurfaceView','0x7f050001 style/UnityThemeSelector']:
+    assert entry in resource_text, entry
+source_files=list((ROOT/'src').rglob('*'))+list((ROOT/'tools').rglob('*.py'))+[ROOT/'CMakeLists.txt']
 source_hash=hashlib.sha256()
 for p in sorted(x for x in source_files if x.is_file()):source_hash.update(p.relative_to(ROOT).as_posix().encode());source_hash.update(p.read_bytes())
 receipt={'apk':apk.name,'apk_sha256':digest(apk),'bytes':apk.stat().st_size,'base_apk_sha256':identity['sha256'],'source_tree_sha256':source_hash.hexdigest(),'native_plugin_sha256':digest(ROOT/'build/libp06quest.so'),'preserved_entries':preserved,'added_or_modified_entries':list(additions),'headset_tested':False}
-(OUT/'package-receipt.json').write_text(json.dumps(receipt,indent=2),encoding='utf-8')
+(OUT/'p06-quest-0.1.1-receipt.json').write_text(json.dumps(receipt,indent=2),encoding='utf-8')
 print('APK ready:',apk,flush=True);print('SHA256:',receipt['apk_sha256'],flush=True)

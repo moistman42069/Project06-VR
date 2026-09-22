@@ -1,17 +1,25 @@
 # Active work checkpoint
 
 Date: 2026-09-22
-Status: candidate packaged; awaiting Quest 3 test.
+Status: 0.1.0 failed on Quest 3; replacement 0.1.1 packaged, awaiting retest.
 
-The current candidate is `out/p06-quest-0.1.0.apk`. It is signed with the local
-development key and has passed native compilation, menu/view-math tests, APK
-signing/alignment checks and full ZIP CRC verification. The headset has not been
-connected and no runtime acceptance has been claimed.
+Current candidate: `out/p06-quest-0.1.1.apk` (versionCode 101).
+SHA-256: `7d7e622f35c4e97bf15df1baab8b5545f872724c8b17c521a1884c524b46b7ca`.
+Matching source: `out/p06-quest-0.1.1-source.zip`.
+Receipt: `out/p06-quest-0.1.1-receipt.json`.
 
-The next action is a sideload test. Record the first failure and copy the matching
-`Downloads/P06Quest/P06Quest-*.log`. Test title/menu input, one gameplay stage,
-stereo/head tracking, HUD, both-stick menu, 3D screen, 2D theatre and right Meta
-recenter before changing mechanics.
+Both user logs are preserved under `baseline/0.1.0-startup-failure/`.
+The failed APK and source ZIP remain under `out/` with their original 0.1.0 names.
+Do not promote either candidate to a public release without headset acceptance.
 
-Planned mechanics are tracked in `docs/PROJECT-PLAN.md`; gesture homing, gesture
-running, first-person IK and world collision are deliberately future milestones.
+See [startup crash diagnosis](STARTUP-CRASH-20260922.md) for the reproduced
+package/resource mismatch, patch, checks and limits. This changes Android
+resource packaging and startup diagnostics; immersive third-person rendering,
+controller bindings, HUD handling and menu modes remain the existing candidate
+implementation. Neither run reached their runtime verification.
+
+Next: user sideloads over 0.1.0, launches and supplies the new Downloads/P06Quest
+log. Confirm nonzero resource IDs and UnityPlayerActivity.onCreate completion,
+then provider registration, XR initialization, controls, gameplay and HUD.
+Use HEADSET-TEST-CHECKLIST.md for acceptance. No USB/headset access is available
+through the user's Shadow PC. Planned mechanics remain in PROJECT-PLAN.md.
