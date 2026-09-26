@@ -1,12 +1,13 @@
 # Project 06 Quest VR
 
 Standalone ARM64 Quest 3 VR project for Sonic Project 06. The current tree contains
-an experimental replacement candidate, **0.1.3, awaiting headset retest**.
+an experimental replacement candidate, **0.1.4, awaiting headset retest**.
 Candidate 0.1.0 failed on a resource namespace mismatch. On the user's Quest,
 0.1.1 resolves those resources and completes activity creation, then exits during
 native Unity startup. Candidate 0.1.2 reached the game loop but found zero XR descriptors. Candidate
-0.1.3 initializes Unity SubsystemManager before reading descriptors; Quest
-verification is pending.
+0.1.3 initializes Unity SubsystemManager, then fails at EGL config resolution
+before creating an OpenXR session. Candidate 0.1.4 handles configless Unity EGL
+contexts; Quest visibility verification is pending.
 Signing, alignment, payload integrity,
 native compilation, input-menu tests and view-math tests are build evidence;
 they do not prove startup, correct stereo, HUD appearance or playable performance.
@@ -37,9 +38,9 @@ a private or unindexed Discord test build could still exist.
 
 ## Install and play
 
-Sideload `out/p06-quest-0.1.3.apk` using your existing Quest sideload method.
+Sideload `out/p06-quest-0.1.4.apk` using your existing Quest sideload method.
 This replacement uses the same signing key and a higher version code; install it
-over 0.1.2 to retain settings. See [latest XR startup investigation](docs/XR-DESCRIPTOR-BOOTSTRAP-20260926.md).
+over 0.1.3 to retain settings. See [latest XR startup investigation](docs/EGL-SESSION-STARTUP-20260926.md).
 Launch **Project 06 Quest** from Unknown Sources. Package `com.p06.quest` installs
 alongside the original Android game; its saves/settings are separate.
 
@@ -137,6 +138,6 @@ Native dependencies included at these revisions:
 - Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
 - dhepper/font8x8 basic font, public domain; notice in its header.
 
-`out/p06-quest-0.1.3-receipt.json` identifies the exact APK, native plugin and mod source
+`out/p06-quest-0.1.4-receipt.json` identifies the exact APK, native plugin and mod source
 tree and records preserved game entries. The original APK and MCC workspace were
-not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained. Candidate 0.1.3 awaits retest.
+not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. Candidate 0.1.4 awaits headset verification.

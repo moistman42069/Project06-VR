@@ -1,7 +1,9 @@
 # Quest 3 headset test checklist
 
-For 0.1.2, retain any previous-exit trace blocks and first check the log reports nonzero Unity resource IDs and
-`UnityPlayerActivity.onCreate completed`.
+For 0.1.4, retain any previous-exit trace blocks and check that the log reports
+an EGL config source, `XR graphics initialized`, `OpenXR session state=FOCUSED`,
+and `First OpenXR frame submitted`. The last line plus actually seeing the game
+confirms the loading view cleared; the log alone cannot prove visible pixels.
 
 Use a fresh launch and retain the corresponding `Downloads/P06Quest` log.
 

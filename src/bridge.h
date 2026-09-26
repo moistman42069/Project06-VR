@@ -9,6 +9,7 @@ extern JavaVM* g_vm;
 extern jobject g_activity;
 void PublishControls(const Controls&);
 void GameMainTick();
+bool XRDisplayGraphicsReady();
 void SyncHudCamera();
 void LogBridgeStats();
 void InstallGameHooks(void* library);

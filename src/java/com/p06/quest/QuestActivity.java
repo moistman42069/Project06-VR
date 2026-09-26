@@ -54,7 +54,7 @@ public final class QuestActivity extends UnityPlayerActivity {
             } catch (Exception fallback) { Log.e("P06Quest", "Cannot create run log", fallback); }
         }
         try {
-            if (logOutput != null) logOutput.write(("P06 Quest candidate 0.1.3\nRun: " + runName + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL + "\nAndroid: " + Build.VERSION.RELEASE + " / API " + Build.VERSION.SDK_INT + "\nPackage: " + getPackageName() + "\nSettings: " + files.getAbsolutePath() + "\nPublic log target: Downloads/P06Quest\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            if (logOutput != null) logOutput.write(("P06 Quest candidate 0.1.4\nRun: " + runName + "\nDevice: " + Build.MANUFACTURER + " " + Build.MODEL + "\nAndroid: " + Build.VERSION.RELEASE + " / API " + Build.VERSION.SDK_INT + "\nPackage: " + getPackageName() + "\nSettings: " + files.getAbsolutePath() + "\nPublic log target: Downloads/P06Quest\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
         } catch (Exception e) { Log.e("P06Quest", "Log header failed", e); }
         final Thread.UncaughtExceptionHandler previousHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler((thread, failure) -> {

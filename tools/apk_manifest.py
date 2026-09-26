@@ -74,7 +74,7 @@ class Manifest:
                             a[2]=self.string(value) if typ==3 else NONE;a[5]=typ;a[6]=self.string(value) if typ==3 else value;return
                     raise ValueError('Missing original attribute '+attr)
                 if name=='manifest':
-                    replace('package','com.p06.quest');replace('versionName','0.1.3-vr-candidate');replace('versionCode',103,0x10)
+                    replace('package','com.p06.quest');replace('versionName','0.1.4-vr-candidate');replace('versionCode',104,0x10)
                 if name=='uses-sdk':replace('minSdkVersion',29,0x10)
                 if name=='application':replace('label','Project 06 Quest')
                 if name=='activity':replace('name','com.p06.quest.QuestActivity')

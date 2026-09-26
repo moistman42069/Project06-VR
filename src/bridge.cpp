@@ -53,7 +53,8 @@ std::atomic<uint64_t> axisQueries{0},buttonQueries{0};
 std::mutex inputMutex;
 Controls controls;
 uint32_t previous=0;
-bool haveXR=false,tryingXR=false;
+bool haveXR=false,tryingXR=false,xrStartAttempted=false;
+void* xrStartedSubsystem=nullptr;
 
 using Method=void;
 using Obj=void;
@@ -117,7 +118,16 @@ bool bindApi(){
     return true;
 }
 void startXR(){
-    if(haveXR || tryingXR || !resolve)return;
+    if(haveXR&&XRDisplayGraphicsReady())return;
+    haveXR=false;
+    if(tryingXR || !resolve)return;
+    if(xrStartAttempted){
+        auto running=icall<bool(*)(void*)>("UnityEngine.IntegratedSubsystem::IsRunning");
+        bool subsystemRunning=xrStartedSubsystem&&running&&running(xrStartedSubsystem);
+        bool graphicsReady=XRDisplayGraphicsReady();haveXR=subsystemRunning&&graphicsReady;
+        static bool statusLogged=false;if(!statusLogged||haveXR){LOG("XR activation check: subsystemRunning=%d graphicsReady=%d",int(subsystemRunning),int(graphicsReady));statusLogged=true;}
+        return;
+    }
     unityThread=gettid();
     static timespec last{};timespec now{};clock_gettime(CLOCK_MONOTONIC,&now);
     if(last.tv_sec && now.tv_sec-last.tv_sec<2)return;last=now;
@@ -150,7 +160,7 @@ void startXR(){
             auto sub=call(klass("UnityEngine","SubsystemManager"),"GetIntegratedSubsystemByPtr",nullptr,args,1);
             if(!sub){LOG("XR managed subsystem missing after Create");break;}
             if(auto descriptorField=class_field(object_class(sub),"m_SubsystemDescriptor"))field_set(sub,descriptorField,&desc);
-            start(sub);haveXR=running(sub);LOG("XR display running=%d",int(haveXR));break;
+            xrStartedSubsystem=sub;xrStartAttempted=true;start(sub);bool subsystemRunning=running(sub);bool graphicsReady=XRDisplayGraphicsReady();haveXR=subsystemRunning&&graphicsReady;LOG("XR activation: subsystemRunning=%d graphicsReady=%d",int(subsystemRunning),int(graphicsReady));break;
         }
     }
     tryingXR=false;
@@ -323,7 +333,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm,void*){g_vm=vm;return JNI_VERSIO
 extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativePrepare(JNIEnv* env,jclass,jobject activity,jstring directory,jint fd){
     if(fd>=0)logFd=dup(fd);
     g_activity=env->NewGlobalRef(activity);const char* dir=env->GetStringUTFChars(directory,nullptr);InitOptions(dir);env->ReleaseStringUTFChars(directory,dir);
-    LOG("P06 Quest candidate 0.1.2 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
+    LOG("P06 Quest candidate 0.1.4 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
     LOG("System library loading is untouched; waiting for Unity activity creation");
 }
 

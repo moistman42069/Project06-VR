@@ -1,22 +1,21 @@
 # Active work checkpoint
 
 Date: 2026-09-26
-Status: candidate 0.1.2 runs Unity but never registers XR; candidate 0.1.3 is
-packaged with the SubsystemManager descriptor initialization correction and
-awaits the user's Quest 3 retest.
+Status: candidate 0.1.3 launches Unity and creates the OpenXR instance but the
+user's Quest log proves graphics startup fails at EGL config resolution. Candidate
+0.1.4 addresses that binding and adds startup/frame evidence. Quest 3 visibility
+acceptance remains pending.
 
-APK: `out/p06-quest-0.1.3.apk` (versionCode 103).
-SHA-256: `76b2477e7585fb34d76f3d048045d45aeb8d0211ad0d8bc964de4e9fd75d4fe3`.
-Matching source ZIP: `out/p06-quest-0.1.3-source.zip`.
-Receipt: `out/p06-quest-0.1.3-receipt.json`.
+APK: `out/p06-quest-0.1.4.apk` (versionCode 104).
+SHA-256: `54b6f34480e341eca4ecc4a595e199acfdc4425042fa1bb7b7c1e6e54677d66e`.
+Matching source ZIP: `out/p06-quest-0.1.4-source.zip`.
+Receipt: `out/p06-quest-0.1.4-receipt.json`.
 
-Read [XR descriptor startup notes](XR-DESCRIPTOR-BOOTSTRAP-20260926.md). The
-last Quest log and prior artifacts are preserved under baseline/out. Static
-verification passes. Headset acceptance has not been recorded; no public release.
+Read [EGL and session startup investigation](EGL-SESSION-STARTUP-20260926.md).
+The user tested 0.1.3 through Shadow PC and cannot connect the Quest by USB.
+No headset acceptance or public release is recorded. Keep MCC untouched.
 
-Install 0.1.3 over 0.1.2. In its log check SubsystemManager map initialization,
-nonzero integrated descriptor count, provider registration, `XR graphics
-initialized`, `XR display running=1`, and whether the Quest loading view clears.
-If anything fails, share the matching Downloads/P06Quest log. The user's Quest
-cannot attach through Shadow PC. Keep MCC untouched. Planned mechanics remain
-in PROJECT-PLAN.md; use HEADSET-TEST-CHECKLIST.md after display startup succeeds.
+On 0.1.4, check the EGL context/draw-surface config-query line, resolved config,
+`XR graphics initialized`, OpenXR session state transitions, and
+`First OpenXR frame submitted`. The headset loading view must actually clear;
+logs and static checks alone do not prove visible or correct stereo output.

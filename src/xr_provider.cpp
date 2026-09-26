@@ -2,6 +2,7 @@
 #include "vr_options.h"
 #include "view_math.h"
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES3/gl3.h>
 #include <openxr/openxr.h>
 #include <openxr/openxr_platform.h>
@@ -24,7 +25,7 @@ XrSystemId systemId=XR_NULL_SYSTEM_ID;
 XrSession session=XR_NULL_HANDLE;
 XrSpace localSpace=XR_NULL_HANDLE,renderSpace=XR_NULL_HANDLE,viewSpace=XR_NULL_HANDLE;
 XrSessionState sessionState=XR_SESSION_STATE_UNKNOWN;
-bool running=false,frameBegun=false,renderFrame=false,recentered=false,shouldRender=false;
+bool running=false,graphicsReady=false,frameBegun=false,renderFrame=false,recentered=false,shouldRender=false,firstFrameLogged=false;
 XrTime predictedTime=0;
 XrTime pendingRecenterTime=0;
 VROptions frameOptions;
@@ -100,8 +101,10 @@ Controls readControls(){
 void pollEvents(){
     if(!instance)return;
     for(;;){XrEventDataBuffer ev{XR_TYPE_EVENT_DATA_BUFFER};XrResult r=xrPollEvent(instance,&ev);if(r==XR_EVENT_UNAVAILABLE)break;if(!XR_OK(r))break;
-        if(ev.type==XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED){auto& s=*reinterpret_cast<XrEventDataSessionStateChanged*>(&ev);sessionState=s.state;LOG("OpenXR session state=%d",int(sessionState));
-            if(s.state==XR_SESSION_STATE_READY&&!running){XrSessionBeginInfo bi{XR_TYPE_SESSION_BEGIN_INFO};bi.primaryViewConfigurationType=XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;running=XR_OK(xrBeginSession(session,&bi));}
+        if(ev.type==XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED){auto& s=*reinterpret_cast<XrEventDataSessionStateChanged*>(&ev);sessionState=s.state;
+            const char* stateName="UNKNOWN";switch(sessionState){case XR_SESSION_STATE_IDLE:stateName="IDLE";break;case XR_SESSION_STATE_READY:stateName="READY";break;case XR_SESSION_STATE_SYNCHRONIZED:stateName="SYNCHRONIZED";break;case XR_SESSION_STATE_VISIBLE:stateName="VISIBLE";break;case XR_SESSION_STATE_FOCUSED:stateName="FOCUSED";break;case XR_SESSION_STATE_STOPPING:stateName="STOPPING";break;case XR_SESSION_STATE_EXITING:stateName="EXITING";break;case XR_SESSION_STATE_LOSS_PENDING:stateName="LOSS_PENDING";break;default:break;}
+            LOG("OpenXR session state=%s (%d)",stateName,int(sessionState));
+            if(s.state==XR_SESSION_STATE_READY&&!running){XrSessionBeginInfo bi{XR_TYPE_SESSION_BEGIN_INFO};bi.primaryViewConfigurationType=XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;XrResult beginResult=xrBeginSession(session,&bi);running=XR_OK(beginResult);LOG("xrBeginSession result=%d running=%d",int(beginResult),int(running));}
             if(s.state==XR_SESSION_STATE_STOPPING&&running){XR_OK(xrEndSession(session));running=false;}
             if(s.state==XR_SESSION_STATE_EXITING||s.state==XR_SESSION_STATE_LOSS_PENDING){running=false;}
         }else if(ev.type==XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING){
@@ -131,14 +134,57 @@ bool createInstance(){
     XrSystemGetInfo si{XR_TYPE_SYSTEM_GET_INFO};si.formFactor=XR_FORM_FACTOR_HEAD_MOUNTED_DISPLAY;
     return XR_OK(xrGetSystem(instance,&si,&systemId));
 }
+EGLConfig unityEglConfig(EGLDisplay display,EGLContext context){
+    EGLint contextId=0,drawId=0,readId=0;
+    EGLBoolean contextOk=eglQueryContext(display,context,EGL_CONFIG_ID,&contextId);
+    EGLint contextError=contextOk?EGL_SUCCESS:eglGetError();
+    EGLSurface draw=eglGetCurrentSurface(EGL_DRAW);
+    EGLSurface read=eglGetCurrentSurface(EGL_READ);
+    EGLBoolean drawOk=draw!=EGL_NO_SURFACE&&eglQuerySurface(display,draw,EGL_CONFIG_ID,&drawId);
+    EGLint drawError=drawOk?EGL_SUCCESS:eglGetError();
+    EGLBoolean readOk=read!=EGL_NO_SURFACE&&eglQuerySurface(display,read,EGL_CONFIG_ID,&readId);
+    EGLint readError=readOk?EGL_SUCCESS:eglGetError();
+    LOG("EGL bindings: context=%p draw=%p read=%p contextQuery=%d id=%d error=0x%x drawQuery=%d id=%d error=0x%x readQuery=%d id=%d error=0x%x",
+        context,draw,read,int(contextOk),contextId,contextError,int(drawOk),drawId,drawError,int(readOk),readId,readError);
+    // Prefer the config that created the Unity context. Some Android GLES
+    // contexts use EGL_KHR_no_config_context, so recover it from Unity's current
+    // draw surface (whose EGL_CONFIG_ID is specified by EGL).
+    EGLint wanted=0;
+    const char* source="none";
+    if(contextOk&&contextId>0){wanted=contextId;source="context";}
+    else if(drawOk&&drawId>0){wanted=drawId;source="draw-surface fallback";}
+    else if(readOk&&readId>0){wanted=readId;source="read-surface fallback";}
+    else source="surfaceless GLES3-compatible fallback";
+    if(contextOk&&contextId>0&&drawOk&&drawId>0&&contextId!=drawId)
+        LOG("EGL context/draw config mismatch (%d vs %d); using context config",contextId,drawId);
+    EGLint total=0;
+    if(!eglGetConfigs(display,nullptr,0,&total)||total<=0||total>4096){EGLint error=eglGetError();LOG("eglGetConfigs count failed: count=%d error=0x%x",total,error);return nullptr;}
+    std::vector<EGLConfig> configs(static_cast<size_t>(total));EGLint got=0;
+    if(!eglGetConfigs(display,configs.data(),total,&got)||got<=0||got>total){EGLint error=eglGetError();LOG("eglGetConfigs list failed: count=%d error=0x%x",got,error);return nullptr;}
+    EGLConfig compatible=nullptr;EGLint bestDepth=-1;
+    for(EGLint i=0;i<got;++i){
+        EGLint id=0;if(!eglGetConfigAttrib(display,configs[i],EGL_CONFIG_ID,&id))continue;
+        if(wanted>0&&id==wanted){LOG("Resolved Unity EGLConfig: id=%d source=%s handle=%p (%d/%d)",id,source,configs[i],i+1,got);return configs[i];}
+        if(wanted==0){EGLint renderable=0,red=0,green=0,blue=0,alpha=0,depth=0;
+            bool valid=eglGetConfigAttrib(display,configs[i],EGL_RENDERABLE_TYPE,&renderable)&&
+                eglGetConfigAttrib(display,configs[i],EGL_RED_SIZE,&red)&&eglGetConfigAttrib(display,configs[i],EGL_GREEN_SIZE,&green)&&
+                eglGetConfigAttrib(display,configs[i],EGL_BLUE_SIZE,&blue)&&eglGetConfigAttrib(display,configs[i],EGL_ALPHA_SIZE,&alpha)&&
+                eglGetConfigAttrib(display,configs[i],EGL_DEPTH_SIZE,&depth);
+            if(valid&&(renderable&EGL_OPENGL_ES3_BIT_KHR)&&red>=8&&green>=8&&blue>=8&&alpha>=8&&depth>bestDepth){compatible=configs[i];bestDepth=depth;}}
+    }
+    if(compatible){EGLint id=0;eglGetConfigAttrib(display,compatible,EGL_CONFIG_ID,&id);LOG("Resolved Unity EGLConfig: id=%d source=%s handle=%p depth=%d",id,source,compatible,bestDepth);return compatible;}
+    if(wanted>0)LOG("Unity EGLConfig ID %d from %s is absent from %d configs",wanted,source,got);
+    else LOG("No GLES3 RGBA8 EGLConfig found for configless/surfaceless context among %d configs",got);
+    return nullptr;
+}
 bool createSession(){
     if(graphics->GetRenderer()!=kUnityGfxRendererOpenGLES30){LOG("Unsupported renderer %d: GLES3 required",int(graphics->GetRenderer()));return false;}
-    auto eglDisplay=eglGetCurrentDisplay();auto context=eglGetCurrentContext();if(eglDisplay==EGL_NO_DISPLAY||context==EGL_NO_CONTEXT){LOG("Unity GLES context unavailable");return false;}
+    auto eglDisplay=eglGetCurrentDisplay();auto context=eglGetCurrentContext();if(eglDisplay==EGL_NO_DISPLAY||context==EGL_NO_CONTEXT){LOG("Unity GLES context unavailable: display=%p context=%p",eglDisplay,context);return false;}
     PFN_xrGetOpenGLESGraphicsRequirementsKHR requirements=nullptr;
     if(!XR_OK(xrGetInstanceProcAddr(instance,"xrGetOpenGLESGraphicsRequirementsKHR",reinterpret_cast<PFN_xrVoidFunction*>(&requirements)))||!requirements)return false;
     XrGraphicsRequirementsOpenGLESKHR req{XR_TYPE_GRAPHICS_REQUIREMENTS_OPENGL_ES_KHR};if(!XR_OK(requirements(instance,systemId,&req)))return false;
-    EGLint configId=0;eglQueryContext(eglDisplay,context,EGL_CONFIG_ID,&configId);EGLint attrs[]={EGL_CONFIG_ID,configId,EGL_NONE},count=0;EGLConfig config=nullptr;
-    if(!eglChooseConfig(eglDisplay,attrs,&config,1,&count)||count!=1){LOG("Unity EGLConfig unavailable");return false;}
+    if(req.minApiVersionSupported>req.maxApiVersionSupported){LOG("Invalid OpenXR GLES version range");return false;}
+    auto config=unityEglConfig(eglDisplay,context);if(!config)return false;
     XrGraphicsBindingOpenGLESAndroidKHR gb{XR_TYPE_GRAPHICS_BINDING_OPENGL_ES_ANDROID_KHR};gb.display=eglDisplay;gb.context=context;gb.config=config;
     XrSessionCreateInfo ci{XR_TYPE_SESSION_CREATE_INFO};ci.next=&gb;ci.systemId=systemId;if(!XR_OK(xrCreateSession(instance,&ci,&session)))return false;
     XrReferenceSpaceCreateInfo sp{XR_TYPE_REFERENCE_SPACE_CREATE_INFO};sp.referenceSpaceType=XR_REFERENCE_SPACE_TYPE_LOCAL;sp.poseInReferenceSpace.orientation.w=1;
@@ -216,7 +262,7 @@ void finishFrame(){
         XrCompositionLayerQuad menuLayer{XR_TYPE_COMPOSITION_LAYER_QUAD};
         if(menuReady){menuLayer.space=viewSpace;menuLayer.eyeVisibility=XR_EYE_VISIBILITY_BOTH;menuLayer.subImage.swapchain=menuSwapchain;menuLayer.subImage.imageRect.extent={menuSize,menuSize};menuLayer.pose.orientation.w=1;menuLayer.pose.position.z=-1.15f;menuLayer.size={1.05f,1.05f};layers[layerCount++]=reinterpret_cast<const XrCompositionLayerBaseHeader*>(&menuLayer);}
         XrFrameEndInfo end{XR_TYPE_FRAME_END_INFO};end.displayTime=predictedTime;end.environmentBlendMode=XR_ENVIRONMENT_BLEND_MODE_OPAQUE;end.layerCount=layerCount;end.layers=layerCount?layers:nullptr;
-        XR_OK(xrEndFrame(session,&end));frameBegun=false;
+        XrResult endResult=xrEndFrame(session,&end);bool endOk=XR_OK(endResult);if(endOk&&ready&&layerCount&&!firstFrameLogged){firstFrameLogged=true;LOG("First OpenXR frame submitted: layers=%u mode=%d",layerCount,int(frameOptions.mode));}frameBegun=false;
     }renderFrame=false;
 }
 void shutdown(){
@@ -227,7 +273,7 @@ void shutdown(){
     if(session)xrDestroySession(session);session=XR_NULL_HANDLE;
     if(actionSet)xrDestroyActionSet(actionSet);actionSet=XR_NULL_HANDLE;
     if(instance)xrDestroyInstance(instance);instance=XR_NULL_HANDLE;
-    running=false;recentered=false;sessionState=XR_SESSION_STATE_UNKNOWN;PublishControls({});
+    running=false;graphicsReady=false;firstFrameLogged=false;recentered=false;sessionState=XR_SESSION_STATE_UNKNOWN;PublishControls({});
 }
 bool locate(XrSpace space){
     XrViewLocateInfo li{XR_TYPE_VIEW_LOCATE_INFO};li.viewConfigurationType=XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;li.displayTime=predictedTime;li.space=space;
@@ -248,13 +294,14 @@ void recenter(){
     XrSpace next=XR_NULL_HANDLE;if(XR_OK(xrCreateReferenceSpace(session,&ci,&next))){if(renderSpace)xrDestroySpace(renderSpace);renderSpace=next;recentered=true;LOG("Headset origin recentered; game third-person camera retained");}
 }
 UnitySubsystemErrorCode UNITY_INTERFACE_API gfxStart(UnitySubsystemHandle h,void*,UnityXRRenderingCapabilities* caps){
-    std::lock_guard<std::mutex> guard(xrMutex);displayHandle=h;
+    std::lock_guard<std::mutex> guard(xrMutex);graphicsReady=false;displayHandle=h;
     caps->noSinglePassRenderingSupport=true;caps->invalidateRenderStateAfterEachCallback=true;caps->skipPresentToMainScreen=true;
     if(!createInstance()||!createSession()||!createTextures()||!createMenu()){LOG("XR graphics startup FAILED");shutdown();return kUnitySubsystemErrorCodeFailure;}
-    LOG("XR graphics initialized");return kUnitySubsystemErrorCodeSuccess;
+    graphicsReady=true;LOG("XR graphics initialized: session=%p EGL=%p context=%p",session,eglGetCurrentDisplay(),eglGetCurrentContext());return kUnitySubsystemErrorCodeSuccess;
 }
 UnitySubsystemErrorCode UNITY_INTERFACE_API populate(UnitySubsystemHandle,void*,const UnityXRFrameSetupHints*,UnityXRNextFrameDesc* frame){
     std::lock_guard<std::mutex> guard(xrMutex);*frame={};frame->mirrorBlitMode=kUnityXRMirrorBlitNone;
+    static bool firstPopulateLogged=false;if(!firstPopulateLogged){firstPopulateLogged=true;LOG("Unity display PopulateNextFrameDesc entered; graphicsReady=%d",int(graphicsReady));}
     // The pinned APK disables the graphics worker. Sync after game camera updates;
     // the helper refuses Unity object access if a separate worker is ever enabled.
     SyncHudCamera();
@@ -280,7 +327,7 @@ UnitySubsystemErrorCode UNITY_INTERFACE_API populate(UnitySubsystemHandle,void*,
         params.viewportRect={0,0,1,1};params.textureArraySlice=0;
         frame->cullingPasses[i].deviceAnchorToCullingPose=params.deviceAnchorToEyePose;frame->cullingPasses[i].projection=params.projection;frame->cullingPasses[i].separation=0;
     }
-    frame->renderPassesCount=passCount;renderFrame=true;
+    frame->renderPassesCount=passCount;renderFrame=true;static bool firstPassLogged=false;if(!firstPassLogged){firstPassLogged=true;LOG("First Unity stereo render descriptor populated: passes=%d shouldRender=%d",passCount,int(shouldRender));}
     static uint64_t frames=0;if((frames++%600)==0){LOG("Frame %llu; mode=%d passes=%d views valid; focused=%d",(unsigned long long)frames,int(frameOptions.mode),passCount,sessionState==XR_SESSION_STATE_FOCUSED);LogBridgeStats();}
     return kUnitySubsystemErrorCodeSuccess;
 }
@@ -312,3 +359,5 @@ extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityPluginLoad(IUnit
     UnityLifecycleProvider life{};life.Initialize=initialize;life.Start=start;life.Stop=stop;life.Shutdown=destroy;
     auto r=display->RegisterLifecycleProvider("P06Quest","P06 Quest Display",&life);LOG("Unity XR provider registration=%d",int(r));
 }
+
+bool XRDisplayGraphicsReady(){std::lock_guard<std::mutex> guard(xrMutex);return graphicsReady;}
