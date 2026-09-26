@@ -122,12 +122,19 @@ void startXR(){
     static timespec last{};timespec now{};clock_gettime(CLOCK_MONOTONIC,&now);
     if(last.tv_sec && now.tv_sec-last.tv_sec<2)return;last=now;
     installCrashRecorder();tryingXR=true;
+    // Unity's SubsystemManager .cctor calls StaticConstructScriptingClassMap.
+    // That native class map populates managed descriptor types. The descriptor
+    // store alone only initializes its lists; reading it first always finds 0.
+    auto manager=klass("UnityEngine","SubsystemManager");
+    if(!manager){LOG("XR bootstrap: no SubsystemManager class");tryingXR=false;return;}
+    class_init(manager);
+    LOG("XR bootstrap: SubsystemManager class map initialized");
     auto store=klass("UnityEngine.SubsystemsImplementation","SubsystemDescriptorStore");
     if(!store){LOG("XR bootstrap: no descriptor store");tryingXR=false;return;}
     class_init(store);void* list=nullptr;
     auto sf=class_field(store,"s_IntegratedDescriptors");if(sf)static_get(sf,&list);
     auto count=field<int>(list,"_size");auto items=field<void*>(list,"_items");
-    LOG("XR bootstrap: %d descriptors",count);
+    LOG("XR bootstrap: %d integrated descriptors",count);
     auto getid=icall<void*(*)(void*)>("UnityEngine.SubsystemDescriptorBindings::GetId");
     auto create=icall<void*(*)(void*)>("UnityEngine.SubsystemDescriptorBindings::Create");
     auto start=icall<void(*)(void*)>("UnityEngine.IntegratedSubsystem::Start");

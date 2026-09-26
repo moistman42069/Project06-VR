@@ -1,23 +1,22 @@
 # Active work checkpoint
 
-Date: 2026-09-22
-Status: 0.1.1 still fails on Quest 3; 0.1.2 awaits headset retest.
+Date: 2026-09-26
+Status: candidate 0.1.2 runs Unity but never registers XR; candidate 0.1.3 is
+packaged with the SubsystemManager descriptor initialization correction and
+awaits the user's Quest 3 retest.
 
-Current APK: out/p06-quest-0.1.2.apk (versionCode 102).
-SHA-256: 7b89fdf6217611cfb278d2186f3714c13ea6dfff615ff1e06ee1ecfb5a178edb.
-Source: out/p06-quest-0.1.2-source.zip.
-Receipt: out/p06-quest-0.1.2-receipt.json.
+APK: `out/p06-quest-0.1.3.apk` (versionCode 103).
+SHA-256: `76b2477e7585fb34d76f3d048045d45aeb8d0211ad0d8bc964de4e9fd75d4fe3`.
+Matching source ZIP: `out/p06-quest-0.1.3-source.zip`.
+Receipt: `out/p06-quest-0.1.3-receipt.json`.
 
-Read NATIVE-STARTUP-20260922.md for the exact evidence, changed startup path,
-validation and limits. The 0.1.0 resource failure is headset-proven resolved;
-0.1.1 completes Java activity startup but exits later, without a captured cause.
-0.1.2 removes global loader interception and adds early/native/previous-exit
-logging. Do not claim its startup or VR behavior is headset tested.
+Read [XR descriptor startup notes](XR-DESCRIPTOR-BOOTSTRAP-20260926.md). The
+last Quest log and prior artifacts are preserved under baseline/out. Static
+verification passes. Headset acceptance has not been recorded; no public release.
 
-Both sets of failed logs/receipts are preserved in baseline; prior APK/source
-archives remain in out. No candidate is accepted or promoted to a public release.
-The next action is the user's test of 0.1.2 as an update over 0.1.1. Read the
-new run log, including any previous-exit base64 trace blocks; decode native
-protobuf traces before guessing another cause. The user cannot connect Quest
-USB through Shadow PC. Keep MCC untouched. Planned mechanics remain in
-PROJECT-PLAN.md; full acceptance items are in HEADSET-TEST-CHECKLIST.md.
+Install 0.1.3 over 0.1.2. In its log check SubsystemManager map initialization,
+nonzero integrated descriptor count, provider registration, `XR graphics
+initialized`, `XR display running=1`, and whether the Quest loading view clears.
+If anything fails, share the matching Downloads/P06Quest log. The user's Quest
+cannot attach through Shadow PC. Keep MCC untouched. Planned mechanics remain
+in PROJECT-PLAN.md; use HEADSET-TEST-CHECKLIST.md after display startup succeeds.
