@@ -1,0 +1,20 @@
+{
+  "candidate": "0.1.14",
+  "log": "P06Quest-20260927-010856-078.log.txt",
+  "sha256": "3531f51193062ad7c55d5421b5b818a2049d88b60c604ff506fcf6cd79164b93",
+  "user_acceptance": "Amazing; works fantastic; good baseline.",
+  "settings_source": "User explicitly supplied values in chat; not recoverable from this log.",
+  "requested_defaults": {
+    "hudDistance": 2,
+    "hudX": -0.4,
+    "hudY": -0.3,
+    "hudSize": 0.2,
+    "screenDistance": 1,
+    "screenWidth": 3,
+    "titleSize": 0.15,
+    "titleDistance": 3,
+    "leftRoll": 30,
+    "rightRoll": -30
+  },
+  "known_issues": "Three Settings.SetLocalSettings NullReferenceException records. No current-run native crash record found. No unrelated change made."
+}

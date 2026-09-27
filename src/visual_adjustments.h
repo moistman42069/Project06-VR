@@ -19,3 +19,12 @@ inline void P06HUDFromHead(const float offset[3],const float position[3],const f
     out[2]=offset[2]+q[3]*tz+q[0]*ty-q[1]*tx;
     if(positional)for(int i=0;i<3;++i)out[i]+=position[i]/worldScale;
 }
+
+struct P06HUDVisibility {
+    bool hidden=false,savedEnabled=true;
+    bool update(bool hide,bool current){
+        if(hide){if(!hidden)savedEnabled=current;hidden=true;return false;}
+        if(hidden){hidden=false;return savedEnabled;}
+        return current;
+    }
+};

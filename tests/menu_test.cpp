@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <vector>
 #include <iostream>
+#include <sstream>
 
 int main(){
     assert(std::strcmp(kSaveSchemaVersion,"0.1.10-vr-candidate")==0);
@@ -18,6 +19,12 @@ int main(){
     const char* invalidSaveVersions[]={nullptr,"","1.0","0.1.11-vr-candidate","0.1.999-vr-candidate","0.1.9","0.1.9-vr-candidate-extra"};
     for(const char* bad:invalidSaveVersions)assert(!CompatibleSaveVersion(bad));
     testGestures();
+    {VROptions d;assert(d.hudDistance==2&&d.hudX==-.4f&&d.hudY==-.3f&&d.hudSize==.2f&&d.screenDistance==1&&d.screenWidth==3&&d.titleSize==.15f&&d.titleDistance==3);
+     assert(d.handAngles[0][2]==30&&d.handAngles[1][2]==-30&&d.handAngles[0][0]==-10&&d.handAngles[1][1]==5);
+     assert(d.hudWidth==1&&d.titleWidth==1&&!d.hideHUD);}
+    {P06HUDVisibility v;assert(!v.update(true,true));assert(!v.update(true,false));assert(v.update(false,false));assert(v.update(false,true));
+     assert(!v.update(true,false));assert(!v.update(false,false));} // Never enable originally disabled UI.
+
     {float offset[3]={0,0,2},p[3]={2,4,6},q[4]={0,.70710678f,0,.70710678f},out[3];
      P06HUDFromHead(offset,p,q,2,true,out);assert(std::fabs(out[0]-3)<.00001f&&out[1]==2&&std::fabs(out[2]-3)<.00001f);
      P06HUDFromHead(offset,p,q,2,false,out);assert(std::fabs(out[0]-2)<.00001f&&out[1]==0&&std::fabs(out[2])<.00001f);}
@@ -114,20 +121,20 @@ int main(){
     InitOptions("out/menu-test-state");auto migrated=GetOptions();
     assert(migrated.firstPerson&&migrated.motionRun&&migrated.gestureHoming&&migrated.crouchSpin);
     assert(migrated.homingTravel==.10f&&migrated.crouchDepth==.4f&&migrated.runSensitivity==2.3f&&migrated.hapticStrength==.6f);
-    assert(migrated.hudX==0&&migrated.hudY==0&&migrated.hudSize==1);
+    assert(migrated.hudX==-.4f&&migrated.hudY==-.3f&&migrated.hudSize==.2f);
     for(int h=0;h<2;++h)for(int axis=0;axis<3;++axis)assert(migrated.handAngles[h][axis]==VROptions{}.handAngles[h][axis]);
     // Current accepted candidate uses schema 5; retain its tuned homing threshold.
     file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);
     fprintf(file,"5 0 0.8 1.2 2.5 3 1 2 1 1 0.9 1 1 1 2.3 2.5 0.16 0.4 1 0.6\n");fclose(file);
     InitOptions("out/menu-test-state");migrated=GetOptions();
-    assert(migrated.homingTravel==.16f&&migrated.hudX==0&&migrated.hudY==0&&migrated.hudSize==1);
+    assert(migrated.homingTravel==.16f&&migrated.hudX==-.4f&&migrated.hudY==-.3f&&migrated.hudSize==.2f);
     for(int h=0;h<2;++h)for(int axis=0;axis<3;++axis)assert(migrated.handAngles[h][axis]==VROptions{}.handAngles[h][axis]);
     // Adjust both HUD axes, depth/size and each hand independently through actual menu input.
     press(LClick|RClick);down(3);press(A); // Root was Graphics; wrap to UI.
     c.lx=1;update();c.lx=0;update();assert(GetOptions().hudDistance==2.25f);
-    down(1);press(A);assert(GetOptions().hudX==.05f);
-    down(1);press(A);assert(GetOptions().hudY==.05f);
-    down(1);press(A);assert(GetOptions().hudSize==1.05f);
+    down(1);press(A);assert(std::fabs(GetOptions().hudX+.35f)<.00001f);
+    down(1);press(A);assert(std::fabs(GetOptions().hudY+.25f)<.00001f);
+    down(1);press(A);assert(GetOptions().hudSize==.25f);
     RasterMenu(pixels.data(),1024,1024);file=fopen("out/vr-menu-hud.ppm","wb");assert(file);fprintf(file,"P6\n1024 1024\n255\n");
     for(auto px:pixels){unsigned char rgb[]={static_cast<unsigned char>(px),static_cast<unsigned char>(px>>8),static_cast<unsigned char>(px>>16)};fwrite(rgb,1,3,file);}fclose(file);
     press(X);down(1);press(A);down(15);
@@ -135,10 +142,10 @@ int main(){
     RasterMenu(pixels.data(),1024,1024);file=fopen("out/vr-menu-hands.ppm","wb");assert(file);fprintf(file,"P6\n1024 1024\n255\n");
     for(auto px:pixels){unsigned char rgb[]={static_cast<unsigned char>(px),static_cast<unsigned char>(px>>8),static_cast<unsigned char>(px>>16)};fwrite(rgb,1,3,file);}fclose(file);
     InitOptions("out/menu-test-state");auto saved=GetOptions();
-    assert(saved.hudX==.05f&&saved.hudY==.05f&&saved.hudSize==1.05f&&saved.hudDistance==2.25f);
+    assert(saved.hudX==-.35f&&saved.hudY==-.25f&&saved.hudSize==.25f&&saved.hudDistance==2.25f);
     for(int h=0;h<2;++h)for(int axis=0;axis<3;++axis)assert(saved.handAngles[h][axis]==VROptions{}.handAngles[h][axis]+5);
     down(1);press(A);for(int h=0;h<2;++h)for(int axis=0;axis<3;++axis)assert(GetOptions().handAngles[h][axis]==VROptions{}.handAngles[h][axis]);
-    press(X);down(4);press(A);down(4);press(A);assert(GetOptions().hudX==0&&GetOptions().hudY==0&&GetOptions().hudSize==1&&GetOptions().hudDistance==2);
+    press(X);down(4);press(A);down(4);press(A);assert(GetOptions().hudX==-.4f&&GetOptions().hudY==-.3f&&GetOptions().hudSize==.2f&&GetOptions().hudDistance==2);
     assert(GetOptions().crouchSpin&&GetOptions().gestureHoming&&GetOptions().firstPerson);press(B);
     // Expanded ranges are reachable via menu, persisted, and recoverable with reset.
     press(LClick|RClick);press(A);
@@ -146,7 +153,7 @@ int main(){
     changeMany(-1,100);assert(GetOptions().hudDistance==.25f);down(1);changeMany(-1,250);assert(GetOptions().hudX==-10);
     down(1);changeMany(1,250);assert(GetOptions().hudY==10);down(1);changeMany(-1,100);assert(GetOptions().hudSize==.05f);
     down(5);changeMany(-1,100);assert(GetOptions().titleSize==.05f);down(1);changeMany(1,100);assert(GetOptions().titleDistance==20);
-    down(3);press(A);assert(GetOptions().titleSize==.65f&&GetOptions().titleDistance==3);
+    down(3);press(A);assert(GetOptions().titleSize==.15f&&GetOptions().titleDistance==3);
     down(1);changeMany(-1,100);assert(GetOptions().vrMenuSize==.1f);down(1);changeMany(1,250);assert(GetOptions().vrMenuDistance==10);
     down(1);press(A);assert(GetOptions().menuFollowView);InitOptions("out/menu-test-state");assert(GetOptions().hudSize==.05f&&GetOptions().menuFollowView&&GetOptions().vrMenuDistance==10);
     down(1);press(A);assert(!GetOptions().menuFollowView&&GetOptions().vrMenuSize==1.05f&&GetOptions().vrMenuDistance==1.15f);
@@ -158,10 +165,17 @@ int main(){
     capture("out/vr-menu-immersive.ppm");press(X);down(4);press(A);down(8);capture("out/vr-menu-title.ppm");
     down(9);press(A);assert(!GetOptions().hudFollowView&&!ImmersiveInteractions(GetOptions()));InitOptions("out/menu-test-state");assert(!GetOptions().hudFollowView);
     press(A);InitOptions("out/menu-test-state");assert(GetOptions().hudFollowView&&ImmersiveInteractions(GetOptions()));
+    down(1);press(A);assert(GetOptions().hudWidth==1.05f);down(1);c.lx=-1;update();c.lx=0;update();assert(GetOptions().titleWidth==.95f);
+    down(1);press(A);assert(GetOptions().hideHUD);auto snapshot=OptionsSnapshot();InitOptions("out/menu-test-state");assert(GetOptions().hideHUD&&GetOptions().hudWidth==1.05f&&GetOptions().titleWidth==.95f&&snapshot==OptionsSnapshot());
+    capture("out/vr-menu-width-hide.ppm");
+    // An accepted schema-8 file retains its existing settings, with new controls neutral.
+    std::istringstream tokens(snapshot);std::vector<std::string> fields;std::string token;while(tokens>>token)fields.push_back(token);assert(fields.size()==40&&fields[0]=="9");
+    fields.resize(37);fields[0]="8";file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);for(auto& value:fields)fprintf(file,"%s ",value.c_str());fclose(file);
+    InitOptions("out/menu-test-state");assert(GetOptions().hudWidth==1&&GetOptions().titleWidth==1&&!GetOptions().hideHUD&&GetOptions().hudFollowView);
     // A calibrated hand survives schema-6 migration; untouched hands adopt natural defaults.
     file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);
     fprintf(file,"6 0 0.8 1.2 2.5 3 1 2 1 1 0.9 1 1 1 2.3 2.5 0.16 0.4 1 0.6 0 0 1 0 0 0 15 20 25\n");fclose(file);
     InitOptions("out/menu-test-state");assert(GetOptions().handAngles[0][0]==-10&&GetOptions().handAngles[1][0]==15&&GetOptions().handAngles[1][2]==25);
-    assert(GetOptions().titleSize==.65f&&!GetOptions().menuFollowView&&!GetOptions().hudFollowView);
+    assert(GetOptions().titleSize==.15f&&!GetOptions().menuFollowView&&!GetOptions().hudFollowView);
     std::cout<<"PASS: anchored panel/recenter, UI ranges, schema migration, immersive preset,  eye handedness/IPD, world scale, rotation-only tracking, stereo/mono screen poses, FOV signs, chord debounce, category navigation, staggered clicks, mode selection, input capture, focus loss, persistence, menu raster\n";
 }

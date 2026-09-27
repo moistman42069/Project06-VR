@@ -5,7 +5,7 @@ void rememberFrontEnd(void* owner){
     if(!managedReady||gettid()!=unityThread||!alive(owner))return;
     if(frontEndRoot)gc_free(frontEndRoot);frontEndOwner=owner;frontEndRoot=gc_root(owner,false);
 }
-struct HUDCanvas { void* canvas=nullptr;uint32_t root=0;bool world=false;float scale[3]{1,1,1};float distance=2; };
+struct HUDCanvas { void* canvas=nullptr;uint32_t root=0;bool world=false;float scale[3]{1,1,1};float distance=2;P06HUDVisibility visibility; };
 std::vector<HUDCanvas> hudCanvases;
 void rememberHUDCanvas(void* canvas){
     if(!alive(canvas))return;
@@ -23,6 +23,8 @@ void syncFirstPersonHUD(bool firstPerson){
     static auto setMode=icall<void(*)(void*,int)>("UnityEngine.Canvas::set_renderMode");
     static auto getDistance=icall<float(*)(void*)>("UnityEngine.Canvas::get_planeDistance");
     if(!transform||!getPos||!getRot||!getScale||!setPos||!setRot||!setScale||!getMode||!setMode||!getDistance)return;
+    static auto getEnabled=icall<bool(*)(void*)>("UnityEngine.Behaviour::get_enabled");
+    static auto setEnabled=icall<void(*)(void*,bool)>("UnityEngine.Behaviour::set_enabled");
     const auto options=GetOptions();
     const bool frontEnd=alive(frontEndOwner);
     if(!frontEnd&&frontEndRoot){gc_free(frontEndRoot);frontEndRoot=0;frontEndOwner=nullptr;}
@@ -30,7 +32,7 @@ void syncFirstPersonHUD(bool firstPerson){
     const float size=frontEnd?options.titleSize:options.hudSize;
     const float offsetX=frontEnd?options.titleX:options.hudX,offsetY=frontEnd?options.titleY:options.hudY;
     if(frontEnd)firstPerson=false;
-    bool customHUD=options.hudX!=0||options.hudY!=0||options.hudSize!=1||options.hudFollowView;
+    bool customHUD=options.hudX!=0||options.hudY!=0||options.hudSize!=1||options.hudFollowView||options.hudWidth!=1;
     bool thirdPerson=options.mode==ViewMode::Immersive&&!firstPerson&&customHUD&&refreshFirstPersonAnchor();
     bool positioned=firstPerson||thirdPerson||frontEnd;
     float cameraPos[3]{},cameraRot[4]{0,0,0,1},worldPos[3]{},worldRot[4]{0,0,0,1};
@@ -51,12 +53,15 @@ void syncFirstPersonHUD(bool firstPerson){
         float followedRotation[4];quatMultiply(worldRot,headRotation,followedRotation);std::copy(followedRotation,followedRotation+4,worldRot);
         quatRotate(cameraRot,local,worldPos);for(int i=0;i<3;++i)worldPos[i]+=cameraPos[i];
     }
+    const bool hideUI=options.hideHUD&&!frontEnd&&!VRMenuOpen();
     for(auto it=hudCanvases.begin();it!=hudCanvases.end();){
         auto& c=*it;if(!alive(c.canvas)){gc_free(c.root);it=hudCanvases.erase(it);continue;}
+        if(getEnabled&&setEnabled){bool current=getEnabled(c.canvas),desired=c.visibility.update(hideUI,current);if(current!=desired)setEnabled(c.canvas,desired);}
         auto tr=transform(c.canvas);if(!alive(tr)){++it;continue;}
         if(positioned){
             if(!c.world||getMode(c.canvas)!=2){getScale(tr,c.scale);c.distance=std::max(getDistance(c.canvas),.1f);setMode(c.canvas,2);c.world=true;}
             float scale[3];for(int i=0;i<3;++i)scale[i]=c.scale[i]*distance/c.distance*size;
+            scale[0]*=frontEnd?options.titleWidth:options.hudWidth;
             setScale(tr,scale);setPos(tr,worldPos);setRot(tr,worldRot);
         }else if(c.world){setScale(tr,c.scale);setMode(c.canvas,1);if(canvasSetCamera)canvasSetCamera(c.canvas,hudCamera);if(canvasSetDistance)canvasSetDistance(c.canvas,distance);c.world=false;}
         ++it;

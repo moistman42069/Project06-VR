@@ -3,7 +3,7 @@ import hashlib,io,json,pathlib,sys,zipfile
 root=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(root/'vendor/python'))
 from elftools.elf.elffile import ELFFile
-receipt=json.loads((root/'out/p06-quest-0.1.14-receipt.json').read_text())
+receipt=json.loads((root/'out/p06-quest-0.1.15-receipt.json').read_text())
 apk=root/'out'/receipt['apk'];original=pathlib.Path(r'C:\Users\Shadow\Downloads\p-06RELEASE64.apk')
 def sha_file(path):
     with path.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
