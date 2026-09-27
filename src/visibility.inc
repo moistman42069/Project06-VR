@@ -21,8 +21,8 @@ bool bindBillboardCamera(void* self,const char* fieldName){
     if(alive(field<void*>(self,fieldName)))return true;
     auto camera=selectGameCamera();
     static auto transform=icall<void*(*)(void*)>("UnityEngine.Component::get_transform");
-    auto f=class_field(object_class(self),fieldName);if(!alive(camera)||!transform||!f)return false;
-    auto t=transform(camera);if(!alive(t))return false;field_set(self,f,&t);return true;
+    if(!alive(camera)||!transform)return false;
+    auto t=transform(camera);if(!alive(t))return false;return setObjectField(self,fieldName,t);
 }
 void gaugeStartHook(void* self,const Method* method){
     if(!managedReady||gettid()!=unityThread){oldGaugeStart(self,method);return;}

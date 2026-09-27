@@ -119,7 +119,7 @@ void RasterMenu(uint32_t* p,int w,int h){
     rect(p,w,h,0,0,w,8,color(38,191,255));rect(p,w,h,0,127,w,4,color(255,205,55));
     text(p,w,h,52,46,"PROJECT 06 / VR",4,color(2,12,45),true);
     text(p,w,h,48,40,"PROJECT 06 / VR",4,color(242,249,255),true);
-    text(p,w,h,48,94,"QUEST 3   -   CANDIDATE 0.1.10",2,color(137,214,255));
+    text(p,w,h,48,94,"QUEST 3   -   CANDIDATE 0.1.11",2,color(137,214,255));
     text(p,w,h,48,158,category<0?"VR SETTINGS":categoryNames[category],3,color(255,217,85));
     const int count=category<0?categoryCount:categoryRows[category];
     int first=category>=0?std::max(0,selected-5):0;

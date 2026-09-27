@@ -1,15 +1,16 @@
 # Project 06 Quest VR
 
-Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.10 is a test
+Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.11 is a test
 candidate, not a public release.** The user confirmed 0.1.9's crouch spindash,
 glove orientation, first-person head-follow view and blue menu. Startup,
 immersive VR and haptics were already confirmed in earlier candidates.
 
-0.1.10 adds a title-specific forward/LDR camera path, head-relative steering at
-the native movement consumers, outward-swing homing, smooth authored Sonic
-gloves, conservative world visibility and local gauge/skybox camera fixes.
-Physical controls now live inside the scrollable VR category.
-[Evidence, changes and limits](docs/CANDIDATE-0110.md). This candidate has not yet
+The user confirmed 0.1.10 fixes title pink flicker, but it crashes during the
+transition after slot selection. 0.1.11 corrects managed reference assignments
+that stored a native stack address, verified by executing the pinned ARM64 API.
+It also separates save compatibility from APK versions and accepts intact saves
+from earlier VR candidates. The existing features and title fix are retained.
+[Evidence, changes and limits](docs/CANDIDATE-0111.md). This candidate has not yet
 been tested on Quest; host checks cannot guarantee headset rendering.
 
 ## Project status
@@ -38,9 +39,13 @@ a private or unindexed Discord test build could still exist.
 
 ## Install and play
 
-Sideload `out/p06-quest-0.1.10.apk` using your existing Quest sideload method.
+Sideload `out/p06-quest-0.1.11.apk` using your existing Quest sideload method.
 This replacement uses the same signing key and a higher version code; install it
 over the previous candidate to retain settings. See [latest XR startup investigation](docs/EGL-SESSION-STARTUP-20260926.md).
+Do not uninstall or clear app data to update. Save compatibility is now tied to
+the unchanged game schema, not the candidate version; intact 0.1.0–0.1.10 slots
+are accepted without resetting progress. Deleted/overwritten slots cannot be
+recovered by this fix. Unknown save versions remain rejected.
 Launch **Project 06 Quest** from Unknown Sources. Package `com.p06.quest` installs
 alongside the original Android game; its saves/settings are separate.
 
@@ -85,8 +90,9 @@ marked WIP and leave the game's settings in effect.
 HUD/menu overlay canvases are moved onto a separate camera for stereo rendering.
 The bridge now redirects runtime requests for Screen Space Overlay immediately
 after the stereo HUD camera is available, with the periodic conversion retained
-as a fallback. The user confirmed level select displays correctly; title-screen
-pink flicker remains the target of 0.1.10's separate camera correction.
+as a fallback. The user confirmed level select displays correctly in 0.1.9 and
+title-screen pink flicker is fixed in 0.1.10. Its scene-transition crash is the
+target of 0.1.11's managed-reference correction.
 Touch-control canvases are hidden without disabling their input rig. The bridge
 handles the APK's active OutlineCamera when Camera.main is absent. Actual
 readability, scene transitions, effects, cutscenes and stereo correctness require
@@ -182,6 +188,12 @@ the production menu and view mathematics. Adjust its vcvars path on other hosts.
 The production bindings are supplied in `src/bindings.h`; regeneration requires
 the original APK's Il2CppDumper output and extracted native ELF.
 
+`tools/test-reference-abi.py` executes the pinned ARM64 field setters on the host
+to catch managed-reference ABI mistakes. It requires the extracted original ELF
+and `python -m pip install --target vendor/python unicorn==2.1.4 pyelftools`.
+Keep `src/save_schema.h` fixed when updating APK/menu/log versions: that identity
+describes unchanged save data, not the mod's release number.
+
 Native dependencies included at these revisions:
 
 - Khronos OpenXR-SDK: `f2448a8797c85814aa892efc1ab8707900fbcc78`.
@@ -189,6 +201,6 @@ Native dependencies included at these revisions:
 - Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
 - dhepper/font8x8 basic font, public domain; notice in its header.
 
-`out/p06-quest-0.1.10-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
+`out/p06-quest-0.1.11-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
 tree and records preserved game entries. The original APK and MCC workspace were
-not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup/haptics and 0.1.9 first-person view, hand orientation, crouch spindash and menu are confirmed; 0.1.10 awaits headset verification.
+not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup/haptics, 0.1.9 first-person view/hand orientation/crouch/menu and 0.1.10 title rendering are confirmed. 0.1.10 then crashes after slot selection; 0.1.11 awaits headset verification.

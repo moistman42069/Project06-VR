@@ -1,0 +1,70 @@
+[
+  {
+    "class": "SaveSlotUI",
+    "method": "public void SetUp(float Playtime, string LastSave, int BannerIndex, string FileVersion) { }",
+    "rva": "0x126b630",
+    "version_calls": [
+      {
+        "at": "0x126b6b8",
+        "target": "0x24c2658",
+        "method": "public static string get_version() { }"
+      },
+      {
+        "at": "0x126b6c8",
+        "target": "0x1d4ad04",
+        "method": "public static bool op_Equality(string a, string b) { }"
+      }
+    ]
+  },
+  {
+    "class": "TitleScreen",
+    "method": "private void StateStarter() { }",
+    "rva": "0x12eb024",
+    "version_calls": [
+      {
+        "at": "0x12eb720",
+        "target": "0x24c2658",
+        "method": "public static string get_version() { }"
+      },
+      {
+        "at": "0x12eb730",
+        "target": "0x1d4ad04",
+        "method": "public static bool op_Equality(string a, string b) { }"
+      },
+      {
+        "at": "0x12eb75c",
+        "target": "0x13cc980",
+        "method": "public void LoadGameData(bool GameOver = False) { }"
+      },
+      {
+        "at": "0x12eba20",
+        "target": "0x24c2658",
+        "method": "public static string get_version() { }"
+      }
+    ]
+  },
+  {
+    "class": "GameData",
+    "method": "public void CreateGameData(int Banner) { }",
+    "rva": "0x13ccb94",
+    "version_calls": [
+      {
+        "at": "0x13cccb0",
+        "target": "0x24c2658",
+        "method": "public static string get_version() { }"
+      }
+    ]
+  },
+  {
+    "class": "GameData",
+    "method": "public void SaveGameData() { }",
+    "rva": "0x13ccd30",
+    "version_calls": [
+      {
+        "at": "0x13ccde8",
+        "target": "0x24c2658",
+        "method": "public static string get_version() { }"
+      }
+    ]
+  }
+]

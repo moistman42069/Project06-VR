@@ -114,6 +114,24 @@
     "prologue": "fe4fbfa9f30300aae0031faa6e644894"
   },
   {
+    "name": "ApplicationVersion",
+    "method": "Application.public static string get_version()",
+    "rva": "0x24c2658",
+    "prologue": "fe4fbfa9732a00b0602e47f9a00000b5"
+  },
+  {
+    "name": "SaveSlotSetup",
+    "method": "SaveSlotUI.public void SetUp(float Playtime, string LastSave, int BannerIndex, string FileVersion)",
+    "rva": "0x126b630",
+    "prologue": "ff0302d1e923016dfd7b02a9fc6f03a9"
+  },
+  {
+    "name": "SaveStarter",
+    "method": "TitleScreen.private void StateStarterStart()",
+    "rva": "0x12ead64",
+    "prologue": "fe0f1cf8f85f01a9f65702a9f44f03a9"
+  },
+  {
     "name": "BackgroundUpdate",
     "method": "BackgroundVideo.public void UpdateVideo()",
     "rva": "0x11add6c",

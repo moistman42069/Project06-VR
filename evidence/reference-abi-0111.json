@@ -1,0 +1,31 @@
+{
+  "binary_sha256": "3f54e24393b152f97e42e8b468e2d3233e8e1bf3976b4d9a7282d300de0bddf4",
+  "reference_cases": [
+    {
+      "type": "0xe",
+      "old_stores_stack_address": true,
+      "object_setter_stores_reference": true
+    },
+    {
+      "type": "0x12",
+      "old_stores_stack_address": true,
+      "object_setter_stores_reference": true
+    },
+    {
+      "type": "0x1c",
+      "old_stores_stack_address": true,
+      "object_setter_stores_reference": true
+    },
+    {
+      "type": "0x1d",
+      "old_stores_stack_address": true,
+      "object_setter_stores_reference": true
+    }
+  ],
+  "float_value_setter_unchanged": true,
+  "setter_rvas": {
+    "il2cpp_field_set_value": "0x10573c8",
+    "il2cpp_field_set_value_object": "0x10573cc"
+  },
+  "headset_tested": false
+}

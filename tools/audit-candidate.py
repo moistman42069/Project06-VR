@@ -18,6 +18,14 @@ with (root/'original/libil2cpp.so').open('rb') as f:
 required=sorted(set(re.findall(r'API\(\w+,"([^"]+)"\)',bridge)))
 missing_exports=[s for s in required if s not in exports]
 assert '#include "ground_grace.h"' not in bridge
+assert 'field_set(sub' not in bridge, 'XR descriptor must use object-reference setter'
+assert 'field_set(self,f,&t)' not in source, 'Camera binding must never store a stack address'
+assert 'API(field_set_object,"il2cpp_field_set_value_object")' in bridge
+assert 'field_set_object(obj,f,value)' in bridge and 'readback!=value' in bridge
+assert len(re.findall(r'\bfield_set\s*\(',source))==1, 'Raw field setter must be confined to the arithmetic-only wrapper'
+assert 'std::is_arithmetic<T>::value' in bridge
+schema=(root/'src/save_schema.h').read_text()
+assert 'kSaveSchemaVersion="0.1.10-vr-candidate"' in schema, 'Save schema must not follow candidate version'
 dump=(root/'vendor/dumper/dump.cs').read_text(encoding='utf-8-sig')
 managed_methods={'Mesh':['public void .ctor()', 'public void set_vertices(Vector3[] value)', 'public void set_normals(Vector3[] value)', 'public void set_triangles(int[] value)', 'public void RecalculateBounds()'], 'MeshFilter':['public void set_sharedMesh(Mesh value)'], 'Material':['private void SetColorImpl(int name, Color value)']}
 for cls,signatures in managed_methods.items():

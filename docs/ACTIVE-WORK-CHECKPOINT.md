@@ -1,27 +1,32 @@
 # Active work checkpoint
 
-Date: 2026-09-26. Current candidate: **0.1.10 / versionCode 110**.
+Date: 2026-09-26. Current candidate: **0.1.11 / versionCode 111**.
 
-- User accepted 0.1.9 crouch spindash, glove orientation, first-person head-follow
-  view and blue menu; startup, immersive VR and haptics also work.
-- Latest log 211947 is preserved in ignored out/headset-logs. Hash and findings
-  are in evidence/candidate-0110-run.json. 0.1.9 remains the tested fallback.
-- 0.1.10 applies the title-specific Forward/LDR/no-forced-RT camera correction on
-  every title entry; MainMenu's accepted path is preserved.
-- Native-consumer head steering covers RotatePlayer/SlopePhysics, including air.
-- Either-hand outward homing replaces point/pull, with native eligibility gates.
-- Smooth authored Sonic gloves replace primitives; no feet or arm IK. Geometry
-  is derived locally from the pinned APK and excluded from source distribution.
-- World cameras bypass baked occlusion; per-eye frustums remain. Local gauge and
-  skybox camera bindings address native Camera.main null dereferences.
-- Physical controls and sliders are inside the scrollable VR category; X backs out.
-- No further concrete water diagnosis: water code remains unchanged, as requested.
-- Details/references/limits: [CANDIDATE-0110.md](CANDIDATE-0110.md).
+- User is angry about recurring crashes and saves becoming incompatible. Acknowledge
+  the impact; do not promise headset guarantees from static checks.
+- User confirmed title pink flicker is fixed in 0.1.10; preserve that camera path.
+- Both latest runs (224650 and 224727) crash after slot selection. Logs preserved
+  under out/headset-logs; hashes and frames in evidence/crash-0110-runs.json.
+- Exact crash: IL2CPP liveness traversal at 0x109cb9c follows a stack address
+  stored in the managed XR descriptor field. field_set_value stores a reference
+  argument directly: passing &desc was wrong. Same issue existed in new camera
+  bindings. Both now use field_set_value_object with direct object and read-back.
+- tools/test-reference-abi.py executes the pinned ARM64 setters with Unicorn and
+  reproduces the old bug, verifies all 4 reference kinds and unchanged float writes.
+- Application.version is the game's save compatibility key. Freeze game-facing
+  schema identity at 0.1.10-vr-candidate while APK/menu/log versions advance.
+  Accept exact prior candidate labels in memory; no file rewrite on slot browsing.
+  Do not bump src/save_schema.h when bumping the package version.
+- Keep all previous features: authored smooth gloves, outward homing, head-relative
+  steering, blue grouped VR menu, crouch, haptics, visibility and title fixes.
+- Water remains unchanged: no concrete further diagnosis, per user instruction.
+- Details: [CANDIDATE-0111.md](CANDIDATE-0111.md).
 
-Artifacts: out/p06-quest-0.1.10.apk, source ZIP, receipt, compatibility audit and
-external checksums. Preserve original APK, logs, source archives, receipts and
-0.1.9 fallback. MCC remains untouched. No public release before user testing.
+Artifacts: out/p06-quest-0.1.11.apk, matching source ZIP, receipt, compatibility
+audit and external checksums. Preserve original, logs, source archives, receipts
+and 0.1.9 playable fallback. Do not distribute 0.1.10 as a working candidate.
+No public release; MCC untouched. Install over existing app without clearing data.
 
-Pending headset verification: title fresh/return transitions, outward homing,
-airborne heading, authored gloves, visibility/performance and baseline regressions.
-Static checks cannot establish headset acceptance. No connected Quest on Shadow PC.
+Pending Quest acceptance: select an intact older slot, reach level select and
+stage, return to title, relaunch/reopen the slot, then check retained features.
+No connected Quest through Shadow PC. Host checks are not headset acceptance.

@@ -46,8 +46,8 @@ void accelerationHook(void* self,float acceleration,const Method* m){
     if(self!=gestureRunPlayer||gestureRunAmount<=0||!eq(call(object_class(self),"GetState",self,nullptr,0),"Ground")){oldAcceleration(self,acceleration,m);return;}
     float maximum=field<float>(self,"MaximumSpeed");auto f=class_field(object_class(self),"MaximumSpeed");
     if(!f||!std::isfinite(maximum)||maximum<=0){oldAcceleration(self,acceleration,m);return;}
-    float cap=maximum*std::clamp(gestureRunAmount,.02f,1.f);field_set(self,f,&cap);
-    oldAcceleration(self,acceleration,m);field_set(self,f,&maximum);
+    float cap=maximum*std::clamp(gestureRunAmount,.02f,1.f);setScalarField(self,f,cap);
+    oldAcceleration(self,acceleration,m);setScalarField(self,f,maximum);
 }
 void discoverWaterTriggers(){
     for(auto it=waterTriggers.begin();it!=waterTriggers.end();){if(!alive(it->script)||!alive(it->collider)){gc_free(it->root);gc_free(it->colliderRoot);it=waterTriggers.erase(it);}else ++it;}

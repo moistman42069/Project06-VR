@@ -15,6 +15,9 @@ spec += [('AnimatedUV','AnimatedUV','private void Update()'),('SonicFixed','Soni
  ('GaugeStart','GaugeController','private void Start()'),
  ('GaugeUpdate','GaugeController','private void Update()'),
  ('SkyboxStart','SkyboxModel','private void Start()'),
+ ('ApplicationVersion','Application','public static string get_version()'),
+ ('SaveSlotSetup','SaveSlotUI','public void SetUp(float Playtime, string LastSave, int BannerIndex, string FileVersion)'),
+ ('SaveStarter','TitleScreen','private void StateStarterStart()'),
  ('BackgroundUpdate','BackgroundVideo','public void UpdateVideo()')]
 
 f=open('original/libil2cpp.so','rb');e=ELFFile(f);out=['#pragma once','#include <cstdint>','struct Binding { uintptr_t rva; unsigned char bytes[16]; };'];record=[]

@@ -1,10 +1,14 @@
-# Quest 3 candidate 0.1.10 checks
+# Quest 3 candidate 0.1.11 checks
 
 Sideload over the previous candidate; preserve the log in Downloads/P06Quest.
 Expected startup milestones: `Managed runtime ready`, `XR graphics initialized`,
 `OpenXR session state=FOCUSED`, `First OpenXR frame submitted`, and visible game.
 Logs alone cannot prove visible pixels.
 
+- [ ] Install over current APK without uninstalling or clearing app data.
+- [ ] Previously incompatible, intact slots show their progress and load without resetting.
+- [ ] After slot selection, reach level select and enter a stage without crashing.
+- [ ] Quit/relaunch, then reopen the same slot; progress and settings remain.
 - [ ] Fresh launch reaches title and both eyes remain free of pink flicker.
 - [ ] Enter a stage, return to level select, then title: neither eye turns pink.
 - [ ] Original sticks/buttons/grips/triggers work and third-person stereo remains correct.

@@ -26,6 +26,7 @@
 #include <array>
 #include <chrono>
 #include <cstddef>
+#include <type_traits>
 
 JavaVM* g_vm=nullptr;
 jobject g_activity=nullptr;
@@ -102,6 +103,7 @@ void* (*object_class)(void*);
 void* (*class_field)(void*,const char*);
 void (*field_get)(void*,void*,void*);
 void (*field_set)(void*,void*,void*);
+void (*field_set_object)(void*,void*,void*);
 void (*static_get)(void*,void*);
 void (*class_init)(void*);
 const Method* (*class_method)(void*,const char*,int);
@@ -143,6 +145,18 @@ void* call(void* k,const char* name,void* self,void** args,int argc) {
     void* ex=nullptr;auto r=invoke(m,self,args,&ex);if(ex){LOG("Managed call failed: %s",name);return nullptr;}return r;
 }
 bool alive(void* obj){return obj&&field<void*>(obj,"m_CachedPtr");}
+bool setObjectField(void* obj,const char* name,void* value){
+    if(!obj||!field_set_object)return false;
+    auto f=class_field(object_class(obj),name);if(!f)return false;
+    // Reference setters take the managed object itself, NEVER &value.
+    field_set_object(obj,f,value);void* readback=nullptr;field_get(obj,f,&readback);
+    if(readback!=value){LOG("Managed reference assignment failed read-back: %s",name);return false;}
+    return true;
+}
+template<typename T>void setScalarField(void* obj,void* f,const T& value){
+    static_assert(std::is_arithmetic<T>::value,"Managed references must use setObjectField");
+    field_set(obj,f,const_cast<T*>(&value));
+}
 template<typename T>T icall(const char* n){auto f=resolve(n);if(!f)LOG("Missing Unity icall: %s",n);return reinterpret_cast<T>(f);}
 void quatMultiply(const float a[4],const float b[4],float out[4]){
     out[0]=a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1];out[1]=a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0];
@@ -327,6 +341,7 @@ bool bindApi(){
     API(object_class,"il2cpp_object_get_class") API(class_field,"il2cpp_class_get_field_from_name")
     API(field_get,"il2cpp_field_get_value") API(static_get,"il2cpp_field_static_get_value")
     API(field_set,"il2cpp_field_set_value")
+    API(field_set_object,"il2cpp_field_set_value_object")
     API(class_init,"il2cpp_runtime_class_init") API(class_method,"il2cpp_class_get_method_from_name")
     API(invoke,"il2cpp_runtime_invoke") API(class_type,"il2cpp_class_get_type")
     API(type_object,"il2cpp_type_get_object") API(array_length,"il2cpp_array_length")
@@ -383,7 +398,8 @@ void startXR(){
             void* args[]={&instancePtr};
             auto sub=call(klass("UnityEngine","SubsystemManager"),"GetIntegratedSubsystemByPtr",nullptr,args,1);
             if(!sub){LOG("XR managed subsystem missing after Create");break;}
-            if(auto descriptorField=class_field(object_class(sub),"m_SubsystemDescriptor"))field_set(sub,descriptorField,&desc);
+            if(!setObjectField(sub,"m_SubsystemDescriptor",desc)){LOG("XR descriptor reference assignment failed");break;}
+            LOG("XR descriptor managed reference verified by read-back");
             xrStartedSubsystem=sub;xrStartAttempted=true;start(sub);bool subsystemRunning=running(sub);bool graphicsReady=XRDisplayGraphicsReady();haveXR=subsystemRunning&&graphicsReady;LOG("XR activation: subsystemRunning=%d graphicsReady=%d",int(subsystemRunning),int(graphicsReady));break;
         }
     }
@@ -461,6 +477,7 @@ void* selectGameCamera(){
 #include "gesture_bridge.inc"
 #include "menu_rendering.inc"
 #include "visibility.inc"
+#include "save_compatibility.inc"
 void* (*oldDlopen)(const char*,int)=nullptr;
 void* (*oldExt)(const char*,int,const android_dlextinfo*)=nullptr;
 void loaded(const char* name,void* h){if(h&&name&&strstr(name,"libil2cpp.so"))InstallGameHooks(h);}
@@ -593,6 +610,11 @@ void InstallGameHooks(void* lib){
     hook(base,kGaugeUpdate,(void*)gaugeUpdateHook,(void**)&oldGaugeUpdate,"GaugeController.Update");
     hook(base,kSkyboxStart,(void*)skyboxStartHook,(void**)&oldSkyboxStart,"SkyboxModel.Start");
     hook(base,kAnimatedUV,(void*)animatedUVHook,(void**)&oldAnimatedUV,"AnimatedUV.Update");
+    bool saveUI=hook(base,kSaveSlotSetup,(void*)saveSlotSetupHook,(void**)&oldSaveSlotSetup,"SaveSlotUI.SetUp");
+    bool saveList=hook(base,kSaveStarter,(void*)saveStarterHook,(void**)&oldSaveStarter,"TitleScreen.StateStarterStart");
+    bool saveVersion=hook(base,kApplicationVersion,(void*)applicationVersionHook,(void**)&oldApplicationVersion,"Application.get_version");
+    saveCompatibilityInstalled=saveUI&&saveList&&saveVersion;
+    LOG("Stable save compatibility: %s",saveCompatibilityInstalled?"installed; schema 1, independent of APK version":"INCOMPLETE; native version behavior retained");
     LOG("Pinned APK hooks installed: %s",ok?"all":"INCOMPLETE");
 }
 void BeginLoaderHooks(){
@@ -605,7 +627,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm,void*){g_vm=vm;return JNI_VERSIO
 extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativePrepare(JNIEnv* env,jclass,jobject activity,jstring directory,jint fd){
     if(fd>=0)logFd=dup(fd);
     g_activity=env->NewGlobalRef(activity);const char* dir=env->GetStringUTFChars(directory,nullptr);InitOptions(dir);env->ReleaseStringUTFChars(directory,dir);
-    LOG("P06 Quest candidate 0.1.10 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
+    LOG("P06 Quest candidate 0.1.11 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
     LOG("System library loading is untouched; waiting for Unity activity creation");
 }
 

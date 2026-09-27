@@ -1,9 +1,10 @@
 # Project 06 VR project plan
 
-Status: 0.1.9 first-person head-follow, hand orientation, crouch spindash and blue
-menu were headset-confirmed, alongside earlier startup/VR/haptics. 0.1.10 refines
-title rendering, air steering, outward homing, gloves and visibility; awaiting
-Quest verification, no public release. See CANDIDATE-0110.md.
+Status: 0.1.9 first-person head-follow, hand orientation, crouch and blue menu are
+confirmed, alongside earlier startup/VR/haptics. 0.1.10 fixes title pink flicker
+but crashes after slot selection. 0.1.11 corrects managed reference writes and
+separates save compatibility from APK versions. Awaiting Quest verification;
+no public release. See CANDIDATE-0111.md.
 
 ## Current foundation
 

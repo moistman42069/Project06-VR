@@ -3,6 +3,7 @@
 #include "gesture_test.h"
 #include "hand_model.h"
 #include "locomotion_math.h"
+#include "save_schema.h"
 #include <cassert>
 #include <cstdio>
 #include <filesystem>
@@ -10,6 +11,10 @@
 #include <iostream>
 
 int main(){
+    assert(std::strcmp(kSaveSchemaVersion,"0.1.10-vr-candidate")==0);
+    for(int patch=0;patch<=10;++patch){char version[64];snprintf(version,sizeof(version),"0.1.%d-vr-candidate",patch);assert(CompatibleSaveVersion(version));}
+    const char* invalidSaveVersions[]={nullptr,"","1.0","0.1.11-vr-candidate","0.1.999-vr-candidate","0.1.9","0.1.9-vr-candidate-extra"};
+    for(const char* bad:invalidSaveVersions)assert(!CompatibleSaveVersion(bad));
     testGestures();
     {float zero[3]{};UnityXRPose glove{};glove.rotation.w=1;glove.position={0,0,1};P06ApplyFirstPersonAnchor(glove,zero,P06GloveFromAim,1);
         assert(glove.position.x==0&&glove.position.y==0&&glove.position.z==1);}
