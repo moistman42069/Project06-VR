@@ -1,231 +1,202 @@
-# Project 06 Quest VR
+# Project 06 VR
 
-Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.15 is a test
-candidate, not a public release.** The user confirms 0.1.14 works fantastically;
-it is the retained headset-tested baseline.
+> **Work in progress. No public APK release is available yet.** Testing continues.
+> The 0.1.15 build is a local test candidate and has not been verified on the
+> headset. Do not treat it as a public release.
 
-0.1.15 uses the user's chosen HUD/title sizes, offsets, screen distance and hand
-rolls as defaults. It adds independent HUD/title width controls and Hide In-Game
-UI. Complete settings snapshots are now logged at startup and after changes.
-[Defaults, changes and validation](docs/CANDIDATE-0115.md). New controls await Quest
-verification. Existing saved settings are preserved on upgrade. Settings writes are atomic,
-with backup recovery for missing or damaged files; defaults apply only to new
-installs, newly added fields or explicit resets.
+A standalone Android/ARM64 VR mod for **Sonic Project 06** on Meta Quest 3. The
+project uses OpenXR for stereo rendering and maps Quest Touch controllers to the
+game. Immersive third-person VR is the default, with an experimental first-person
+view and optional physical controls.
 
-## Project status
+The intended distribution is simple: when the first candidate passes Quest
+testing, download one `.apk` from [GitHub Releases](https://github.com/moistman42069/Project06-VR/releases)
+and sideload it. The APK is not hosted in Git yet because it is about 1.76 GB.
+For now the repository contains source, documentation and selected small review
+evidence; no release has been published.
 
-This is a working pre-release repository. There are no releases yet. Headset acceptance is required before a candidate is promoted into
-`releases/`. Future work is tracked in [docs/PROJECT-PLAN.md](docs/PROJECT-PLAN.md),
-with the current handoff in [docs/ACTIVE-WORK-CHECKPOINT.md](docs/ACTIVE-WORK-CHECKPOINT.md).
-The repository is intentionally arranged so a tested candidate can become a
-release without moving the source, evidence or build scripts.
+## Android game this is based on
 
-The public repository contains source, documentation and small reviewable APK
-evidence. The original game, extracted Unity payload, SDK/toolchain binaries,
-development key, logs and the 1.76 GB candidate APK stay local and ignored. The
-`out/` path below refers to a local build produced from this tree; it is not a
-GitHub download link until a tested release is deliberately published.
+The pinned input is **`p-06RELEASE64.apk`**, a 64-bit Android port of Sonic
+Project 06, built with **Unity 2022.3.62f1** and IL2CPP metadata version 31. It
+is associated with Lowfriend's Sonic Release Android port and was uploaded on
+**September 10, 2025**. It is not a conversion of a newer PC build. During the
+research recorded for this project, no later publicly documented Android APK,
+patch or version tag was found (as of September 22, 2026); a private or
+unindexed build may exist.
 
-### Base build provenance
+- [Original Android APK listing](https://www.mediafire.com/file/tgiales231mf4v0/p-06RELEASE64.apk/file)
+- [Lowfriend release video](https://www.youtube.com/watch?v=crjt6Sth97Q)
+- Original APK SHA-256: `3801cfc73cf99157e779d0bc9b1e76e54ba5644dbf9d73303c93f38bc6d305dc`
+- The older [Project06OSP PC reconstruction](https://github.com/R3verseG0d/Project06OSP)
+  is a research reference, not this Android build's code or input adapter.
 
-This project uses the newest publicly documented Android build located during
-research: `p-06RELEASE64.apk`, uploaded September 10, 2025 and associated with
-Lowfriend's Sonic Release Android port. The exact source listing is the
-[MediaFire APK page](https://www.mediafire.com/file/tgiales231mf4v0/p-06RELEASE64.apk/file),
-with the release context in the [Lowfriend video](https://www.youtube.com/watch?v=crjt6Sth97Q).
-No later public APK, patch or version tag was found as of September 22, 2026;
-a private or unindexed Discord test build could still exist.
+## Current state
 
-## Install and play
+The user confirmed **0.1.14** works well and selected the defaults carried into
+0.1.15. The newer **0.1.15** build adds width and hide controls, settings logs,
+and safer settings-file updates. It has passed local build and package checks;
+its new controls still need headset testing. The APK and test logs are local,
+not downloadable from this repository. See the [0.1.15 change record](docs/CANDIDATE-0115.md)
+and [Quest test checklist](docs/HEADSET-TEST-CHECKLIST.md).
 
-Sideload `out/p06-quest-0.1.15.apk` using your existing Quest sideload method.
-This replacement uses the same signing key and a higher version code; install it
-over the previous candidate to retain settings. See [latest XR startup investigation](docs/EGL-SESSION-STARTUP-20260926.md).
-Do not uninstall or clear app data to update. Save compatibility is now tied to
-the unchanged game schema, not the candidate version; intact 0.1.0–0.1.10 slots
-are accepted without resetting progress. Deleted/overwritten slots cannot be
-recovered by this fix. Unknown save versions remain rejected.
-Launch **Project 06 Quest** from Unknown Sources. Package `com.p06.quest` installs
-alongside the original Android game; its saves/settings are separate.
+Implemented features include stereoscopic third-person VR, head translation and
+rotation, Quest Touch input, a floating VR settings panel, a configurable HUD,
+optional first-person view with Sonic gloves, hand-swing running, outward-swing
+homing, crouch spindash and game-action haptics. Feature availability depends on
+the game state and character; optional interactions default off unless enabled
+in the VR menu.
 
-The default mode is immersive third-person VR. The original gameplay camera
-remains the third-person anchor by default; the native XR provider supplies
-tracked left and right eye views. Experimental first person uses a player-relative
-eye-height anchor, with stable yaw, head tracking, right-stick turning and body
-hiding. Smooth white Sonic gloves use each controller's grip position and aim orientation independently. Body hiding includes separate
-upgrade attachments; no floating replacement feet are added.
-Eye height is adjustable; losing one controller hides that glove and preserves
-the camera. The glove geometry comes from this APK's Sonic mesh, with one
-subdivision pass and smooth normals; there is no finger animation or arm IK yet.
-Missing required player/render APIs leave third person active.
+## Quest controls
 
-| Quest input | Game action |
+| Touch input | In-game action |
 | --- | --- |
-| Left stick | Original left stick / movement / menu navigation |
-| Right stick | Original right stick / camera |
-| A, B, X, Y | Corresponding original gamepad buttons |
+| Left stick | Original movement; menu navigation while VR menu is open |
+| Right stick | Original camera; D-pad while holding right stick click |
+| A, B, X, Y | Original gamepad buttons |
 | Left/right grip | Left/right bumper |
 | Left/right trigger | Left/right trigger |
-| Left controller menu button | Start / game pause |
-| Left stick click | Back (150 ms chord guard; quick taps delivered on release) |
-| Hold right stick click and move right stick | D-pad |
-| Both stick clicks together | Toggle VR menu |
-| Hold right Meta button | Quest system recenter; reserved button is not intercepted |
+| Left controller menu button | Start / pause |
+| Left stick click | Back; quick taps are delivered after the chord guard |
+| Click both sticks together | Open/close the VR settings panel |
+| Hold right Meta button | Quest system recenter; the button is not intercepted |
 
-In the VR menu, use left stick up/down to select and left/right to change;
-the root screen lists **UI**, **VR**, **GRAPHICS**, **HAPTICS**, and **SYSTEM**.
-Running, homing and crouch controls are inside **VR**; scroll down to reach them.
-Scroll with the stick, A opens a
-category/applies a setting, X returns to the category list and B closes. Game time is paused while this menu is open. Closing
-inputs remain captured until controls return to neutral.
+When the VR panel is open, use the left stick to scroll/select, left/right to
+change a value, **A** to open/apply, **X** to return to the category list and
+**B** to close. The categories are **UI**, **VR**, **GRAPHICS**, **HAPTICS** and **SYSTEM**. Game time pauses while this panel is open. The panel floats at the
+pose where it opened; close and reopen to place it again. Enable **VR Panel
+Follows View** to attach it to head movement.
 
-Display modes: **Immersive third person**, **3D stereo screen**, **2D theatre**.
-The screen modes are optional. World scale, positional tracking, screen size,
-distance, stereo strength and HUD placement are adjustable and saved. Under **UI**,
-HUD distance (0.25-20), left/right and down/up offsets (-10 to +10), size (5-200%)
-and reset are available. **HUD Width** and **Title/Menu Width** range from
-5-300% independently of height. **Hide In-Game UI** hides bridge-managed gameplay
-canvases; title menus and the VR panel remain accessible. Opening VR settings
-also temporarily restores the HUD for adjustment. HUD defaults: distance 2,
-left/right -0.40, down/up -0.30, size 20%. Screen defaults: distance 1, width 3.
-Title/main-menu UI has separate size, distance and
-position controls, defaulting to 15% size at distance 3. These controls resize
-the UI canvas, not the background 3D scene. VR-panel size/distance and optional
-follow-view behavior are also under UI. Negative positions are supported;
-size/depth stay positive to avoid mirroring or placing a panel behind you.
+### VR category
 
-Under **VR**, **Immersive Mode (All)** enables first person, positional tracking,
-physical running, outward homing, crouch spindash and HUD follow-view together. Turning it off
-disables the four optional interactions while retaining third-person VR.
-Individual switches and sensitivities remain available; the bundle reads OFF
-when not all its settings are enabled. Scroll for independent left/right hand
-pitch, yaw and roll (-180 to +180 degrees, 5-degree steps) and reset. Defaults
-are left (-10, -5, +30) and right (-10, +5, -30). Existing nonzero calibration
-is preserved; untouched hands adopt the new defaults. Calibration affects only
-rendered gloves, preserving gesture/controller input.
+**Immersive Mode (All)** is the first option. Enabling it selects immersive VR,
+first-person view, positional head tracking, physical running, outward-swing
+homing, crouch spindash and HUD follow-view. Disabling it turns those optional
+interactions off and returns to third-person immersive VR. Individual options
+remain available if you want to adjust the bundle.
 
-The VR panel stays at the captured opening pose while you look around. Close
-and reopen to place it in front of you again. Recenter also places an open panel
-in front of the new origin. **VR Panel Follows View** restores head-following.
-Render scale
-defaults to 70% and requires relaunch after changes. The runtime is asked for
-72 Hz; this is not a frame-rate guarantee. Shadows and post-effects are explicitly
-marked WIP and leave the game's settings in effect.
+- **First person:** hides Sonic's body and moves the view to a player-relative
+  head anchor. Smooth white Sonic gloves follow the Touch controllers. Eye height
+  and each hand's pitch, yaw and roll can be adjusted. Hand adjustments change
+  only the rendered glove; gesture tracking retains the original controller pose.
+- **Physical running:** swing both hands in an alternating running motion.
+  Sensitivity and speed ramp are adjustable. Left-stick movement takes priority.
+- **Outward-swing homing:** while airborne, swing either hand outward when an
+  eligible native homing target is available. The game's targeting and attack
+  rules remain in effect; no eligible target means no gesture attack.
+- **Crouch spindash:** calibrate standing height, crouch below the selected
+  threshold to charge, then stand to release toward head direction. Menu/focus/
+  tracking loss cancels an owned charge.
+- **Haptics:** enabled by default. Toggle and strength controls cover game action
+  and movement feedback; focus or menu loss stops continuous output.
 
-HUD/menu overlay canvases are moved onto a separate camera for stereo rendering.
-The bridge now redirects runtime requests for Screen Space Overlay immediately
-after the stereo HUD camera is available, with the periodic conversion retained
-as a fallback. The user confirmed level select displays correctly in 0.1.9 and
-title-screen pink flicker is fixed in 0.1.10. The 0.1.11 managed-reference
-correction resolved the reported transition failure in the latest user test.
-Touch-control canvases are hidden without disabling their input rig. The bridge
-handles the APK's active OutlineCamera when Camera.main is absent. Actual
-readability, scene transitions, effects, cutscenes and stereo correctness require
-headset testing; there is no claim that every original screen-space effect is VR compatible.
+Gesture actions require their toggles and a supported game state/character.
+Ordinary Touch controls continue to work. See the source notes and test checklist
+for character and failure guards.
 
-## Experimental controls and haptics
+### UI category and user-selected defaults
 
-The three gesture toggles default off. Shared ground running supports the
-standard character motors; homing is enabled for Sonic, Shadow, Metal Sonic and
-Princess/Sonic-with-Elise, and crouch spindash for Sonic, Shadow and Metal Sonic.
-Mach-speed and snowboard controls retain their original directional semantics.
-Code presence does not establish which characters this port exposes in menus. Normal
-Touch controls remain available. Gestures are suspended in menus, unsupported
-states, screen modes, tracking loss and after a reference-space change.
+The defaults below are the values the user asked to carry forward. Existing
+settings files take precedence on updates, so upgrading preserves personal
+choices. Reset controls restore these compiled defaults.
 
-- **Running:** alternating swings from both hands drive head-directed movement.
-  Swing sensitivity and speed ramp are adjustable. Acceleration remains native; only the requested speed cap changes during
-  gesture-owned ground running; native
-  physics, slopes and maximum speed remain authoritative. Left-stick input wins.
-- **Homing:** swing either hand outward while airborne with an eligible native
-  target. Adjustable travel distance (default 10 cm), velocity gates and cooldown
-  reject accidental gestures. No pointing dwell or inward pull is required.
-  It does not select a different enemy or bypass the
-  game's homing rules. No target means no gesture attack.
-- **Spindash:** stand normally when enabling/calibrating, crouch past the chosen
-  depth to hold native charge, then stand to release toward your head direction.
-  Focus/menu/tracking loss cancels an owned charge through a native state change.
-- **Haptics:** enabled by default at 70%, with toggle/intensity controls. Feedback
-  covers game state/action transitions, damage/death, jump/landing, attacks,
-  rings, movement, grinding/sliding, charge and release. Continuous effects are
-  bounded; focus/menu loss stops output. Character-specific timing and intensity
-  still need headset verification; no claim of exhaustive action coverage is made.
+| Setting | Default |
+| --- | ---: |
+| HUD distance | 2.00 m |
+| HUD left/right, down/up | -0.40 m, -0.30 m |
+| HUD size, width | 20%, 100% |
+| Screen distance, width | 1.00 m, 3.00 m |
+| Title/menu size, distance, width | 15%, 3.00 m, 100% |
+| Left/right glove roll | +30?, -30? |
 
-The water recovery only supplements complete crossings of live WaterSlider or
-WaterslideBooster sphere/box triggers that native overlap detection missed. It
-does not fabricate grounding or extend a water slide indefinitely. Logs capture
-entries, booster speeds and exits. Whether it fixes the exact filmed fall is
-not established by the existing logs/video. The user reports it still happens;
-0.1.10 leaves water behavior unchanged because no concrete further fix was found.
+HUD and title/menu size range from 5% to 200%; width is an independent 5%-300%
+horizontal adjustment. Position offsets range from -10 m to +10 m. UI size and
+distance remain positive. **Hide In-Game UI** hides bridge-managed gameplay
+canvases; the title/menu and VR settings panel remain accessible. Opening the VR
+panel temporarily restores the HUD so it can be adjusted.
 
-## Per-run logs
+The **In-Game HUD Follows View** toggle is included in Immersive Mode (All). It
+rotates and positions the gameplay HUD with head movement while retaining HUD
+size, distance and offsets. It defaults off unless enabled with the immersive
+bundle. It is independent of the VR panel's **Follows View** setting.
 
-Each launch creates `Downloads/P06Quest/P06Quest-<date>-<time>.log` through Android
-MediaStore. Send the log from the failed/problematic run, even if the game never
-gets past startup. It includes device/build information, loader/hook results,
-OpenXR session/frame failures, controller transitions and game-input query counts.
-Before Unity starts, the app queries Android's saved exit information for its
-own package (up to three prior exits). Available trace bytes are embedded as
-base64 in the log, including native tombstone protobufs on API 31+. Capture is
-bounded and may be unavailable. This allows diagnosis without USB debugging.
-Startup Java exceptions are written directly to the run log before rethrowing;
-resource lookup IDs and activity startup completion are recorded.
-Unity/app error output is collected where Android permits it. A minimal native
-crash recorder includes signal and register addresses; it is not a full crash dump.
+Optional display modes are **3D stereo screen** and **2D theatre**. Other UI
+controls adjust stereo depth, world scale, HUD placement and screen size/distance.
+Graphics settings that do not have a safe implementation are marked WIP and leave
+the game's settings in control.
 
-If Downloads creation fails, the fallback is
-`Android/data/com.p06.quest/files/P06Quest-<date>-<time>.log`.
-Settings live in that app files directory as `vr-settings.txt`. Logs are local,
-not uploaded automatically. Abrupt process/OS termination may truncate the log.
+## Installation and saves
 
-For the first test, check title/menu input, one gameplay stage, head rotation and
-translation, HUD visibility, both-stick menu, all three modes and system recenter.
-Report the first failure and share that run's log. A successful build cannot
-replace this check on your Quest.
+There is **no public download yet**. After the candidate has been tested and a
+release is made, installation is intended to be: download the APK from the
+[Releases page](https://github.com/moistman42069/Project06-VR/releases), sideload
+it to Quest, then launch **Project 06 Quest** from Unknown Sources. No PC launcher
+or separate mod installer is planned. The package ID is `com.p06.quest` and it
+installs beside the original Android game.
 
-## Source and reproduction
+For local development, follow the build instructions below. The APK generated
+by `tools/build-apk.py` is an unsigned-source project output signed with the
+local development key. **Keep that key** for upgrade-compatible builds.
 
-The supplied APK is pinned to SHA-256
-`3801cfc73cf99157e779d0bc9b1e76e54ba5644dbf9d73303c93f38bc6d305dc`.
-It contains Unity 2022.3.62f1, IL2CPP metadata 31. The reference repository
-<https://github.com/R3verseG0d/Project06OSP> is an older desktop reconstruction.
-Its Rewired input is not the adapter target: native callers in this Android APK
-use ControlFreak2.CF2Input. All patched method prologues are verified at runtime.
+Install updates over the existing app; do not uninstall it or clear its app data.
+Candidate APK versions do not change the game's fixed save-schema identity.
+Intact saves from prior P06 Quest candidates are accepted in memory without
+rewriting slot files. Unknown save versions are rejected. The Quest settings file
+is kept separately at `Android/data/com.p06.quest/files/vr-settings.txt`.
+Settings use schema migration, atomic replacement and a backup. Future settings
+snapshots are written to each run log. Uninstalling/clearing app data removes
+local settings and logs; it is not part of a normal update.
 
-The source ZIP includes the mod, tests, packaging tools, selected evidence and
-native dependency sources/licenses. It excludes the original game, extracted
-assets/assemblies, SDK binaries and signing key. Supply your own original APK.
+## Logs and testing
 
-Windows prerequisites: Python 3.11+, CMake 3.22+, Ninja, NDK r27c, Android
-build-tools 35, platform 35, JDK 17. `tools/download-toolchain.py` downloads the
-SDK/JDK archives into their expected vendor paths. Install UnityPy and NumPy with
-`python -m pip install --target vendor/unitypy UnityPy numpy`; the native build
-extracts only the pinned glove mesh locally into ignored `out/generated/`.
-Extracted game geometry is excluded from Git and the source ZIP. Install Ninja with
-`python -m pip install --target vendor/ninja ninja`, then configure using
-`python tools/configure.py` and run `python tools/build-apk.py --apk <base.apk>`.
-The build script creates a local development signing key if absent; retain that
-key for future upgrade-compatible builds. A rebuilt package with a different key
-requires uninstalling this candidate first (which removes app data).
+Each launch writes a per-run log to `Downloads/P06Quest` (with an app-private
+fallback). Logs contain build/device details, startup and OpenXR status, controller
+transitions, crash diagnostics where Android provides them, and the current VR
+settings snapshot. Settings snapshots were added in 0.1.15; earlier logs do not
+show the numeric settings selected in their session. Logs remain on-device and
+are not uploaded automatically.
 
-`tools/build-menu-test.cmd` uses the locally installed VS 18 Build Tools to test
-the production menu and view mathematics. Adjust its vcvars path on other hosts.
-The production bindings are supplied in `src/bindings.h`; regeneration requires
-the original APK's Il2CppDumper output and extracted native ELF.
+Host builds and package checks do not confirm headset rendering or comfort. The
+0.1.15 HUD width/hide changes are awaiting the user's Quest check. If a problem
+occurs, share the log from that run and identify the first place behavior differs.
+The current checklist includes save migration, scene transitions, title rendering,
+HUD, panel anchoring, gesture controls, recenter and haptics.
 
-`tools/test-reference-abi.py` executes the pinned ARM64 field setters on the host
-to catch managed-reference ABI mistakes. It requires the extracted original ELF
-and `python -m pip install --target vendor/python unicorn==2.1.4 pyelftools`.
-Keep `src/save_schema.h` fixed when updating APK/menu/log versions: that identity
-describes unchanged save data, not the mod's release number.
+Known issues and limits:
 
-Native dependencies included at these revisions:
+- The latest accepted log contains three `Settings.SetLocalSettings`
+  `NullReferenceException` records; the game continues and this path has not been
+  changed in 0.1.15.
+- The filmed water-fall case has no further concrete fix; water behavior remains
+  unchanged pending a reproducible route and evidence.
+- Shadows and post-effects are WIP. Full visual compatibility for every original
+  screen-space effect, level, character and cutscene is not claimed.
 
-- Khronos OpenXR-SDK: `f2448a8797c85814aa892efc1ab8707900fbcc78`.
-- Dobby: `9c85e74f92eda36b99ddb0fddb17a9df2278a4d3`.
-- Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
-- dhepper/font8x8 basic font, public domain; notice in its header.
+## Build from source
 
-`out/p06-quest-0.1.15-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
-tree and records preserved game entries. The original APK and MCC workspace were
-not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup/haptics, 0.1.9 first-person view/hand orientation/crouch/menu and 0.1.10 title rendering are confirmed. 0.1.10 then crashed after slot selection; the user reports 0.1.11 works well. The user reports 0.1.12 works well; 0.1.14 is user-confirmed; 0.1.15 width/hide refinements await headset verification.
+The repository deliberately excludes the original game, extracted Unity payload,
+Android toolchain binaries and signing key. Use a legally obtained copy of the
+pinned APK and retain your own build key.
+
+On Windows, the documented toolchain is Python 3.11+, CMake 3.22+, Ninja, Android
+NDK r27c, Android build-tools 35, platform 35 and JDK 17. Download the pinned
+SDK/JDK files with `python tools/download-toolchain.py`, install build dependencies
+with `python -m pip install --target vendor/unitypy UnityPy numpy` and
+`python -m pip install --target vendor/ninja ninja`, then run
+`python tools/configure.py` and `python tools/build-apk.py --apk <base.apk>`.
+The local package script verifies the pinned original, preserves its game payload
+and writes APK/source receipts under ignored `out/`. The source ZIP contains the
+code, tests, selected evidence and dependency sources/licenses; it does not contain
+the APK, original game or signing key.
+
+## Project layout
+
+- `src/` ? Android OpenXR provider, game bridge, options, input and save compatibility.
+- `tests/` ? host-side menu, settings migration, view math and gesture checks.
+- `docs/` ? candidate records, reverse-engineering evidence and headset checklist.
+- `evidence/` ? pinned APK identity, binding and candidate evidence.
+- `tools/` ? build, package, audit and source-archive scripts.
+- `out/` ? local-only builds, receipts and run logs; ignored by Git.
+
+This repository remains a work in progress. There are no public APK releases;
+that changes only after a candidate is tested and accepted on Quest.
