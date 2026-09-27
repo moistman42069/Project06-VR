@@ -1,4 +1,8 @@
-# Quest 3 candidate 0.1.15 checks
+# Quest 3 release 0.1.15 checks and future regression list
+
+The user tested 0.1.15 on Quest 3 and accepted it as the first release. This
+checklist is retained for future regression testing and broader compatibility
+checks; it is not a claim that every listed scenario was individually tested.
 
 Sideload over the previous candidate; preserve the log in Downloads/P06Quest.
 Expected startup milestones: `Managed runtime ready`, `XR graphics initialized`,
@@ -56,5 +60,5 @@ Logs alone cannot prove visible pixels.
 - [ ] Normal low-speed falls, slopes, rails, springs and non-water triggers still work.
 - [ ] Death/reset, scene transitions and return to title remain stable.
 
-Report the first failure, approximate run time and matching log. Do not publish a
-release before the user confirms the candidate on Quest.
+For future tests, report the first failure, approximate run time and matching
+log. The release acceptance record is in `docs/RELEASE-0.1.15.md`.

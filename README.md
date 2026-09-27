@@ -1,43 +1,43 @@
 # Project 06 VR
 
-> **Work in progress. No public APK release is available yet.** Testing continues.
-> The 0.1.15 build is a local test candidate and has not been verified on the
-> headset. Do not treat it as a public release.
+> **Work in progress. First public release: 0.1.15.** The user has tested this
+> build on Quest 3 and considers it a good first release. Further fixes and
+> compatibility work remain planned.
 
 A standalone Android/ARM64 VR mod for **Sonic Project 06** on Meta Quest 3. The
 project uses OpenXR for stereo rendering and maps Quest Touch controllers to the
 game. Immersive third-person VR is the default, with an experimental first-person
 view and optional physical controls.
 
-The intended distribution is simple: when the first candidate passes Quest
-testing, download one `.apk` from [GitHub Releases](https://github.com/moistman42069/Project06-VR/releases)
-and sideload it. The APK is not hosted in Git yet because it is about 1.76 GB.
-For now the repository contains source, documentation and selected small review
-evidence; no release has been published.
+Download the single `.apk` asset from the [0.1.15 GitHub release](https://github.com/moistman42069/Project06-VR/releases/tag/v0.1.15)
+and sideload it to Quest. The release also includes the matching source archive
+and verification files. The APK is about 1.76 GB; it is attached to the release
+and is not stored in Git history.
 
 ## Android game this is based on
 
 The pinned input is **`p-06RELEASE64.apk`**, a 64-bit Android port of Sonic
 Project 06, built with **Unity 2022.3.62f1** and IL2CPP metadata version 31. It
-is associated with Lowfriend's Sonic Release Android port and was uploaded on
-**September 10, 2025**. It is not a conversion of a newer PC build. During the
-research recorded for this project, no later publicly documented Android APK,
-patch or version tag was found (as of September 22, 2026); a private or
-unindexed build may exist.
+is the Android Sonic Release announced in Lowfriend's YouTube trailer,
+[SONIC P-06 ANDROID PORT. SONIC RELEASE](https://www.youtube.com/watch?v=crjt6Sth97Q),
+and was uploaded on **September 10, 2025**. It is not a conversion of a newer PC
+build. As of **September 27, 2026**, no later publicly documented Android APK,
+patch or version tag is known; a private or unindexed build may exist. Future
+work hopes to bring this mod forward to a newer Android port/build if one becomes
+available and its compatibility can be verified.
 
 - [Original Android APK listing](https://www.mediafire.com/file/tgiales231mf4v0/p-06RELEASE64.apk/file)
-- [Lowfriend release video](https://www.youtube.com/watch?v=crjt6Sth97Q)
+- [Lowfriend's Android Sonic Release trailer](https://www.youtube.com/watch?v=crjt6Sth97Q)
 - Original APK SHA-256: `3801cfc73cf99157e779d0bc9b1e76e54ba5644dbf9d73303c93f38bc6d305dc`
 - The older [Project06OSP PC reconstruction](https://github.com/R3verseG0d/Project06OSP)
   is a research reference, not this Android build's code or input adapter.
 
 ## Current state
 
-The user confirmed **0.1.14** works well and selected the defaults carried into
-0.1.15. The newer **0.1.15** build adds width and hide controls, settings logs,
-and safer settings-file updates. It has passed local build and package checks;
-its new controls still need headset testing. The APK and test logs are local,
-not downloadable from this repository. See the [0.1.15 change record](docs/CANDIDATE-0115.md)
+The user confirmed **0.1.14** as a good baseline and then tested **0.1.15** on
+Quest 3, calling it perfect for a first release. Version 0.1.15 adds width and
+hide controls, settings logs, and safer settings-file updates. See the
+[0.1.15 change record](docs/CANDIDATE-0115.md), [release record](docs/RELEASE-0.1.15.md)
 and [Quest test checklist](docs/HEADSET-TEST-CHECKLIST.md).
 
 Implemented features include stereoscopic third-person VR, head translation and
@@ -127,12 +127,11 @@ the game's settings in control.
 
 ## Installation and saves
 
-There is **no public download yet**. After the candidate has been tested and a
-release is made, installation is intended to be: download the APK from the
-[Releases page](https://github.com/moistman42069/Project06-VR/releases), sideload
-it to Quest, then launch **Project 06 Quest** from Unknown Sources. No PC launcher
-or separate mod installer is planned. The package ID is `com.p06.quest` and it
-installs beside the original Android game.
+Download **`p06-quest-0.1.15.apk`** from the
+[0.1.15 release](https://github.com/moistman42069/Project06-VR/releases/tag/v0.1.15),
+sideload it to Quest, then launch **Project 06 Quest** from Unknown Sources. No
+PC launcher or separate mod installer is needed. The package ID is
+`com.p06.quest` and it installs beside the original Android game.
 
 For local development, follow the build instructions below. The APK generated
 by `tools/build-apk.py` is an unsigned-source project output signed with the
@@ -156,19 +155,21 @@ settings snapshot. Settings snapshots were added in 0.1.15; earlier logs do not
 show the numeric settings selected in their session. Logs remain on-device and
 are not uploaded automatically.
 
-Host builds and package checks do not confirm headset rendering or comfort. The
-0.1.15 HUD width/hide changes are awaiting the user's Quest check. If a problem
-occurs, share the log from that run and identify the first place behavior differs.
-The current checklist includes save migration, scene transitions, title rendering,
-HUD, panel anchoring, gesture controls, recenter and haptics.
+The user has tested 0.1.15 on Quest 3 and accepted it as the first release. That
+does not establish compatibility with every level, character, scene, or headset
+configuration. If a problem occurs, share the log from that run and identify the
+first place behavior differs. The test checklist remains useful for future
+refinement and regression checks.
 
 Known issues and limits:
 
 - The latest accepted log contains three `Settings.SetLocalSettings`
   `NullReferenceException` records; the game continues and this path has not been
   changed in 0.1.15.
-- The filmed water-fall case has no further concrete fix; water behavior remains
-  unchanged pending a reproducible route and evidence.
+- Some level glitches appear connected to the Android port itself. In particular,
+  a water section may fail to register Sonic on the surface. This is not
+  conclusively diagnosed or fixed in this release; use an alternate route through
+  affected stages where possible until the port or mod is refined.
 - Shadows and post-effects are WIP. Full visual compatibility for every original
   screen-space effect, level, character and cutscene is not claimed.
 
@@ -198,5 +199,6 @@ the APK, original game or signing key.
 - `tools/` ? build, package, audit and source-archive scripts.
 - `out/` ? local-only builds, receipts and run logs; ignored by Git.
 
-This repository remains a work in progress. There are no public APK releases;
-that changes only after a candidate is tested and accepted on Quest.
+This repository remains a work in progress. Version 0.1.15 is the first public
+Quest-tested APK release; later fixes, broader compatibility checks and possible
+support for a newer Android port remain future work.

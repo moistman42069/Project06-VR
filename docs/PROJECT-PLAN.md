@@ -1,8 +1,9 @@
 # Project 06 VR project plan
 
-Status: user confirms 0.1.14 as the working baseline. 0.1.15 adopts the explicit
-user defaults, adds HUD/title width and Hide In-Game UI, and logs complete settings.
-New controls await Quest testing; no public release. See CANDIDATE-0115.md.
+Status: the user has accepted 0.1.15 as the first public Quest-tested release.
+It adopts the explicit UI defaults, adds HUD/title width and Hide In-Game UI,
+and logs complete settings. Some level-specific issues may be inherited from
+the Android port. See CANDIDATE-0115.md and RELEASE-0.1.15.md.
 
 ## Current foundation
 
@@ -91,7 +92,8 @@ New controls await Quest testing; no public release. See CANDIDATE-0115.md.
 
 ## Release gate
 
-The first release can be created by promoting the tested APK and matching source
-ZIP into `releases/<version>/`, adding release notes and checksums, and updating
-the root README. No source-layout migration should be needed. Before that gate,
-`releases/` remains a placeholder and no artifact is called a release.
+The first release is 0.1.15. Publish later tested APKs and matching source
+archives on GitHub Releases, add release notes and checksums, and update the root
+README. Keep large binary builds out of Git history; no source-layout migration
+is needed. Continue investigating compatibility and track any newer Android
+Sonic Release port before attempting a verified update.

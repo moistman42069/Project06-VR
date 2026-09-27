@@ -1,8 +1,10 @@
-# Candidate 0.1.15: accepted defaults, UI width and visibility
+# Release 0.1.15: accepted defaults, UI width and visibility
 
-The user accepts 0.1.14 as a fantastic working baseline. Its preserved log and
-hash are recorded in evidence/candidate-0114-run.json. Settings below were supplied
-explicitly in chat; the previous log did not contain their numeric values.
+0.1.15 was built from the accepted 0.1.14 baseline. The user subsequently tested
+the 0.1.15 APK on Quest 3 and described it as perfect for the first release.
+That user acceptance is recorded in docs/RELEASE-0.1.15.md. Numeric settings
+below were supplied explicitly in chat; earlier logs did not contain their
+values.
 
 | Default | Value |
 | --- | --- |
@@ -54,8 +56,11 @@ after migration and simulate incomplete temp writes, truncated/missing primary
 files, and a failed write; backup recovery and preservation of the prior file pass.
 Existing tracking/menu/gesture checks pass; the new UI page is visually inspected.
 Final APK checks verify signature, alignment, preserved game payload and matching
-source archive. Native headset behavior of the new controls remains unverified.
+source archive. The user later reports that the 0.1.15 APK works well on Quest 3;
+the release record distinguishes this hands-on acceptance from exhaustive
+coverage of every checklist item, level, character and headset configuration.
 
 The accepted run has three existing Settings.SetLocalSettings null references;
 that unrelated game path is unchanged. No speculative water or other gameplay
-changes. Retain 0.1.14 as fallback; no public release.
+changes. Some level-specific glitches appear to come from the Android port; see
+the release notes for the water-route limitation. Retain 0.1.14 as fallback.
