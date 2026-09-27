@@ -6,6 +6,14 @@
 #include <cstring>
 #include <mutex>
 #include <string>
+#if defined(_WIN32)
+#define NOMINMAX
+#include <windows.h>
+#include <io.h>
+#else
+#include <unistd.h>
+#include <fcntl.h>
+#endif
 #if defined(__ANDROID__)
 extern void Log(const char*,...);
 #endif
@@ -13,7 +21,7 @@ extern void Log(const char*,...);
 namespace {
 std::mutex mutex;
 VROptions options;
-bool open=false,recenterRequested=false,chordHeld=false,swallow=false,chordArmed=true;
+bool menuOpen=false,recenterRequested=false,chordHeld=false,swallow=false,chordArmed=true;
 uint32_t oldButtons=0;
 int category=-1,rootSelected=0,selected=0,oldVertical=0,oldHorizontal=0;
 double nextRepeat=0;
@@ -45,9 +53,30 @@ void logSettings(const char* reason){
     (void)reason;
 #endif
 }
-void save(){if(filename.empty())return;if(auto f=fopen(filename.c_str(),"w")){
-    auto value=snapshot();bool written=fputs(value.c_str(),f)>=0;int closed=fclose(f);logSettings(written&&closed==0?"saved":"save failed; active values");
-}else logSettings("save failed; active values");}
+bool writeAtomic(const std::string& path,const std::string& value){
+    const auto temporary=path+".tmp";auto f=fopen(temporary.c_str(),"w");if(!f)return false;
+    bool good=fputs(value.c_str(),f)>=0&&fflush(f)==0;
+#if defined(_WIN32)
+    if(good)good=_commit(_fileno(f))==0;
+#else
+    if(good)good=fsync(fileno(f))==0;
+#endif
+    if(fclose(f)!=0)good=false;
+    if(!good){std::remove(temporary.c_str());return false;}
+#if defined(_WIN32)
+    good=MoveFileExA(temporary.c_str(),path.c_str(),MOVEFILE_REPLACE_EXISTING|MOVEFILE_WRITE_THROUGH)!=0;
+#else
+    good=std::rename(temporary.c_str(),path.c_str())==0;
+    if(good){auto parent=path.substr(0,path.find_last_of('/'));int fd=::open(parent.c_str(),O_RDONLY|O_DIRECTORY);if(fd>=0){fsync(fd);close(fd);}}
+#endif
+    if(!good)std::remove(temporary.c_str());return good;
+}
+void save(){
+    if(filename.empty())return;auto value=snapshot();
+    if(!writeAtomic(filename,value)){logSettings("save failed; prior file preserved; active values");return;}
+    bool backup=writeAtomic(filename+".bak",value);
+    logSettings(backup?"saved atomically + backup":"saved atomically; backup refresh failed");
+}
 float valid(float v,float lo,float hi,float fallback){return std::isfinite(v)?std::clamp(v,lo,hi):fallback;}
 void change(int direction){
     if(category<0){category=rootSelected;selected=0;++revision;return;}
@@ -62,7 +91,7 @@ void change(int direction){
         case 6:options.stereoStrength=std::clamp(options.stereoStrength+direction*.1f,0.f,4.f);break;
         case 7:options.hudDistance=std::clamp(options.hudDistance+direction*.25f,.25f,20.f);break;
         case 11:recenterRequested=true;break;
-        case 12:open=false;swallow=true;break;
+        case 12:menuOpen=false;swallow=true;break;
         case 13:options.firstPerson=!options.firstPerson;break;
         case 14:options.eyeHeight=std::clamp(options.eyeHeight+direction*.05f,.4f,1.5f);break;
         case 15:options.motionRun=!options.motionRun;break;
@@ -102,19 +131,26 @@ void rect(uint32_t* p,int w,int h,int x,int y,int rw,int rh,uint32_t c){for(int 
 void text(uint32_t* p,int w,int h,int x,int y,const char* s,int scale,uint32_t c,bool italic=false){
     for(;*s;++s,x+=8*scale){unsigned ch=static_cast<unsigned char>(*s);if(ch>=128)ch='?';for(int row=0;row<8;++row)for(int col=0;col<8;++col)if(font8x8_basic[ch][row]&(1<<col))rect(p,w,h,x+col*scale+(italic?(7-row)*scale/2:0),y+row*scale,scale,scale,c);}}
 }
-void InitOptions(const char* directory){std::lock_guard<std::mutex> lock(mutex);filename=std::string(directory)+"/vr-settings.txt";if(auto f=fopen(filename.c_str(),"r")){
+bool loadOptionsFile(const std::string& path){if(auto f=fopen(path.c_str(),"r")){
     VROptions read;int version=0,mode=0,pos=1,fp=0,mr=0,gh=0,cs=0,haptic=1,follow=0,hudFollow=0,hide=0;int n=fscanf(f,"%d %d %f %f %f %f %f %f %d %d %f %d %d %d %f %f %f %f %d %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %d %d %f %f %d",&version,&mode,&read.renderScale,&read.worldScale,&read.screenDistance,&read.screenWidth,&read.stereoStrength,&read.hudDistance,&pos,&fp,&read.eyeHeight,&mr,&gh,&cs,&read.runSensitivity,&read.runAcceleration,&read.homingTravel,&read.crouchDepth,&haptic,&read.hapticStrength,&read.hudX,&read.hudY,&read.hudSize,&read.handAngles[0][0],&read.handAngles[0][1],&read.handAngles[0][2],&read.handAngles[1][0],&read.handAngles[1][1],&read.handAngles[1][2],&read.titleSize,&read.titleDistance,&read.titleX,&read.titleY,&read.vrMenuSize,&read.vrMenuDistance,&follow,&hudFollow,&read.hudWidth,&read.titleWidth,&hide);fclose(f);
     if((n==9&&version==1)||(n==10&&version==2)||(n==18&&version==3)||(n==20&&(version==4||version==5))||(n==29&&version==6)||(n==36&&version==7)||(n==37&&version==8)||(n==40&&version==9)){read.mode=ViewMode(std::clamp(mode,0,2));read.renderScale=valid(read.renderScale,.4f,1.f,.7f);read.worldScale=valid(read.worldScale,.25f,3.f,1.f);read.screenDistance=valid(read.screenDistance,.25f,20.f,1.f);read.screenWidth=valid(read.screenWidth,.1f,20.f,3.f);read.stereoStrength=valid(read.stereoStrength,0.f,4.f,1.f);read.hudDistance=valid(read.hudDistance,.25f,20.f,2.f);read.positionalTracking=pos!=0;read.firstPerson=version>=2&&fp!=0;read.eyeHeight=valid(read.eyeHeight,.4f,1.5f,.85f);read.motionRun=mr!=0;read.gestureHoming=gh!=0;read.crouchSpin=cs!=0;read.runSensitivity=valid(read.runSensitivity,.2f,3.f,1.f);read.runAcceleration=valid(read.runAcceleration,.5f,5.f,2.f);read.homingTravel=version<5?.10f:valid(read.homingTravel,.04f,.3f,.10f);read.crouchDepth=valid(read.crouchDepth,.15f,.65f,.3f);read.haptics=haptic!=0;read.hapticStrength=valid(read.hapticStrength,0.f,1.f,.7f);read.hudX=valid(read.hudX,-10.f,10.f,-.4f);read.hudY=valid(read.hudY,-10.f,10.f,-.3f);read.hudSize=valid(read.hudSize,.05f,2.f,.2f);for(auto& hand:read.handAngles)for(auto& angle:hand)angle=valid(angle,-180.f,180.f,0.f);read.titleSize=valid(read.titleSize,.05f,2.f,.15f);read.titleDistance=valid(read.titleDistance,.25f,20.f,3.f);read.titleX=valid(read.titleX,-10.f,10.f,0.f);read.titleY=valid(read.titleY,-10.f,10.f,0.f);read.vrMenuSize=valid(read.vrMenuSize,.1f,3.f,1.05f);read.vrMenuDistance=valid(read.vrMenuDistance,.25f,10.f,1.15f);read.menuFollowView=follow!=0;read.hudFollowView=hudFollow!=0;read.hudWidth=valid(read.hudWidth,.05f,3.f,1.f);read.titleWidth=valid(read.titleWidth,.05f,3.f,1.f);read.hideHUD=hide!=0;
         if(version==6){VROptions defaults;for(int h=0;h<2;++h)if(read.handAngles[h][0]==0&&read.handAngles[h][1]==0&&read.handAngles[h][2]==0)std::copy(defaults.handAngles[h],defaults.handAngles[h]+3,read.handAngles[h]);}
-        options=read;}}
+        options=read;return true;}}
+    return false;
+}
+void InitOptions(const char* directory){
+    std::lock_guard<std::mutex> lock(mutex);filename=std::string(directory)+"/vr-settings.txt";options=VROptions{};
+    const char* source="defaults; no valid saved file";
+    if(loadOptionsFile(filename))source="loaded saved settings";
+    else if(loadOptionsFile(filename+".bak"))source="recovered backup; primary missing/invalid";
 #if defined(__ANDROID__)
     Log("VR settings fields: schema mode renderScale worldScale screenDistance screenWidth stereoStrength hudDistance positionalTracking firstPerson eyeHeight motionRun gestureHoming crouchSpin runSensitivity runAcceleration homingTravel crouchDepth haptics hapticStrength hudX hudY hudSize leftPitch leftYaw leftRoll rightPitch rightYaw rightRoll titleSize titleDistance titleX titleY vrMenuSize vrMenuDistance menuFollowView hudFollowView hudWidth titleWidth hideHUD");
 #endif
-    logSettings("loaded/defaults");
+    logSettings(source);
 }
 std::string OptionsSnapshot(){std::lock_guard<std::mutex> lock(mutex);return snapshot();}
 VROptions GetOptions(){std::lock_guard<std::mutex> lock(mutex);return options;}
-bool VRMenuOpen(){std::lock_guard<std::mutex> lock(mutex);return open;}
+bool VRMenuOpen(){std::lock_guard<std::mutex> lock(mutex);return menuOpen;}
 bool ConsumeRecenter(){std::lock_guard<std::mutex> lock(mutex);bool r=recenterRequested;recenterRequested=false;return r;}
 uint64_t MenuRevision(){std::lock_guard<std::mutex> lock(mutex);return revision;}
 Controls UpdateVRMenu(const Controls& c,double now){
@@ -123,11 +159,11 @@ Controls UpdateVRMenu(const Controls& c,double now){
     const bool chord=(c.buttons&(LClick|RClick))==(LClick|RClick);
     const uint32_t pressed=c.buttons&~oldButtons;
     if(!(c.buttons&(LClick|RClick)))chordArmed=true;
-    if(chord&&!chordHeld&&chordArmed){open=!open;if(open){category=-1;selected=0;}swallow=true;++revision;nextRepeat=now+.3;}
+    if(chord&&!chordHeld&&chordArmed){menuOpen=!menuOpen;if(menuOpen){category=-1;selected=0;}swallow=true;++revision;nextRepeat=now+.3;}
     chordHeld=chord;oldButtons=c.buttons;
-    if(open){
-        if((pressed&B)&&!chord){open=false;swallow=true;++revision;}
-        if(open&&!chord){
+    if(menuOpen){
+        if((pressed&B)&&!chord){menuOpen=false;swallow=true;++revision;}
+        if(menuOpen&&!chord){
             int vertical=c.ly>.55f?-1:c.ly<-.55f?1:0;int horizontal=c.lx>.55f?1:c.lx<-.55f?-1:0;
             if(pressed&X){if(category>=0){rootSelected=category;category=-1;selected=0;++revision;}nextRepeat=now+.25;}
             else{
@@ -143,8 +179,8 @@ Controls UpdateVRMenu(const Controls& c,double now){
         }
     }
     const bool neutral=c.buttons==0&&std::fabs(c.lx)<.2f&&std::fabs(c.ly)<.2f&&std::fabs(c.rx)<.2f&&std::fabs(c.ry)<.2f;
-    if(!open&&!chord&&neutral)swallow=false;
-    if(open||swallow||chord){leftClickPending=false;Controls blank;blank.focused=true;blank.blocked=true;return blank;}
+    if(!menuOpen&&!chord&&neutral)swallow=false;
+    if(menuOpen||swallow||chord){leftClickPending=false;Controls blank;blank.focused=true;blank.blocked=true;return blank;}
     Controls result=c;
     if(pressed&LClick){leftClickSince=now;leftClickPending=true;}
     if(c.buttons&LClick){

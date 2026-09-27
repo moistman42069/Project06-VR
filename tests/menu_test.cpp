@@ -65,6 +65,7 @@ int main(){
     assert(std::fabs(fpPose.position.z-5.f)<.0001f&&std::fabs(fpPose.rotation.y-anchorRot[1])<.0001f);
     std::filesystem::create_directories("out/menu-test-state");
     std::filesystem::remove("out/menu-test-state/vr-settings.txt");
+    std::filesystem::remove("out/menu-test-state/vr-settings.txt.bak");
     InitOptions("out/menu-test-state");
     Controls c;c.focused=true;
     assert(GetOptions().mode==ViewMode::Immersive);assert(!VRMenuOpen());
@@ -168,10 +169,23 @@ int main(){
     down(1);press(A);assert(GetOptions().hudWidth==1.05f);down(1);c.lx=-1;update();c.lx=0;update();assert(GetOptions().titleWidth==.95f);
     down(1);press(A);assert(GetOptions().hideHUD);auto snapshot=OptionsSnapshot();InitOptions("out/menu-test-state");assert(GetOptions().hideHUD&&GetOptions().hudWidth==1.05f&&GetOptions().titleWidth==.95f&&snapshot==OptionsSnapshot());
     capture("out/vr-menu-width-hide.ppm");
+    // Interrupted temp write leaves main untouched; invalid/missing primary recovers backup.
+    file=fopen("out/menu-test-state/vr-settings.txt.tmp","w");assert(file);fputs("9 partial",file);fclose(file);
+    InitOptions("out/menu-test-state");assert(OptionsSnapshot()==snapshot);std::filesystem::remove("out/menu-test-state/vr-settings.txt.tmp");
+    file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);fputs("9 truncated",file);fclose(file);
+    InitOptions("out/menu-test-state");assert(OptionsSnapshot()==snapshot);
+    std::filesystem::remove("out/menu-test-state/vr-settings.txt");InitOptions("out/menu-test-state");assert(OptionsSnapshot()==snapshot);
+    // Restoring by a normal edit regenerates primary atomically.
+    press(A);press(A);assert(OptionsSnapshot()==snapshot);
+    std::filesystem::create_directory("out/menu-test-state/vr-settings.txt.tmp");press(A);assert(!GetOptions().hideHUD);
+    InitOptions("out/menu-test-state");assert(OptionsSnapshot()==snapshot); // Failed save did not truncate the valid primary.
+    std::filesystem::remove("out/menu-test-state/vr-settings.txt.tmp");
     // An accepted schema-8 file retains its existing settings, with new controls neutral.
     std::istringstream tokens(snapshot);std::vector<std::string> fields;std::string token;while(tokens>>token)fields.push_back(token);assert(fields.size()==40&&fields[0]=="9");
     fields.resize(37);fields[0]="8";file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);for(auto& value:fields)fprintf(file,"%s ",value.c_str());fclose(file);
     InitOptions("out/menu-test-state");assert(GetOptions().hudWidth==1&&GetOptions().titleWidth==1&&!GetOptions().hideHUD&&GetOptions().hudFollowView);
+    std::istringstream upgraded(OptionsSnapshot());std::vector<std::string> retained;while(upgraded>>token)retained.push_back(token);
+    for(size_t i=1;i<fields.size();++i)assert(std::stof(fields[i])==std::stof(retained[i])); // Every prior field survives, not just selected values.
     // A calibrated hand survives schema-6 migration; untouched hands adopt natural defaults.
     file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);
     fprintf(file,"6 0 0.8 1.2 2.5 3 1 2 1 1 0.9 1 1 1 2.3 2.5 0.16 0.4 1 0.6 0 0 1 0 0 0 15 20 25\n");fclose(file);

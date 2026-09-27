@@ -8,7 +8,9 @@ it is the retained headset-tested baseline.
 rolls as defaults. It adds independent HUD/title width controls and Hide In-Game
 UI. Complete settings snapshots are now logged at startup and after changes.
 [Defaults, changes and validation](docs/CANDIDATE-0115.md). New controls await Quest
-verification. Existing saved settings are preserved on upgrade.
+verification. Existing saved settings are preserved on upgrade. Settings writes are atomic,
+with backup recovery for missing or damaged files; defaults apply only to new
+installs, newly added fields or explicit resets.
 
 ## Project status
 

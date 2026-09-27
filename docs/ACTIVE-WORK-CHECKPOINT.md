@@ -12,6 +12,9 @@ User reports it works fantastically and is a good baseline.
 - 0.1.15 adds HUD Width and Title/Menu Width (5-300%) and Hide In-Game UI.
   Only bridge-owned canvases are hidden; prior enabled state is restored.
   Title and VR menu remain accessible; opening VR settings temporarily shows HUD.
+- User explicitly requires settings preservation across releases. Atomic temporary
+  write/flush/rename plus backup recovery added before delivery; every old field
+  is checked during migration. Never replace saved settings with new defaults.
 - Settings schema 9 reads 1-8; snapshots with field legend are logged at startup
   and after changes. Previous logs did not contain numeric VR preferences.
 - Preserve the accepted head-follow HUD, anchored VR panel, interaction bundle,

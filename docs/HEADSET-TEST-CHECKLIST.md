@@ -9,6 +9,7 @@ Logs alone cannot prove visible pixels.
 - [ ] Hide In-Game UI hides game canvases, while VR panel/title remain accessible; disabling restores visibility.
 - [ ] Opening VR settings temporarily restores HUD; closing hides it again when configured.
 - [ ] Startup and setting changes emit complete VR settings snapshots in the run log.
+- [ ] Change several settings, relaunch, update over the existing app and verify exact values remain.
 - [ ] Existing saved settings and saves survive update; fresh defaults match the user's supplied values.
 - [ ] In-Game HUD Follows View: look up/down/sideways and move head in first/third person; HUD follows with saved offsets and size.
 - [ ] Disable HUD follow: prior placement restores; enable Immersive Mode (All): HUD follow turns on and persists after restart.

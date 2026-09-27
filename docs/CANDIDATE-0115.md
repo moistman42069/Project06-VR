@@ -32,7 +32,14 @@ restores HUD visibility for adjustment. Turning hiding off restores previous
 Canvas visibility, including leaving originally disabled canvases disabled.
 Scene destruction releases the same existing canvas roots.
 
-Settings schema 9 reads versions 1-8. Startup logs contain the field legend and
+Settings schema 9 reads versions 1-8. Existing values override compiled defaults
+on updates. Saves write a separate temporary file, flush it to storage, then
+atomically replace the primary file; a second atomic write refreshes the backup.
+Startup falls back to the backup when the primary is missing or invalid. Temporary
+files are never treated as valid settings. Failed saves leave the previous primary
+intact and are logged. The package ID, signing key and app-private settings path
+remain stable across candidates. Install updates over the app; uninstalling or
+clearing app data removes its local settings. Startup logs contain the field legend and
 active/default snapshot; each saved change records the complete serialized
 settings. Save failures are identified separately. Logging and persistence share
 one serializer to prevent disagreement between saved and reported values.
@@ -42,7 +49,9 @@ The game-save schema remains fixed, and existing progress is not rewritten.
 
 ARM64 build and pinned API audit pass. Host checks cover the exact requested
 defaults, menu changes, width/hide persistence, schema-8 migration, snapshot
-round-trip, and visibility restoration including originally disabled canvases.
+round-trip, and visibility restoration including originally disabled canvases. Persistence tests compare every old field
+after migration and simulate incomplete temp writes, truncated/missing primary
+files, and a failed write; backup recovery and preservation of the prior file pass.
 Existing tracking/menu/gesture checks pass; the new UI page is visually inspected.
 Final APK checks verify signature, alignment, preserved game payload and matching
 source archive. Native headset behavior of the new controls remains unverified.
