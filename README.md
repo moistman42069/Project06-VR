@@ -79,14 +79,18 @@ remain available if you want to adjust the bundle.
   head anchor. Smooth white Sonic gloves follow the Touch controllers. Eye height
   and each hand's pitch, yaw and roll can be adjusted. Hand adjustments change
   only the rendered glove; gesture tracking retains the original controller pose.
-- **Physical running:** swing both hands in an alternating running motion.
-  Sensitivity and speed ramp are adjustable. Left-stick movement takes priority.
-- **Outward-swing homing:** while airborne, swing either hand outward when an
-  eligible native homing target is available. The game's targeting and attack
-  rules remain in effect; no eligible target means no gesture attack.
-- **Crouch spindash:** calibrate standing height, crouch below the selected
-  threshold to charge, then stand to release toward head direction. Menu/focus/
-  tracking loss cancels an owned charge.
+- **Physical running:** with **PHYSICAL RUNNING** enabled, swing both hands
+  forward and back in an alternating running rhythm. Both hands must be tracked;
+  move the left stick to take manual control. **RUN SWING SENSITIVITY** and
+  **RUN SPEED RAMP** tune the response.
+- **Outward-swing homing:** while airborne, get a native homing target selected
+  by the game, then quickly swing either arm outward away from your body. No
+  inward pull is needed. **HOMING SWING DISTANCE** adjusts the extension needed;
+  no eligible target means no gesture attack.
+- **Crouch spindash:** stand upright and select **CALIBRATE STANDING**, then
+  crouch until your head passes the **CROUCH DEPTH** threshold while Sonic is
+  grounded. Hold briefly to charge, then stand upright to release toward your
+  head direction. Menu/focus/tracking loss cancels an owned charge safely.
 - **Haptics:** enabled by default. Toggle and strength controls cover game action
   and movement feedback; focus or menu loss stops continuous output.
 

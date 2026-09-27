@@ -31,6 +31,45 @@ physical running, outward-swing homing, crouch spindash, haptics, persistent VR
 settings and per-run logs. The README documents controls, categories, settings,
 installation and the known limits.
 
+## Using VR movement and gestures
+
+In a level, click both controller sticks together to open the VR menu. Use the
+left stick to move through the list, **A** to enter/change a setting, **X** to
+return to the category list and **B** to close. Open **VR** and turn on
+**Immersive Mode (All)** to enable immersive VR, first person, physical running,
+outward-swing homing, crouch spindash and HUD follow together. To keep third
+person, leave that bundle off and toggle the individual gesture options instead.
+Gesture options are in the **VR** category and their values save automatically.
+
+- **Run:** turn on **PHYSICAL RUNNING**. Swing both tracked hands back and forth
+  in an alternating running rhythm, with one hand moving forward as the other
+  moves back. Swing clearly and keep the alternating rhythm going. Move the left
+  stick to take manual control; the hand gesture yields to it. Adjust **RUN
+  SWING SENSITIVITY** if swings need to register more easily, and **RUN SPEED
+  RAMP** to change how quickly the motion builds speed. The gesture is for normal
+  free movement; special rail, vehicle and board controls remain native.
+- **Homing attack:** turn on **OUTWARD SWING HOMING**. In an eligible airborne
+  homing state, let the game select a homing target, then make a quick outward
+  arm swing, extending either hand away from your body. No pull-back is required.
+  The game still decides whether a target is valid and performs its native
+  attack, so a swing with no selected/eligible target does nothing. Adjust
+  **HOMING SWING DISTANCE** to change the required extension. Supported character
+  types in this build are Sonic, Shadow, Metal Sonic and Princess.
+- **Crouch spindash:** turn on **CROUCH SPINDASH**. Stand upright and select
+  **CALIBRATE STANDING** in the VR menu. While grounded, crouch until your head
+  drops beyond **CROUCH DEPTH** and hold briefly to begin charging; stand back up
+  to launch once in the direction you are facing. Adjust **CROUCH DEPTH** if it
+  triggers too easily or requires too deep a crouch. Sonic, Shadow and Metal
+  Sonic support this gesture in the current build. Opening a menu or losing
+  tracking cancels an owned charge rather than firing it.
+- **Haptics:** in **HAPTICS**, leave **GAME HAPTICS** on and set **HAPTIC
+  STRENGTH** to taste. Feedback covers supported game actions and movement.
+
+If gestures do not engage, check that the matching toggle is on, the headset and
+both hands are tracked, the game is focused and unpaused, and the current
+character/state supports that move. Left-stick movement intentionally overrides
+physical running.
+
 Install the APK over an existing P06 Quest install to preserve settings and
 saves. Do not uninstall or clear app data when updating. The package ID is
 `com.p06.quest`.
