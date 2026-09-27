@@ -2,7 +2,7 @@
 
 The first public APK release, **0.1.15**, is published on
 [GitHub Releases](https://github.com/moistman42069/Project06-VR/releases/tag/v0.1.15).
-It includes the Quest-tested APK, matching source archive, receipt and checksums.
+It includes the Quest-tested APK, matching source archive and checksums.
 The release record is [docs/RELEASE-0.1.15.md](../docs/RELEASE-0.1.15.md).
 
 Future release assets belong on GitHub Releases; keep large APKs out of Git
