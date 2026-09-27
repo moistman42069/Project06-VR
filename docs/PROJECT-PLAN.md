@@ -1,8 +1,9 @@
 # Project 06 VR project plan
 
-Status: user reports 0.1.11 works well, including the hands and prior features.
-0.1.12 adds HUD placement/size and per-hand rotation calibration. The new controls
-await Quest verification; no public release. See CANDIDATE-0112.md.
+Status: user reports 0.1.12 is a fantastic working build. 0.1.13 expands UI ranges,
+shrinks title/menu UI by default, anchors the VR panel, refines default glove
+angles and adds an all-interactions toggle. Awaiting Quest verification; no public
+release. See CANDIDATE-0113.md.
 
 ## Current foundation
 

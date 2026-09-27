@@ -1,16 +1,13 @@
 # Project 06 Quest VR
 
-Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.12 is a test
-candidate, not a public release.** The user reports 0.1.11 works well, with good
-hands and the previously requested features working. That is the retained
-headset-tested baseline.
+Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.13 is a test
+candidate, not a public release.** The user calls 0.1.12 a fantastic working
+build; it remains the retained headset-tested fallback.
 
-0.1.12 adds HUD horizontal/vertical offsets, independent size and reset controls,
-plus separate pitch/yaw/roll calibration for each glove. Existing preferences
-migrate with neutral defaults for the new adjustments. The game save identity
-remains fixed, independent of the APK version.
-[Changes and validation](docs/CANDIDATE-0112.md). These new controls still need
-Quest testing; host checks do not establish headset acceptance.
+0.1.13 allows much smaller HUD/title UI, adds independent title/menu and VR-panel
+controls, anchors the VR panel where it opens, adjusts default glove angles and
+adds **Immersive Mode (All)** at the top of VR settings.
+[Changes and validation](docs/CANDIDATE-0113.md). These changes await Quest testing.
 
 ## Project status
 
@@ -38,7 +35,7 @@ a private or unindexed Discord test build could still exist.
 
 ## Install and play
 
-Sideload `out/p06-quest-0.1.12.apk` using your existing Quest sideload method.
+Sideload `out/p06-quest-0.1.13.apk` using your existing Quest sideload method.
 This replacement uses the same signing key and a higher version code; install it
 over the previous candidate to retain settings. See [latest XR startup investigation](docs/EGL-SESSION-STARTUP-20260926.md).
 Do not uninstall or clear app data to update. Save compatibility is now tied to
@@ -82,10 +79,27 @@ inputs remain captured until controls return to neutral.
 Display modes: **Immersive third person**, **3D stereo screen**, **2D theatre**.
 The screen modes are optional. World scale, positional tracking, screen size,
 distance, stereo strength and HUD placement are adjustable and saved. Under **UI**,
-HUD distance (0.75-8), left/right and down/up offsets, size (50-150%) and reset
-are available. Under **VR**, scroll down for independent left/right hand pitch,
-yaw and roll (-180 to +180 degrees, 5-degree steps) and reset. Hand calibration
-affects the rendered gloves only, preserving gesture/controller tracking. Render scale
+HUD distance (0.25-20), left/right and down/up offsets (-10 to +10), size (5-200%)
+and reset are available. Title/main-menu UI has separate size, distance and
+position controls, defaulting to 65% size at distance 3. These controls resize
+the UI canvas, not the background 3D scene. VR-panel size/distance and optional
+follow-view behavior are also under UI. Negative positions are supported;
+size/depth stay positive to avoid mirroring or placing a panel behind you.
+
+Under **VR**, **Immersive Mode (All)** enables first person, positional tracking,
+physical running, outward homing and crouch spindash together. Turning it off
+disables the four optional interactions while retaining third-person VR.
+Individual switches and sensitivities remain available; the bundle reads OFF
+when not all its settings are enabled. Scroll for independent left/right hand
+pitch, yaw and roll (-180 to +180 degrees, 5-degree steps) and reset. Defaults
+are left (-10, -5, -10) and right (-10, +5, +10). Existing nonzero calibration
+is preserved; untouched hands adopt the new defaults. Calibration affects only
+rendered gloves, preserving gesture/controller input.
+
+The VR panel stays at the captured opening pose while you look around. Close
+and reopen to place it in front of you again. Recenter also places an open panel
+in front of the new origin. **VR Panel Follows View** restores head-following.
+Render scale
 defaults to 70% and requires relaunch after changes. The runtime is asked for
 72 Hz; this is not a frame-rate guarantee. Shadows and post-effects are explicitly
 marked WIP and leave the game's settings in effect.
@@ -204,6 +218,6 @@ Native dependencies included at these revisions:
 - Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
 - dhepper/font8x8 basic font, public domain; notice in its header.
 
-`out/p06-quest-0.1.12-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
+`out/p06-quest-0.1.13-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
 tree and records preserved game entries. The original APK and MCC workspace were
-not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup/haptics, 0.1.9 first-person view/hand orientation/crouch/menu and 0.1.10 title rendering are confirmed. 0.1.10 then crashed after slot selection; the user reports 0.1.11 works well. 0.1.12 HUD/glove calibration awaits headset verification.
+not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup/haptics, 0.1.9 first-person view/hand orientation/crouch/menu and 0.1.10 title rendering are confirmed. 0.1.10 then crashed after slot selection; the user reports 0.1.11 works well. The user reports 0.1.12 works well; 0.1.13 UI/panel/default refinements await headset verification.

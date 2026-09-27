@@ -36,6 +36,7 @@ void configureMenuCameras(){
     }
 }
 void menuStartHook(void* self,const Method* method){
+    rememberFrontEnd(self);
     oldMenuStart(self,method);
     if(managedReady&&gettid()==unityThread)configureMenuCameras();
 }

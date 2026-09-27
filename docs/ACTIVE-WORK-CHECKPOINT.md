@@ -1,34 +1,31 @@
 # Active work checkpoint
 
-Date: 2026-09-27. New candidate: **0.1.12 / versionCode 112**.
-Headset-tested baseline: **0.1.11**, commit 252cb42c09fd226b898d3f87875c29cd933ff65b.
+Date: 2026-09-27. New candidate: **0.1.13 / versionCode 113**.
+Accepted fallback: **0.1.12**, source e2f8a79baee89e357ebbe32708e2cd86b997bec7.
 
-- User reports great progress, good hands and all other features working well.
-- Current request: HUD left/right/up/down adjustment and hand orientation calibration.
-- Added UI HUD distance (extended to 8), horizontal/vertical position, size and reset.
-- Added independent left/right pitch, yaw and roll plus hand rotation reset under VR.
-- New options default neutral and persist in VR settings schema 6; schemas 1-5 migrate.
-- Render-only hand calibration preserves controller pose input for gestures and movement.
-- HUD transforms apply to bridge-owned canvases during immersive gameplay; title and
-  world-space gameplay canvases keep their existing ownership behavior.
-- Latest log preserved in out/headset-logs/P06Quest-20260926-234747-097.log.txt;
-  evidence/candidate-0111-run.json records its hash, acceptance and remaining
-  Settings.SetLocalSettings null-reference records (unrelated path not changed).
-- Preserve the accepted XR submission, title fix, glove geometry, locomotion,
-  physical gestures, haptics and managed-reference corrections.
-- **Do not bump src/save_schema.h.** Game-facing identity stays 0.1.10-vr-candidate,
-  independent of APK/menu/log versions. Exact prior aliases are accepted in memory.
-- All reference writes must use il2cpp_field_set_value_object with direct object;
-  scalar writes use the arithmetic-only wrapper. The old address-of-reference
-  setter corrupted managed fields and caused 0.1.10's liveness crash.
-- Water remains unchanged: no concrete further diagnosis, per user instruction.
-- Details and checks: CANDIDATE-0112.md and HEADSET-TEST-CHECKLIST.md.
+- User calls 0.1.12 a fantastic build. Latest log is preserved in out/headset-logs;
+  hash/report in evidence/candidate-0112-run.json. One existing game settings
+  null reference remains; no reported startup/transition failure.
+- 0.1.13 lowers HUD/title size to 5%, extends HUD/screen depth and UI offsets,
+  adds separate title/menu and VR panel controls, and defaults title UI to 65%.
+- VR panel captures opening head pose in renderSpace; head motion does not drag it.
+  It recaptures after close/open, recenter or switching follow-view off. Optional
+  follow-view remains. Invalid pose suppresses only the panel until valid tracking.
+- Immersive Mode (All) is first VR row: first person + physical running + homing
+  + crouch spindash; enabling also selects immersive display and positional tracking.
+  Disabling retains third-person VR. Individual switches/sensitivities remain.
+- Default glove angles: left (-10,-5,-10), right (-10,+5,+10). These are modest
+  ergonomic choices, not measured headset calibration. User had not adjusted hands.
+  Preserve nonzero schema-6 custom calibration; zeroed hands adopt new defaults.
+- Settings schema 7 reads older formats. **Never bump src/save_schema.h**:
+  game save identity stays 0.1.10-vr-candidate independently of package version.
+- Keep managed object writes on field_set_value_object, arithmetic-only scalar
+  wrapper, and native-only early hook install. They prevent the old liveness crash.
+- Preserve stereo submission, title pink fix, smooth authored meshes, input and
+  gameplay hooks. Water remains unchanged without concrete further evidence.
+- New controls and changed defaults await user Quest test. Host tests are not
+  headset acceptance. Details: CANDIDATE-0113.md and HEADSET-TEST-CHECKLIST.md.
 
-Artifacts: out/p06-quest-0.1.12.apk, matching source ZIP, receipt, compatibility
-report and external checksums. Preserve original APK, logs, sources, receipts
-and accepted 0.1.11 fallback. No public release; MCC untouched.
-Install over existing app without uninstalling or clearing data.
-
-Pending Quest acceptance: new HUD offsets/size/depth in first and third person,
-per-hand calibration, persistence/reset, scene transitions and retained gestures.
-No connected Quest through Shadow PC. Host checks are not headset acceptance.
+Artifacts: out/p06-quest-0.1.13.apk, matching source ZIP, receipt and checksums.
+Retain tested 0.1.12 fallback, original APK, source archives and run evidence.
+No public release. MCC untouched. Install over existing app; do not clear data.

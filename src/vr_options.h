@@ -11,8 +11,12 @@ struct VROptions {
     bool haptics=true;
     float hapticStrength=.7f;
     float hudX=0,hudY=0,hudSize=1;
-    float handAngles[2][3]{}; // Local visual pitch, yaw, roll in degrees; tracking stays unchanged.
+    float titleSize=.65f,titleDistance=3.f,titleX=0,titleY=0;
+    float vrMenuSize=1.05f,vrMenuDistance=1.15f;
+    bool menuFollowView=false;
+    float handAngles[2][3]{{-10,-5,-10},{-10,5,10}}; // Local visual pitch, yaw, roll in degrees; tracking stays unchanged.
 };
+inline bool ImmersiveInteractions(const VROptions& o){return o.mode==ViewMode::Immersive&&o.firstPerson&&o.motionRun&&o.gestureHoming&&o.crouchSpin&&o.positionalTracking;}
 void InitOptions(const char* directory);
 VROptions GetOptions();
 Controls UpdateVRMenu(const Controls& input,double now);

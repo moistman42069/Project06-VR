@@ -1,10 +1,17 @@
-# Quest 3 candidate 0.1.12 checks
+# Quest 3 candidate 0.1.13 checks
 
 Sideload over the previous candidate; preserve the log in Downloads/P06Quest.
 Expected startup milestones: `Managed runtime ready`, `XR graphics initialized`,
 `OpenXR session state=FOCUSED`, `First OpenXR frame submitted`, and visible game.
 Logs alone cannot prove visible pixels.
 
+- [ ] HUD size reaches 5%; offsets/depth remain independently adjustable and reset recovers visibility.
+- [ ] Title and main menu start smaller; separate UI controls work after stage-to-title transitions without pink flicker.
+- [ ] Open VR panel, rotate/move head: panel remains in place; close/reopen relocates it.
+- [ ] Recenter with panel open, and suspend/resume: panel stays accessible.
+- [ ] VR panel follow-view option and size/distance adjustments work; reset recovers defaults.
+- [ ] First VR row enables all four interactions, reflects individual overrides, and turns the four off together.
+- [ ] Default glove alignment feels better; custom hand angles persist and reset restores the new defaults.
 - [ ] Install over current APK without uninstalling or clearing app data.
 - [ ] UI: HUD left/right, down/up, size and depth respond separately in a level.
 - [ ] Repeat HUD adjustments in first and third person; reset restores defaults.

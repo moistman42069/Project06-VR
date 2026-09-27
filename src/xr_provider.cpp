@@ -2,6 +2,7 @@
 #include "vr_options.h"
 #include "view_math.h"
 #include "haptics.h"
+#include "menu_anchor.h"
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
@@ -50,6 +51,7 @@ std::vector<XrSwapchainImageOpenGLESKHR> menuImages;
 std::vector<uint64_t> menuImageRevision;
 std::vector<uint32_t> menuPixels,menuUpload;
 bool menuReady=false;
+P06MenuAnchor menuAnchor;
 constexpr int menuSize=1024;
 bool check(XrResult r,const char* what){
     if(XR_SUCCEEDED(r))return true;
@@ -321,7 +323,14 @@ void finishFrame(){
         }
         if(shouldRender)updateMenuTexture();else menuReady=false;
         XrCompositionLayerQuad menuLayer{XR_TYPE_COMPOSITION_LAYER_QUAD};
-        if(menuReady){menuLayer.space=viewSpace;menuLayer.eyeVisibility=XR_EYE_VISIBILITY_BOTH;menuLayer.subImage.swapchain=menuSwapchain;menuLayer.subImage.imageRect.extent={menuSize,menuSize};menuLayer.pose.orientation.w=1;menuLayer.pose.position.z=-1.15f;menuLayer.size={1.05f,1.05f};layers[layerCount++]=reinterpret_cast<const XrCompositionLayerBaseHeader*>(&menuLayer);}
+        const bool menuOpen=VRMenuOpen();
+        XrSpaceLocation menuHead{XR_TYPE_SPACE_LOCATION};const XrPosef* locatedHead=nullptr;
+        if(menuOpen&&viewSpace&&renderSpace){
+            constexpr auto required=XR_SPACE_LOCATION_POSITION_VALID_BIT|XR_SPACE_LOCATION_ORIENTATION_VALID_BIT;
+            if(XR_OK(xrLocateSpace(viewSpace,renderSpace,predictedTime,&menuHead))&&(menuHead.locationFlags&required)==required)locatedHead=&menuHead.pose;
+        }
+        const bool anchored=menuAnchor.update(menuOpen,frameOptions.menuFollowView,trackingOrigin,locatedHead);
+        if(menuReady&&anchored){menuLayer.space=renderSpace;menuLayer.eyeVisibility=XR_EYE_VISIBILITY_BOTH;menuLayer.subImage.swapchain=menuSwapchain;menuLayer.subImage.imageRect.extent={menuSize,menuSize};menuLayer.pose=menuAnchor.pose(frameOptions.vrMenuDistance);menuLayer.size={frameOptions.vrMenuSize,frameOptions.vrMenuSize};layers[layerCount++]=reinterpret_cast<const XrCompositionLayerBaseHeader*>(&menuLayer);}
         XrFrameEndInfo end{XR_TYPE_FRAME_END_INFO};end.displayTime=predictedTime;end.environmentBlendMode=XR_ENVIRONMENT_BLEND_MODE_OPAQUE;end.layerCount=layerCount;end.layers=layerCount?layers:nullptr;
         XrResult endResult=xrEndFrame(session,&end);bool endOk=XR_OK(endResult);if(endOk&&ready&&layerCount&&!firstFrameLogged){firstFrameLogged=true;LOG("First OpenXR frame submitted: layers=%u mode=%d",layerCount,int(frameOptions.mode));}frameBegun=false;
     }renderFrame=false;
@@ -332,7 +341,7 @@ void shutdown(){
     for(auto& space:aimSpaces){if(space)xrDestroySpace(space);space=XR_NULL_HANDLE;}
     for(auto& space:gripSpaces){if(space)xrDestroySpace(space);space=XR_NULL_HANDLE;}
     PublishTrackedControllerPose(0,false,nullptr,nullptr);PublishTrackedControllerPose(1,false,nullptr,nullptr);
-    if(menuSwapchain)xrDestroySwapchain(menuSwapchain);menuSwapchain=XR_NULL_HANDLE;menuImages.clear();menuImageRevision.clear();menuPixels.clear();menuUpload.clear();menuReady=false;
+    if(menuSwapchain)xrDestroySwapchain(menuSwapchain);menuSwapchain=XR_NULL_HANDLE;menuImages.clear();menuImageRevision.clear();menuPixels.clear();menuUpload.clear();menuReady=false;menuAnchor={};
     if(viewSpace)xrDestroySpace(viewSpace);if(renderSpace)xrDestroySpace(renderSpace);if(localSpace)xrDestroySpace(localSpace);renderSpace=localSpace=viewSpace=XR_NULL_HANDLE;
     if(session)xrDestroySession(session);session=XR_NULL_HANDLE;
     if(actionSet)xrDestroyActionSet(actionSet);actionSet=XR_NULL_HANDLE;

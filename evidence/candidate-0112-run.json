@@ -1,0 +1,12 @@
+{
+  "candidate": "0.1.12",
+  "log": "P06Quest-20260927-002619-061.log.txt",
+  "sha256": "edf38e781bf2a51fd044ba301e13ce533a7bf61b9541dd885f19b9a56abb77f8",
+  "user_report": "Fantastic build; requests smaller UI/title/menu, natural glove defaults, anchored VR panel and all-interactions toggle. No hand offsets adjusted during this test.",
+  "observed": [
+    "5 slots checked, no older aliases needed",
+    "Both authored glove meshes created successfully",
+    "One Settings.SetLocalSettings NullReferenceException remains; no current-run native crash record found"
+  ],
+  "acceptance": "User reports working build; new 0.1.13 changes need headset verification."
+}

@@ -1,5 +1,10 @@
 // Only canvases that the bridge owns as screen-space HUD are adjusted here.
 // Existing world-space gameplay UI is untouched.
+void* frontEndOwner=nullptr;uint32_t frontEndRoot=0;
+void rememberFrontEnd(void* owner){
+    if(!managedReady||gettid()!=unityThread||!alive(owner))return;
+    if(frontEndRoot)gc_free(frontEndRoot);frontEndOwner=owner;frontEndRoot=gc_root(owner,false);
+}
 struct HUDCanvas { void* canvas=nullptr;uint32_t root=0;bool world=false;float scale[3]{1,1,1};float distance=2; };
 std::vector<HUDCanvas> hudCanvases;
 void rememberHUDCanvas(void* canvas){
@@ -18,15 +23,21 @@ void syncFirstPersonHUD(bool firstPerson){
     static auto setMode=icall<void(*)(void*,int)>("UnityEngine.Canvas::set_renderMode");
     static auto getDistance=icall<float(*)(void*)>("UnityEngine.Canvas::get_planeDistance");
     if(!transform||!getPos||!getRot||!getScale||!setPos||!setRot||!setScale||!getMode||!setMode||!getDistance)return;
-    const auto options=GetOptions();const float distance=options.hudDistance;
+    const auto options=GetOptions();
+    const bool frontEnd=alive(frontEndOwner);
+    if(!frontEnd&&frontEndRoot){gc_free(frontEndRoot);frontEndRoot=0;frontEndOwner=nullptr;}
+    const float distance=frontEnd?options.titleDistance:options.hudDistance;
+    const float size=frontEnd?options.titleSize:options.hudSize;
+    const float offsetX=frontEnd?options.titleX:options.hudX,offsetY=frontEnd?options.titleY:options.hudY;
+    if(frontEnd)firstPerson=false;
     bool customHUD=options.hudX!=0||options.hudY!=0||options.hudSize!=1;
     bool thirdPerson=options.mode==ViewMode::Immersive&&!firstPerson&&customHUD&&refreshFirstPersonAnchor();
-    bool positioned=firstPerson||thirdPerson;
+    bool positioned=firstPerson||thirdPerson||frontEnd;
     float cameraPos[3]{},cameraRot[4]{0,0,0,1},worldPos[3]{},worldRot[4]{0,0,0,1};
     if(positioned){
         auto camera=firstPerson?firstPersonAnchor.cameraTransform:(alive(hudCamera)?transform(hudCamera):nullptr);if(!alive(camera))return;
         getPos(camera,cameraPos);getRot(camera,cameraRot);
-        float forward[3]={options.hudX,options.hudY,distance},local[3];
+        float forward[3]={offsetX,offsetY,distance},local[3];
         if(firstPerson){quatRotate(firstPersonAnchor.rotation,forward,local);for(int i=0;i<3;++i)local[i]+=firstPersonAnchor.position[i];quatMultiply(cameraRot,firstPersonAnchor.rotation,worldRot);}
         else{std::copy(forward,forward+3,local);std::copy(cameraRot,cameraRot+4,worldRot);}
         quatRotate(cameraRot,local,worldPos);for(int i=0;i<3;++i)worldPos[i]+=cameraPos[i];
@@ -36,7 +47,7 @@ void syncFirstPersonHUD(bool firstPerson){
         auto tr=transform(c.canvas);if(!alive(tr)){++it;continue;}
         if(positioned){
             if(!c.world||getMode(c.canvas)!=2){getScale(tr,c.scale);c.distance=std::max(getDistance(c.canvas),.1f);setMode(c.canvas,2);c.world=true;}
-            float scale[3];for(int i=0;i<3;++i)scale[i]=c.scale[i]*distance/c.distance*options.hudSize;
+            float scale[3];for(int i=0;i<3;++i)scale[i]=c.scale[i]*distance/c.distance*size;
             setScale(tr,scale);setPos(tr,worldPos);setRot(tr,worldRot);
         }else if(c.world){setScale(tr,c.scale);setMode(c.canvas,1);if(canvasSetCamera)canvasSetCamera(c.canvas,hudCamera);if(canvasSetDistance)canvasSetDistance(c.canvas,distance);c.world=false;}
         ++it;
