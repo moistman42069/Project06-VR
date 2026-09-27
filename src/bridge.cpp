@@ -5,6 +5,7 @@
 #include "haptics.h"
 #include "trigger_sweep.h"
 #include "hand_model.h"
+#include "locomotion_math.h"
 #include "dobby.h"
 #include <android/dlext.h>
 #include <dlfcn.h>
@@ -194,15 +195,35 @@ bool refreshFirstPersonAnchor(){
 void setGameObjectActive(void* object,bool active){static auto set=icall<void(*)(void*,bool)>("UnityEngine.GameObject::SetActive");if(set&&object)set(object,active);}
 void setRendererEnabled(void* renderer,bool enabled){static auto set=icall<void(*)(void*,bool)>("UnityEngine.Renderer::set_enabled");if(set&&renderer)set(renderer,enabled);}
 bool getRendererEnabled(void* renderer){static auto get=icall<bool(*)(void*)>("UnityEngine.Renderer::get_enabled");return get&&renderer?get(renderer):true;}
+void hideRenderer(void* renderer){
+    if(!alive(renderer))return;
+    auto it=std::find_if(hiddenRenderers.begin(),hiddenRenderers.end(),[&](const HiddenRenderer& saved){return saved.renderer==renderer;});
+    if(it==hiddenRenderers.end())hiddenRenderers.push_back({renderer,getRendererEnabled(renderer),gc_root(renderer,false)});
+    setRendererEnabled(renderer,false);
+}
+void hideRendererArray(void* array){
+    if(!array)return;auto count=array_length(array);if(count>512)return;
+    for(uintptr_t i=0;i<count;++i)hideRenderer(*reinterpret_cast<void**>(array_address(array,sizeof(void*),i)));
+}
 bool hideSonic(bool hide){
     if(!hide){for(const auto& saved:hiddenRenderers){if(alive(saved.renderer))setRendererEnabled(saved.renderer,saved.wasEnabled);if(saved.root)gc_free(saved.root);}hiddenRenderers.clear();return true;}
     for(auto it=hiddenRenderers.begin();it!=hiddenRenderers.end();){if(!alive(it->renderer)){gc_free(it->root);it=hiddenRenderers.erase(it);}else ++it;}
-    auto array=firstPersonAnchor.player?field<void*>(firstPersonAnchor.player,"PlayerRenderers"):nullptr;if(!array)return false;
-    auto count=array_length(array);if(count<1||count>64)return false;
-    if(hide){for(uintptr_t i=0;i<count;++i){auto renderer=*reinterpret_cast<void**>(array_address(array,sizeof(void*),i));if(!renderer)continue;
-            auto it=std::find_if(hiddenRenderers.begin(),hiddenRenderers.end(),[&](const HiddenRenderer& saved){return saved.renderer==renderer;});
-            if(it==hiddenRenderers.end()){hiddenRenderers.push_back({renderer,getRendererEnabled(renderer),gc_root(renderer,false)});it=hiddenRenderers.end()-1;}setRendererEnabled(renderer,false);}}
-    return true;
+    auto player=firstPersonAnchor.player;if(!alive(player))return false;
+    hideRendererArray(field<void*>(player,"PlayerRenderers"));
+    hideRenderer(field<void*>(player,"PlayerRenderer")); // Metal Sonic uses a singular renderer.
+    auto upgrades=field<void*>(player,"Upgrades");
+    if(alive(upgrades)){auto list=field<void*>(upgrades,"Renderers");if(list)hideRendererArray(field<void*>(list,"_items"));}
+    // Include authored accessories/meshes attached under the visual rig, never colliders.
+    static auto gameObject=icall<void*(*)(void*)>("UnityEngine.Component::get_gameObject");
+    static unsigned scan=0;
+    if(hiddenRenderers.empty()||scan++%60==0){
+        auto mesh=field<void*>(player,"Mesh"),rendererClass=klass("UnityEngine","Renderer"),goClass=klass("UnityEngine","GameObject");
+        if(alive(mesh)&&gameObject&&rendererClass&&goClass){bool typed=true,recursive=true,inactive=true,reverse=false;
+            void* args[]={type_object(class_type(rendererClass)),&typed,&recursive,&inactive,&reverse,nullptr};
+            hideRendererArray(call(goClass,"GetComponentsInternal",gameObject(mesh),args,6));}
+    }
+    for(auto& saved:hiddenRenderers)setRendererEnabled(saved.renderer,false);
+    return !hiddenRenderers.empty();
 }
 bool buildGloves(){
     auto gameObjectClass=klass("UnityEngine","GameObject"),transformClass=klass("UnityEngine","Transform"),materialClass=klass("UnityEngine","Material");
@@ -225,7 +246,7 @@ bool buildGloves(){
     auto shaderClass=klass("UnityEngine","Shader");void* gloveShader=nullptr;
     if(!setShader||!getShader||!supported||!shaderClass)return false;
     for(const char* name:{"Unlit/Color","Legacy Shaders/Diffuse","Standard"}){void* args[]={string_new(name)};auto candidate=call(shaderClass,"Find",nullptr,args,1);if(alive(candidate)&&supported(candidate)){gloveShader=candidate;break;}}
-    const int primitiveTypes[7]={0,1,1,1,1,1,2};const float white[4]={1.f,1.f,1.f,1.f};
+    const int primitiveTypes[7]={0,1,1,1,1,1,2};
     for(int hand=0;hand<2;++hand)for(int i=0;i<7;++i){auto& piece=gloves[hand].pieces[i];int primitive=primitiveTypes[i];void* args[]={&primitive};piece.gameObject=call(gameObjectClass,"CreatePrimitive",nullptr,args,1);if(!piece.gameObject)return false;
         piece.root=gc_root(piece.gameObject,false);setGameObjectActive(piece.gameObject,false);persist(piece.gameObject);
         piece.transform=getTransform(piece.gameObject);void* colliderArgs[]={type_object(class_type(colliderType))};auto collider=call(gameObjectClass,"GetComponent",piece.gameObject,colliderArgs,1);void* rendererArgs[]={type_object(class_type(rendererType))};auto renderer=call(gameObjectClass,"GetComponent",piece.gameObject,rendererArgs,1);
@@ -237,7 +258,9 @@ bool buildGloves(){
         else{scale[0]=.105f;scale[1]=.035f;scale[2]=.08f;offset[2]=-.04f;piece.rotation[0]=.70710678f;piece.rotation[3]=.70710678f;}
         auto mat=material(renderer);if(!alive(mat))return false;if(gloveShader)setShader(mat,gloveShader);
         if(!alive(getShader(mat))||!supported(getShader(mat)))return false;
-        void* colorArgs[]={&colorId,const_cast<float*>(white)};call(materialClass,"SetColorImpl",mat,colorArgs,2);
+        // Slight tonal separation keeps the unlit fallback's cuff and fingers legible.
+        float shade=i==6?.70f:(i==0?.9f:1.f);float white[4]={shade,shade,shade,1.f};
+        void* colorArgs[]={&colorId,white};call(materialClass,"SetColorImpl",mat,colorArgs,2);
         setScale(piece.transform,scale);setPosition(piece.transform,offset);setRotation(piece.transform,piece.rotation);setGameObjectActive(piece.gameObject,false);
     }
     gloveParentTransform=firstPersonAnchor.cameraTransform;LOG("Experimental first-person glove meshes created (render-only; controller-pose driven)");return true;
@@ -260,9 +283,9 @@ bool updateGloves(bool active){
     static auto getRot=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_rotation_Injected");
     if(active){if(!getPos||!getRot||!alive(firstPersonAnchor.cameraTransform))return false;getPos(firstPersonAnchor.cameraTransform,camPos);getRot(firstPersonAnchor.cameraTransform,camRot);}
     const float worldScale=std::clamp(GetOptions().worldScale,.25f,3.f);
-    TrackedPose poses[2];{std::lock_guard<std::mutex> lock(trackedHandsMutex);std::copy(trackedHands,trackedHands+2,poses);}
-    for(int hand=0;hand<2;++hand){bool visible=active&&poses[hand].valid;auto& glove=gloves[hand];
-        if(visible){float gripRotation[4],handRotation[4];quatMultiply(poses[hand].rotation,P06GloveFromGrip[hand],gripRotation);quatMultiply(firstPersonAnchor.rotation,gripRotation,handRotation);float handPos[3],trackedPos[3]={poses[hand].position[0]/worldScale,poses[hand].position[1]/worldScale,poses[hand].position[2]/worldScale};quatRotate(firstPersonAnchor.rotation,trackedPos,handPos);
+    MotionFrame pose;{std::lock_guard<std::mutex> lock(motionMutex);pose=motionFrame;}
+    for(int hand=0;hand<2;++hand){bool visible=active&&pose.focused&&pose.hand[hand].valid&&pose.aim[hand].valid;auto& glove=gloves[hand];
+        if(visible){float handRotation[4];quatMultiply(firstPersonAnchor.rotation,pose.aim[hand].q,handRotation);float handPos[3],trackedPos[3]={pose.hand[hand].p[0]/worldScale,pose.hand[hand].p[1]/worldScale,pose.hand[hand].p[2]/worldScale};quatRotate(firstPersonAnchor.rotation,trackedPos,handPos);
             for(auto& piece:glove.pieces){float relative[3],scale[3];quatRotate(handRotation,piece.offset,relative);for(int j=0;j<3;++j){relative[j]/=worldScale;scale[j]=piece.scale[j]/worldScale;}setScale(piece.transform,scale);float position[3]={firstPersonAnchor.position[0]+handPos[0]+relative[0],firstPersonAnchor.position[1]+handPos[1]+relative[1],firstPersonAnchor.position[2]+handPos[2]+relative[2]};
                 float rotation[4];quatMultiply(handRotation,piece.rotation,rotation);float worldPos[3],worldRot[4];quatRotate(camRot,position,worldPos);for(int j=0;j<3;++j)worldPos[j]+=camPos[j];quatMultiply(camRot,rotation,worldRot);setPosition(piece.transform,worldPos);setRotation(piece.transform,worldRot);if(!piece.active){setGameObjectActive(piece.gameObject,true);piece.active=true;}}}
         else for(auto& piece:glove.pieces)if(piece.active){setGameObjectActive(piece.gameObject,false);piece.active=false;}
@@ -421,6 +444,7 @@ void* selectGameCamera(){
 #include "gameplay_hooks.inc"
 #include "animated_uv.inc"
 #include "gesture_bridge.inc"
+#include "menu_rendering.inc"
 void* (*oldDlopen)(const char*,int)=nullptr;
 void* (*oldExt)(const char*,int,const android_dlextinfo*)=nullptr;
 void loaded(const char* name,void* h){if(h&&name&&strstr(name,"libil2cpp.so"))InstallGameHooks(h);}
@@ -456,11 +480,13 @@ void SyncHudCamera(){
     static auto far=icall<void(*)(void*,float)>("UnityEngine.Camera::set_farClipPlane");
     static auto renderingPath=icall<void(*)(void*,int)>("UnityEngine.Camera::set_renderingPath");
     static auto hdr=icall<void(*)(void*,bool)>("UnityEngine.Camera::set_allowHDR");
+    static auto force=icall<void(*)(void*,bool)>("UnityEngine.Camera::set_forceIntoRenderTexture");
     static auto enabled=icall<void(*)(void*,bool)>("UnityEngine.Behaviour::set_enabled");
     if(!copy||!transform||!getPos||!getRot||!setPos||!setRot||!mask||!setMask||!clear||!depth||!near||!far||!renderingPath||!hdr||!enabled)return;
     auto main=selectGameCamera();if(!main||main==hudCamera){enabled(hudCamera,false);return;}
     copy(hudCamera,main);setMask(hudCamera,hudLayerMask);clear(hudCamera,3);depth(hudCamera,10000.f);near(hudCamera,.05f);far(hudCamera,50.f);
     renderingPath(hudCamera,1);hdr(hudCamera,false);enabled(hudCamera,true);
+    if(force)force(hudCamera,false); // CopyFrom must not inherit a desktop intermediate blit.
     setMask(main,uint32_t(mask(main))&~hudLayerMask);
     float pos[3],rot[4];auto source=transform(main),target=transform(hudCamera);
     if(source&&target){getPos(source,pos);getRot(source,rot);setPos(target,pos);setRot(target,rot);}
@@ -540,6 +566,8 @@ void InstallGameHooks(void* lib){
     hook(base,kWaterEnter,(void*)waterEnterHook,(void**)&oldWaterEnter,"SonicNew.OnWaterSlideEnter");
     hook(base,kAddRing,(void*)addRingHook,(void**)&oldAddRing,"PlayerBase.AddRing");
     hook(base,kAcceleration,(void*)accelerationHook,(void**)&oldAcceleration,"PlayerBase.AccelerationSystem");
+    hook(base,kMenuStart,(void*)menuStartHook,(void**)&oldMenuStart,"MainMenu.Start");
+    hook(base,kBackgroundUpdate,(void*)backgroundUpdateHook,(void**)&oldBackgroundUpdate,"BackgroundVideo.UpdateVideo");
     hook(base,kAnimatedUV,(void*)animatedUVHook,(void**)&oldAnimatedUV,"AnimatedUV.Update");
     LOG("Pinned APK hooks installed: %s",ok?"all":"INCOMPLETE");
 }
@@ -553,7 +581,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm,void*){g_vm=vm;return JNI_VERSIO
 extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativePrepare(JNIEnv* env,jclass,jobject activity,jstring directory,jint fd){
     if(fd>=0)logFd=dup(fd);
     g_activity=env->NewGlobalRef(activity);const char* dir=env->GetStringUTFChars(directory,nullptr);InitOptions(dir);env->ReleaseStringUTFChars(directory,dir);
-    LOG("P06 Quest candidate 0.1.8 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
+    LOG("P06 Quest candidate 0.1.9 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
     LOG("System library loading is untouched; waiting for Unity activity creation");
 }
 

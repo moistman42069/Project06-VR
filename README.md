@@ -1,17 +1,16 @@
 # Project 06 Quest VR
 
-Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.8 is a test
-candidate, not a public release.** The user confirmed that 0.1.4 launches into
-immersive third-person VR with Touch controls and the VR menu. Version 0.1.7
-regressed startup: an early water-hook metadata lookup ran before IL2CPP was
-initialized. All six supplied crash logs identify the same native fault.
+Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.9 is a test
+candidate, not a public release.** The user confirmed 0.1.8 starts, renders
+immersive VR and has working haptics. Its first-person steering, swing speed,
+glove orientation and main-menu right-eye flicker needed further work.
 
-0.1.8 removes that early lookup, audits first-person/glove APIs and lifecycle,
-adds optional running/homing/crouch gestures and game-action haptics, and adds
-bounded water-trigger crossing recovery. The old SonicFast ground-grace
-experiment is disabled. [Investigation and limitations](docs/CANDIDATE-018.md).
-Native compilation and host tests cannot prove headset startup, visuals or
-level completion; those remain pending on the user's Quest.
+0.1.9 corrects movement heading and swing-speed filtering, expands character
+capability checks and body hiding, aligns gloves to controller aim, and adds a
+blue category-list menu with X-to-back navigation. A menu-only rendering
+compatibility path uses the authored static background and forward rendering.
+[Evidence, changes and limits](docs/CANDIDATE-019.md). This candidate has not yet
+been tested on Quest; host checks cannot guarantee headset rendering.
 
 ## Project status
 
@@ -39,7 +38,7 @@ a private or unindexed Discord test build could still exist.
 
 ## Install and play
 
-Sideload `out/p06-quest-0.1.8.apk` using your existing Quest sideload method.
+Sideload `out/p06-quest-0.1.9.apk` using your existing Quest sideload method.
 This replacement uses the same signing key and a higher version code; install it
 over the previous candidate to retain settings. See [latest XR startup investigation](docs/EGL-SESSION-STARTUP-20260926.md).
 Launch **Project 06 Quest** from Unknown Sources. Package `com.p06.quest` installs
@@ -49,7 +48,8 @@ The default mode is immersive third-person VR. The original gameplay camera
 remains the third-person anchor by default; the native XR provider supplies
 tracked left and right eye views. Experimental first person uses a player-relative
 eye-height anchor, with stable yaw, head tracking, right-stick turning and body
-hiding. Simple white five-digit gloves follow each controller independently.
+hiding. Simple white five-digit gloves use each controller's grip position and aim orientation independently. Body hiding includes separate
+upgrade attachments; no floating replacement feet are added.
 Eye height is adjustable; losing one controller hides that glove and preserves
 the camera. These are procedural glove shapes, not rigged Sonic hands or IK.
 Missing required player/render APIs leave third person active.
@@ -68,8 +68,9 @@ Missing required player/render APIs leave third person active.
 | Hold right Meta button | Quest system recenter; reserved button is not intercepted |
 
 In the VR menu, use left stick up/down to select and left/right to change;
-X/Y moves between the **UI**, **VR**, **GRAPHICS**, **RUNNING**, **HOMING**, **SPINDASH**, **HAPTICS**, and **SYSTEM** categories;
-A applies and B closes. Game time is paused while this menu is open. Closing
+the root screen lists **UI**, **VR**, **GRAPHICS**, **RUNNING**, **HOMING**,
+**SPINDASH**, **HAPTICS**, and **SYSTEM**. Scroll with the stick, A opens a
+category/applies a setting, X returns to the category list and B closes. Game time is paused while this menu is open. Closing
 inputs remain captured until controls return to neutral.
 
 Display modes: **Immersive third person**, **3D stereo screen**, **2D theatre**.
@@ -91,13 +92,17 @@ headset testing; there is no claim that every original screen-space effect is VR
 
 ## Experimental controls and haptics
 
-The three gesture toggles default off and currently support SonicNew. Normal
+The three gesture toggles default off. Shared ground running supports the
+standard character motors; homing is enabled for Sonic, Shadow, Metal Sonic and
+Princess/Sonic-with-Elise, and crouch spindash for Sonic, Shadow and Metal Sonic.
+Mach-speed and snowboard controls retain their original directional semantics.
+Code presence does not establish which characters this port exposes in menus. Normal
 Touch controls remain available. Gestures are suspended in menus, unsupported
 states, screen modes, tracking loss and after a reference-space change.
 
 - **Running:** alternating swings from both hands drive head-directed movement.
-  Swing sensitivity and speed ramp are adjustable. The native acceleration and
-  speed limit are scaled only during gesture-owned ground running; native
+  Swing sensitivity and speed ramp are adjustable. Acceleration remains native; only the requested speed cap changes during
+  gesture-owned ground running; native
   physics, slopes and maximum speed remain authoritative. Left-stick input wins.
 - **Homing:** extend either arm toward the game's selected, eligible homing
   target, then pull inward. Adjustable pull distance, aim cone, dwell and cooldown
@@ -177,6 +182,6 @@ Native dependencies included at these revisions:
 - Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
 - dhepper/font8x8 basic font, public domain; notice in its header.
 
-`out/p06-quest-0.1.7-receipt.json` identifies the exact APK, native plugin and mod source
+`out/p06-quest-0.1.9-receipt.json` identifies the exact APK, native plugin and mod source
 tree and records preserved game entries. The original APK and MCC workspace were
-not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. Candidate 0.1.7 awaits menu, first-person, water-ground and gameplay retest.
+not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup and haptics were confirmed by the user; 0.1.9 awaits headset verification.

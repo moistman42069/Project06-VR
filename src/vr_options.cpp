@@ -12,7 +12,7 @@ std::mutex mutex;
 VROptions options;
 bool open=false,recenterRequested=false,chordHeld=false,swallow=false,chordArmed=true;
 uint32_t oldButtons=0;
-int category=0,selected=0,oldVertical=0,oldHorizontal=0;
+int category=-1,rootSelected=0,selected=0,oldVertical=0,oldHorizontal=0;
 double nextRepeat=0;
 double leftClickSince=0;
 bool leftClickPending=false;
@@ -37,6 +37,7 @@ void save(){if(filename.empty())return;if(auto f=fopen(filename.c_str(),"w")){
     fprintf(f,"4 %d %.3f %.3f %.3f %.3f %.3f %.3f %d %d %f %d %d %d %f %f %f %f %d %f\n",int(options.mode),options.renderScale,options.worldScale,options.screenDistance,options.screenWidth,options.stereoStrength,options.hudDistance,int(options.positionalTracking),int(options.firstPerson),options.eyeHeight,int(options.motionRun),int(options.gestureHoming),int(options.crouchSpin),options.runSensitivity,options.runAcceleration,options.homingPull,options.crouchDepth,int(options.haptics),options.hapticStrength);fclose(f);}}
 float valid(float v,float lo,float hi,float fallback){return std::isfinite(v)?std::clamp(v,lo,hi):fallback;}
 void change(int direction){
+    if(category<0){category=rootSelected;selected=0;++revision;return;}
     const int option=menuItems[category][selected].option;
     switch(option){
         case 0:options.mode=ViewMode((int(options.mode)+direction+3)%3);recenterRequested=true;break;
@@ -65,8 +66,8 @@ void change(int direction){
 }
 uint32_t color(int r,int g,int b){return 0xff000000u|uint32_t(b<<16)|uint32_t(g<<8)|uint32_t(r);}
 void rect(uint32_t* p,int w,int h,int x,int y,int rw,int rh,uint32_t c){for(int yy=std::max(0,y);yy<std::min(h,y+rh);++yy)for(int xx=std::max(0,x);xx<std::min(w,x+rw);++xx)p[yy*w+xx]=c;}
-void text(uint32_t* p,int w,int h,int x,int y,const char* s,int scale,uint32_t c){
-    for(;*s;++s,x+=8*scale){unsigned ch=static_cast<unsigned char>(*s);if(ch>=128)ch='?';for(int row=0;row<8;++row)for(int col=0;col<8;++col)if(font8x8_basic[ch][row]&(1<<col))rect(p,w,h,x+col*scale,y+row*scale,scale,scale,c);}}
+void text(uint32_t* p,int w,int h,int x,int y,const char* s,int scale,uint32_t c,bool italic=false){
+    for(;*s;++s,x+=8*scale){unsigned ch=static_cast<unsigned char>(*s);if(ch>=128)ch='?';for(int row=0;row<8;++row)for(int col=0;col<8;++col)if(font8x8_basic[ch][row]&(1<<col))rect(p,w,h,x+col*scale+(italic?(7-row)*scale/2:0),y+row*scale,scale,scale,c);}}
 }
 void InitOptions(const char* directory){std::lock_guard<std::mutex> lock(mutex);filename=std::string(directory)+"/vr-settings.txt";if(auto f=fopen(filename.c_str(),"r")){
     VROptions read;int version=0,mode=0,pos=1,fp=0,mr=0,gh=0,cs=0,haptic=1;int n=fscanf(f,"%d %d %f %f %f %f %f %f %d %d %f %d %d %d %f %f %f %f %d %f",&version,&mode,&read.renderScale,&read.worldScale,&read.screenDistance,&read.screenWidth,&read.stereoStrength,&read.hudDistance,&pos,&fp,&read.eyeHeight,&mr,&gh,&cs,&read.runSensitivity,&read.runAcceleration,&read.homingPull,&read.crouchDepth,&haptic,&read.hapticStrength);fclose(f);
@@ -82,16 +83,23 @@ Controls UpdateVRMenu(const Controls& c,double now){
     const bool chord=(c.buttons&(LClick|RClick))==(LClick|RClick);
     const uint32_t pressed=c.buttons&~oldButtons;
     if(!(c.buttons&(LClick|RClick)))chordArmed=true;
-    if(chord&&!chordHeld&&chordArmed){open=!open;swallow=true;++revision;nextRepeat=now+.3;}
+    if(chord&&!chordHeld&&chordArmed){open=!open;if(open){category=-1;selected=0;}swallow=true;++revision;nextRepeat=now+.3;}
     chordHeld=chord;oldButtons=c.buttons;
     if(open){
         if((pressed&B)&&!chord){open=false;swallow=true;++revision;}
         if(open&&!chord){
             int vertical=c.ly>.55f?-1:c.ly<-.55f?1:0;int horizontal=c.lx>.55f?1:c.lx<-.55f?-1:0;
-            if((pressed&X)||(pressed&Y)){category=(category+((pressed&Y)?1:categoryCount-1))%categoryCount;selected=std::min(selected,categoryRows[category]-1);nextRepeat=now+.25;++revision;}
-            if(vertical&&(vertical!=oldVertical||now>=nextRepeat)){selected=(selected+vertical+categoryRows[category])%categoryRows[category];nextRepeat=now+.25;++revision;}
-            if(horizontal&&(horizontal!=oldHorizontal||now>=nextRepeat)){change(horizontal);nextRepeat=now+.25;}
-            if(pressed&A)change(1);oldVertical=vertical;oldHorizontal=horizontal;
+            if(pressed&X){if(category>=0){rootSelected=category;category=-1;selected=0;++revision;}nextRepeat=now+.25;}
+            else{
+                if(vertical&&(vertical!=oldVertical||now>=nextRepeat)){
+                    if(category<0)rootSelected=(rootSelected+vertical+categoryCount)%categoryCount;
+                    else selected=(selected+vertical+categoryRows[category])%categoryRows[category];
+                    nextRepeat=now+.25;++revision;
+                }
+                if(category>=0&&horizontal&&(horizontal!=oldHorizontal||now>=nextRepeat)){change(horizontal);nextRepeat=now+.25;}
+                if(pressed&A)change(1);
+            }
+            oldVertical=vertical;oldHorizontal=horizontal;
         }
     }
     const bool neutral=c.buttons==0&&std::fabs(c.lx)<.2f&&std::fabs(c.ly)<.2f&&std::fabs(c.rx)<.2f&&std::fabs(c.ry)<.2f;
@@ -107,11 +115,16 @@ Controls UpdateVRMenu(const Controls& c,double now){
 }
 void RasterMenu(uint32_t* p,int w,int h){
     std::lock_guard<std::mutex> lock(mutex);
-    std::fill(p,p+w*h,color(12,18,31));rect(p,w,h,0,0,w,10,color(55,206,244));
-    text(p,w,h,48,44,"PROJECT 06 / VR",4,color(235,244,255));text(p,w,h,48,94,"QUEST 3   -   CANDIDATE 0.1.8",2,color(122,155,190));
-    char heading[100];snprintf(heading,sizeof(heading),"< X   %s  (%d/%d)   Y >",categoryNames[category],category+1,categoryCount);text(p,w,h,48,138,heading,3,color(98,219,248));
-    const int count=categoryRows[category];
-    for(int i=0;i<count;++i){int y=218+i*102;const int option=menuItems[category][i].option;if(i==selected){rect(p,w,h,30,y-12,w-60,74,color(27,60,86));rect(p,w,h,30,y-12,5,74,color(55,206,244));}
+    std::fill(p,p+w*h,color(5,18,54));
+    for(int y=0;y<130;++y)rect(p,w,h,0,y,w,1,color(8,55-y/5,150-y/3));
+    rect(p,w,h,0,0,w,8,color(38,191,255));rect(p,w,h,0,127,w,4,color(255,205,55));
+    text(p,w,h,52,46,"PROJECT 06 / VR",4,color(2,12,45),true);
+    text(p,w,h,48,40,"PROJECT 06 / VR",4,color(242,249,255),true);
+    text(p,w,h,48,94,"QUEST 3   -   CANDIDATE 0.1.9",2,color(137,214,255));
+    text(p,w,h,48,158,category<0?"VR SETTINGS":categoryNames[category],3,color(255,217,85));
+    const int count=category<0?categoryCount:categoryRows[category];
+    for(int i=0;i<count;++i){int y=222+i*(category<0?76:102);const int option=category<0?-1:menuItems[category][i].option;if(i==(category<0?rootSelected:selected)){rect(p,w,h,30,y-12,w-60,74,color(12,72,156));rect(p,w,h,30,y-12,5,74,color(255,205,55));}
+        if(category<0){text(p,w,h,60,y+6,categoryNames[i],3,color(231,245,255));text(p,w,h,w-104,y+6,">",3,color(255,217,85));continue;}
         char value[80]{};switch(option){case 0:snprintf(value,sizeof(value),"%s",modeName());break;case 1:snprintf(value,sizeof(value),"%d%%",int(std::round(options.renderScale*100)));break;case 2:snprintf(value,sizeof(value),"%.2fx",options.worldScale);break;case 3:snprintf(value,sizeof(value),"%s",options.positionalTracking?"ON":"ROTATION ONLY");break;case 4:snprintf(value,sizeof(value),"%.2fm",options.screenDistance);break;case 5:snprintf(value,sizeof(value),"%.2fm",options.screenWidth);break;case 6:snprintf(value,sizeof(value),"%.1fx",options.stereoStrength);break;case 7:snprintf(value,sizeof(value),"%.2fm",options.hudDistance);break;case 8:strcpy(value,"72 HZ REQUESTED");break;case 9:case 10:strcpy(value,"GAME DEFAULT / WIP");break;case 14:snprintf(value,sizeof(value),"%.2fm",options.eyeHeight);break;
         case 15:strcpy(value,options.motionRun?"ON":"OFF");break;
         case 16:snprintf(value,sizeof(value),"%.1fx",options.runSensitivity);break;
@@ -123,9 +136,10 @@ void RasterMenu(uint32_t* p,int w,int h){
         case 22:strcpy(value,options.haptics?"ON":"OFF");break;
         case 23:snprintf(value,sizeof(value),"%d%%",int(options.hapticStrength*100));break;
         case 13:strcpy(value,options.firstPerson?"ON / HEAD-ANCHORED":"OFF / THIRD PERSON");break;default:strcpy(value,"PRESS A");break;}
-        text(p,w,h,52,y,menuItems[category][i].label,2,color(211,222,237));text(p,w,h,555,y,value,2,(option==8||option==9||option==10)?color(142,153,171):color(98,219,248));
+        text(p,w,h,52,y,menuItems[category][i].label,2,color(231,245,255));text(p,w,h,52,y+30,value,2,(option==8||option==9||option==10)?color(159,181,209):color(106,224,255));
     }
-    text(p,w,h,48,862,"STICK: SELECT/CHANGE   X/Y: CATEGORY   A: APPLY   B: CLOSE",2,color(182,196,218));
+    if(category==4||category==5)text(p,w,h,48,805,"REQUIRES THIS CHARACTER'S NATIVE ABILITY",2,color(255,217,85));
+    text(p,w,h,48,862,category<0?"STICK: SCROLL   A: OPEN CATEGORY   B: CLOSE":"STICK: SELECT/CHANGE   A: APPLY   X: BACK   B: CLOSE",2,color(209,228,250));
     text(p,w,h,48,899,"BOTH STICK CLICKS: TOGGLE THIS MENU",2,color(182,196,218));
     text(p,w,h,48,936,"HOLD RIGHT META BUTTON: SYSTEM RECENTER",2,color(182,196,218));
     text(p,w,h,48,980,"REFRESH, SHADOWS AND POST EFFECTS ARE DISPLAY-ONLY",2,color(142,153,171));

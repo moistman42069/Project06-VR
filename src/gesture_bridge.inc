@@ -6,30 +6,55 @@ Controls applyGestures(Controls c){
     MotionFrame f;{std::lock_guard<std::mutex> lock(motionMutex);f=motionFrame;}
     const double now=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
     GestureContext context;
-    bool need=o.motionRun||o.gestureHoming||o.crouchSpin||gesturePlayer;
+    bool need=o.firstPerson||o.motionRun||o.gestureHoming||o.crouchSpin||gesturePlayer;
     void* player=nullptr;
     if(need&&refreshFirstPersonAnchor())player=firstPersonAnchor.player;
-    static void* sonicClass=nullptr;if(need&&!sonicClass)sonicClass=klass("","SonicNew");
-    bool sonic=alive(player)&&object_class(player)==sonicClass;
+    bool present=alive(player);
+    static void* sonicClass=nullptr;static void* shadowClass=nullptr;static void* metalClass=nullptr;static void* princessClass=nullptr;static void* fastClass=nullptr;static void* boardClass=nullptr;
+    if(need&&!sonicClass){sonicClass=klass("","SonicNew");shadowClass=klass("","Shadow");metalClass=klass("","MetalSonic");princessClass=klass("","Princess");fastClass=klass("","SonicFast");boardClass=klass("","SnowBoard");}
+    auto playerClass=present?object_class(player):nullptr;
+    bool sonic=present&&playerClass==sonicClass;
+    bool spin=present&&(sonic||playerClass==shadowClass||playerClass==metalClass);
+    bool homingSupported=spin||(present&&playerClass==princessClass);
+    auto state=present?call(playerClass,"GetState",player,nullptr,0):nullptr;
+    auto is=[&](const char* name){return eq(state,name);};
     static auto timeScale=icall<float(*)()>("UnityEngine.Time::get_timeScale");
-    context.allowed=sonic&&c.focused&&!c.blocked&&!VRMenuOpen()&&o.mode==ViewMode::Immersive&&timeScale&&timeScale()>0&&!field<bool>(player,"IsDead")&&!field<bool>(player,"LockControls");
+    context.allowed=present&&c.focused&&!c.blocked&&!VRMenuOpen()&&o.mode==ViewMode::Immersive&&timeScale&&timeScale()>0&&!field<bool>(player,"IsDead")&&!field<bool>(player,"LockControls");
     context.player=reinterpret_cast<uintptr_t>(player);
     context.manual=(c.buttons&(A|X|B|Menu))!=0;
-    int state=sonic?field<int>(player,"PlayerState"):-1;
-    context.ground=state==0&&!field<bool>(player,"IsSinking");
-    context.charge=state==15&&field<int>(player,"SpinDashState")==0;
-    context.homing=(state==2&&field<bool>(player,"ReleasedKey")&&field<int>(player,"JumpLimit")<1)||(state==3&&field<bool>(player,"CanFallJumpdash"));
-    auto target=sonic?field<void*>(player,"HomingTarget"):nullptr;
+    context.ground=is("Ground")&&!field<bool>(player,"IsSinking");
+    context.spinSupported=spin;
+    context.charge=spin&&is("SpinDash")&&field<int>(player,"SpinDashState")==0;
+    context.homing=homingSupported&&is("Jump")&&field<bool>(player,"ReleasedKey");
+    if(sonic)context.homing=(context.homing&&field<int>(player,"JumpLimit")<1&&!field<bool>(player,"UsingPurpleGem"))||(is("Air")&&field<bool>(player,"CanFallJumpdash"));
+    if(homingSupported&&(is("AfterHoming")||is("Spring")||is("WideSpring")||is("Rope")))context.homing=true;
+    // Pre-arm while pointing on the ground; fire only in a native eligible attack state.
+    auto target=homingSupported?field<void*>(player,"HomingTarget"):nullptr;
     static auto goTransform=icall<void*(*)(void*)>("UnityEngine.GameObject::get_transform");
     static auto compTransform=icall<void*(*)(void*)>("UnityEngine.Component::get_transform");
     static auto getPos=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_position_Injected");
     static auto getRot=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_rotation_Injected");
     static auto setRotation=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_rotation_Injected");
     float camRot[4]{0,0,0,1},baseRot[4]{0,0,0,1},headWorld[4]{0,0,0,1};
-    if(sonic&&getRot&&alive(firstPersonAnchor.cameraTransform))getRot(firstPersonAnchor.cameraTransform,camRot);
+    if(present&&getRot&&alive(firstPersonAnchor.cameraTransform))getRot(firstPersonAnchor.cameraTransform,camRot);
     if(o.firstPerson)quatMultiply(camRot,firstPersonAnchor.rotation,baseRot);else std::copy(camRot,camRot+4,baseRot);
     quatMultiply(baseRot,f.head.q,headWorld);float forward[3]={0,0,1},direction[3];quatRotate(headWorld,forward,direction);
-    if(context.allowed&&context.homing&&alive(target)&&goTransform&&getPos&&getRot){
+    static auto getLocalRot=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_localRotation_Injected");
+    float movementRot[4]{0,0,0,1},movementForward[3]{0,0,1};
+    auto movementCamera=present?field<void*>(player,"Camera"):nullptr;
+    bool movementBasis=alive(movementCamera)&&compTransform&&getLocalRot;
+    if(movementBasis){getLocalRot(compTransform(movementCamera),movementRot);quatRotate(movementRot,forward,movementForward);}
+    static float stableHeadYaw=0;static void* headingPlayer=nullptr;
+    if(headingPlayer!=player){headingPlayer=player;stableHeadYaw=std::atan2(movementForward[0],movementForward[2]);}
+    if(direction[0]*direction[0]+direction[2]*direction[2]>.01f)stableHeadYaw=std::atan2(direction[0],direction[2]);
+    float headYaw=stableHeadYaw,nativeYaw=std::atan2(movementForward[0],movementForward[2]);
+    // Rail/spline/vehicle controls are lane coordinates, not free world movement.
+    bool standardMotor=present&&playerClass!=fastClass&&playerClass!=boardClass;
+    bool freeMove=standardMotor&&(is("Ground")||is("Brake")||is("Jump")||is("Air")||is("SlowFall")||is("AfterHoming")||is("SpinDash"));
+    bool steering=freeMove||(standardMotor&&(is("Fly")||is("Glide")||is("Levitate")||is("Hover")||is("HammerJump")||is("AccelJump")));
+    if(o.firstPerson&&firstPersonWasActive&&context.allowed&&steering&&movementBasis&&f.head.valid)
+        P06RemapStick(c.lx,c.ly,headYaw,nativeYaw);
+    if(context.allowed&&alive(target)&&goTransform&&getPos&&getRot){
         context.target=reinterpret_cast<uintptr_t>(target);float targetPos[3],camPos[3];getPos(goTransform(target),targetPos);getPos(firstPersonAnchor.cameraTransform,camPos);
         for(int h=0;h<2;++h)if(f.aim[h].valid){float local[3];for(int j=0;j<3;++j)local[j]=f.aim[h].p[j]/o.worldScale;
             float posePos[3];
@@ -43,7 +68,7 @@ Controls applyGestures(Controls c){
     }
     auto result=gestures.step(f,context,o,now);
     if(!oldAcceleration)result.run=0;
-    if(result.cancel&&alive(gesturePlayer)&&field<int>(gesturePlayer,"PlayerState")==15&&field<int>(gesturePlayer,"SpinDashState")==0){
+    if(result.cancel&&alive(gesturePlayer)&&eq(call(object_class(gesturePlayer),"GetState",gesturePlayer,nullptr,0),"SpinDash")&&field<int>(gesturePlayer,"SpinDashState")==0){
         // Full native state transition prevents an unintended launch on tracking/menu loss.
         void* args[]={string_new("StateAir")};call(object_class(gesturePlayer),"SetMachineState",gesturePlayer,args,1);
         LOG("Gesture spindash cancelled through native state transition");
@@ -57,11 +82,14 @@ Controls applyGestures(Controls c){
         LOG("Gesture spindash released in headset direction");
     }
     if(result.homing){c.buttons|=A;LOG("Gesture homing pulse: native selected target=%p",target);}
-    if(result.run>0&&!context.manual&&std::fabs(c.lx)<.1f&&std::fabs(c.ly)<.1f){
-        float cameraForward[3];quatRotate(camRot,forward,cameraForward);
-        float yaw=std::atan2(direction[0],direction[2])-std::atan2(cameraForward[0],cameraForward[2]);
+    if(result.run>0&&!context.manual&&freeMove&&movementBasis&&std::fabs(c.lx)<.1f&&std::fabs(c.ly)<.1f){
+        float yaw=headYaw-nativeYaw;
         c.lx=std::sin(yaw);c.ly=std::cos(yaw);
         if(context.ground){gestureRunPlayer=player;gestureRunAmount=result.run;}
+    }
+    static double lastReport=0;
+    if(context.allowed&&now-lastReport>5&&(o.motionRun||o.gestureHoming||o.firstPerson)){
+        lastReport=now;LOG("VR locomotion: prefab=%d ground=%d run=%.3f speed=%.2f nativeYaw=%.1f headYaw=%.1f homingEligible=%d target=%p spinSupported=%d",field<int>(player,"PlayerPrefab"),int(context.ground),result.run,field<float>(player,"CurSpeed"),nativeYaw*57.29578f,headYaw*57.29578f,int(context.homing),target,int(spin));
     }
     return c;
 }

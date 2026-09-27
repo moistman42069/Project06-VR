@@ -8,7 +8,9 @@ spec += [('AnimatedUV','AnimatedUV','private void Update()'),('SonicFixed','Soni
  ('BoosterTrigger','WaterslideBooster','private void OnTriggerEnter(Collider collider)'),
  ('WaterEnter','SonicNew','public override void OnWaterSlideEnter(string Spline = "", bool TriggerState = True, float Speed = 0)'),
  ('AddRing','PlayerBase','public void AddRing(int Amount = 1, AudioSource ThisRingSource)'),
- ('Acceleration','PlayerBase','internal void AccelerationSystem(float AccFloat)')]
+ ('Acceleration','PlayerBase','internal void AccelerationSystem(float AccFloat)'),
+ ('MenuStart','MainMenu','private void Start()'),
+ ('BackgroundUpdate','BackgroundVideo','public void UpdateVideo()')]
 
 f=open('original/libil2cpp.so','rb');e=ELFFile(f);out=['#pragma once','#include <cstdint>','struct Binding { uintptr_t rva; unsigned char bytes[16]; };'];record=[]
 for tag,cls,signature in spec:

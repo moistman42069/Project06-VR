@@ -1,7 +1,8 @@
 # Project 06 VR project plan
 
-Status: 0.1.4 was headset-confirmed for immersive VR/input/menu. 0.1.7 regressed
-startup. Replacement 0.1.8 is awaiting headset testing; no public release.
+Status: 0.1.8 startup, immersive VR and haptics were headset-confirmed.
+0.1.9 refines movement, gestures, first-person visuals and menus; awaiting Quest
+verification, with no public release. See CANDIDATE-019.md.
 
 ## Current foundation
 
@@ -12,7 +13,7 @@ startup. Replacement 0.1.8 is awaiting headset testing; no public release.
 - Separate HUD camera path, active `OutlineCamera` fallback, system recenter reserved.
 - Categorized VR menu (UI, VR, Graphics, Running, Homing, Spindash, Haptics, System); immediate screen-overlay redirect.
 - Experimental first person: player-relative adjustable eye anchor, Sonic renderer hide, and
-  render-only glove meshes following Touch grip poses. Disabled by default; the
+  render-only glove meshes following Touch grip positions and aim rotations. Disabled by default; the
   user must verify camera alignment, model proportions and visibility in headset.
 - Guarded water-entry/booster trigger sweeps and WaterSlide exit telemetry. The SonicFast ground-grace experiment is disabled.
 - Opt-in arm-swing running, native-target pull homing, crouch spindash and configurable game-action haptics in candidate 0.1.8.
@@ -65,8 +66,8 @@ startup. Replacement 0.1.8 is awaiting headset testing; no public release.
   verified in several stages.
 - Candidate 0.1.8 implements corrected procedural tracked gloves, body hiding and
   an adjustable eye anchor. Full hand/arm IK, authored hand meshes, physical world
-  interaction and broader character support remain future work. Gesture running,
-  homing and crouch spindash are now implemented for SonicNew and await testing.
+  interaction and complete per-character headset validation remain future work. Gesture running,
+  homing and crouch spindash now use character-specific capability checks; see the candidate notes.
 
 ### 0.6 — world collision and physical interaction
 

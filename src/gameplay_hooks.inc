@@ -17,11 +17,11 @@ void waterEnterHook(void* self,void* spline,bool enter,float speed,const Method*
 }
 void addRingHook(void* self,int amount,void* source,const Method* m){oldAddRing(self,amount,source,m);if(amount>0)QueueGameHaptic(.16f,.025f);}
 void accelerationHook(void* self,float acceleration,const Method* m){
-    if(self!=gestureRunPlayer||gestureRunAmount<=0||field<int>(self,"PlayerState")!=0){oldAcceleration(self,acceleration,m);return;}
+    if(self!=gestureRunPlayer||gestureRunAmount<=0||!eq(call(object_class(self),"GetState",self,nullptr,0),"Ground")){oldAcceleration(self,acceleration,m);return;}
     float maximum=field<float>(self,"MaximumSpeed");auto f=class_field(object_class(self),"MaximumSpeed");
     if(!f||!std::isfinite(maximum)||maximum<=0){oldAcceleration(self,acceleration,m);return;}
     float cap=maximum*std::clamp(gestureRunAmount,.02f,1.f);field_set(self,f,&cap);
-    oldAcceleration(self,acceleration*std::clamp(gestureRunAmount,.1f,1.f),m);field_set(self,f,&maximum);
+    oldAcceleration(self,acceleration,m);field_set(self,f,&maximum);
 }
 void discoverWaterTriggers(){
     for(auto it=waterTriggers.begin();it!=waterTriggers.end();){if(!alive(it->script)||!alive(it->collider)){gc_free(it->root);gc_free(it->colliderRoot);it=waterTriggers.erase(it);}else ++it;}

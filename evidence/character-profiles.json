@@ -1,0 +1,93 @@
+[
+  {
+    "class": "SonicNew",
+    "shared_ground_motor": true,
+    "native_jump_homing": true,
+    "native_crouch_spin": true,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "SonicFast",
+    "shared_ground_motor": false,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Princess",
+    "shared_ground_motor": true,
+    "native_jump_homing": true,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "SnowBoard",
+    "shared_ground_motor": false,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Shadow",
+    "shared_ground_motor": true,
+    "native_jump_homing": true,
+    "native_crouch_spin": true,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Silver",
+    "shared_ground_motor": true,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Tails",
+    "shared_ground_motor": true,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Amy",
+    "shared_ground_motor": true,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Knuckles",
+    "shared_ground_motor": true,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Blaze",
+    "shared_ground_motor": true,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Rouge",
+    "shared_ground_motor": true,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "Omega",
+    "shared_ground_motor": true,
+    "native_jump_homing": false,
+    "native_crouch_spin": false,
+    "visual_renderer_field": "PlayerRenderers"
+  },
+  {
+    "class": "MetalSonic",
+    "shared_ground_motor": true,
+    "native_jump_homing": true,
+    "native_crouch_spin": true,
+    "visual_renderer_field": "PlayerRenderer"
+  }
+]

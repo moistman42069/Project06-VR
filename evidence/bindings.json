@@ -76,5 +76,17 @@
     "method": "PlayerBase.internal void AccelerationSystem(float AccFloat)",
     "rva": "0x122138c",
     "prologue": "eb2bbc6de923016dfe5702a9f44f03a9"
+  },
+  {
+    "name": "MenuStart",
+    "method": "MainMenu.private void Start()",
+    "rva": "0x11db814",
+    "prologue": "fe0f1cf8f85f01a9f65702a9f44f03a9"
+  },
+  {
+    "name": "BackgroundUpdate",
+    "method": "BackgroundVideo.public void UpdateVideo()",
+    "rva": "0x11add6c",
+    "prologue": "fe0f1df8f65701a9f44f02a9d5c200d0"
   }
 ]

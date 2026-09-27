@@ -1,0 +1,512 @@
+[
+  {
+    "type": "Camera",
+    "name": "Main Camera",
+    "tree": {
+      "m_GameObject": {
+        "m_FileID": 0,
+        "m_PathID": 689
+      },
+      "m_Enabled": 1,
+      "m_ClearFlags": 2,
+      "m_BackGroundColor": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "m_projectionMatrixMode": 1,
+      "m_GateFitMode": 2,
+      "m_Iso": 200,
+      "m_ShutterSpeed": 0.004999999888241291,
+      "m_Aperture": 16.0,
+      "m_FocusDistance": 10.0,
+      "m_FocalLength": 50.0,
+      "m_BladeCount": 5,
+      "m_Curvature": {
+        "x": 2.0,
+        "y": 11.0
+      },
+      "m_BarrelClipping": 0.25,
+      "m_Anamorphism": 0.0,
+      "m_SensorSize": {
+        "x": 36.0,
+        "y": 24.0
+      },
+      "m_LensShift": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "m_NormalizedViewPortRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "near clip plane": 0.30000001192092896,
+      "far clip plane": 10.0,
+      "field of view": 45.0,
+      "orthographic": false,
+      "orthographic size": 5.0,
+      "m_Depth": 0.0,
+      "m_CullingMask": {
+        "m_Bits": 4193847
+      },
+      "m_RenderingPath": 3,
+      "m_TargetTexture": {
+        "m_FileID": 0,
+        "m_PathID": 0
+      },
+      "m_TargetDisplay": 0,
+      "m_TargetEye": 3,
+      "m_HDR": false,
+      "m_AllowMSAA": false,
+      "m_AllowDynamicResolution": false,
+      "m_ForceIntoRT": true,
+      "m_OcclusionCulling": true,
+      "m_StereoConvergence": 10.0,
+      "m_StereoSeparation": 0.02199999988079071
+    },
+    "components": [
+      {
+        "type": "Transform",
+        "id": 2622,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 689
+          },
+          "m_LocalRotation": {
+            "x": 0.0,
+            "y": 1.0,
+            "z": 0.0,
+            "w": 0.0
+          },
+          "m_LocalPosition": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "m_LocalScale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "m_Children": [
+            {
+              "m_FileID": 0,
+              "m_PathID": 3084
+            }
+          ],
+          "m_Father": {
+            "m_FileID": 0,
+            "m_PathID": 0
+          }
+        }
+      },
+      {
+        "type": "Camera",
+        "id": 3236,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 689
+          },
+          "m_Enabled": 1,
+          "m_ClearFlags": 2,
+          "m_BackGroundColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.0
+          },
+          "m_projectionMatrixMode": 1,
+          "m_GateFitMode": 2,
+          "m_Iso": 200,
+          "m_ShutterSpeed": 0.004999999888241291,
+          "m_Aperture": 16.0,
+          "m_FocusDistance": 10.0,
+          "m_FocalLength": 50.0,
+          "m_BladeCount": 5,
+          "m_Curvature": {
+            "x": 2.0,
+            "y": 11.0
+          },
+          "m_BarrelClipping": 0.25,
+          "m_Anamorphism": 0.0,
+          "m_SensorSize": {
+            "x": 36.0,
+            "y": 24.0
+          },
+          "m_LensShift": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "m_NormalizedViewPortRect": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 1.0,
+            "height": 1.0
+          },
+          "near clip plane": 0.30000001192092896,
+          "far clip plane": 10.0,
+          "field of view": 45.0,
+          "orthographic": false,
+          "orthographic size": 5.0,
+          "m_Depth": 0.0,
+          "m_CullingMask": {
+            "m_Bits": 4193847
+          },
+          "m_RenderingPath": 3,
+          "m_TargetTexture": {
+            "m_FileID": 0,
+            "m_PathID": 0
+          },
+          "m_TargetDisplay": 0,
+          "m_TargetEye": 3,
+          "m_HDR": false,
+          "m_AllowMSAA": false,
+          "m_AllowDynamicResolution": false,
+          "m_ForceIntoRT": true,
+          "m_OcclusionCulling": true,
+          "m_StereoConvergence": 10.0,
+          "m_StereoSeparation": 0.02199999988079071
+        }
+      },
+      {
+        "type": "AudioListener",
+        "id": 3238,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 689
+          },
+          "m_Enabled": 1
+        }
+      }
+    ]
+  },
+  {
+    "type": "Camera",
+    "name": "Model Camera",
+    "tree": {
+      "m_GameObject": {
+        "m_FileID": 0,
+        "m_PathID": 1886
+      },
+      "m_Enabled": 1,
+      "m_ClearFlags": 2,
+      "m_BackGroundColor": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "m_projectionMatrixMode": 1,
+      "m_GateFitMode": 2,
+      "m_Iso": 200,
+      "m_ShutterSpeed": 0.004999999888241291,
+      "m_Aperture": 16.0,
+      "m_FocusDistance": 10.0,
+      "m_FocalLength": 50.0,
+      "m_BladeCount": 5,
+      "m_Curvature": {
+        "x": 2.0,
+        "y": 11.0
+      },
+      "m_BarrelClipping": 0.25,
+      "m_Anamorphism": 0.0,
+      "m_SensorSize": {
+        "x": 36.0,
+        "y": 24.0
+      },
+      "m_LensShift": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "m_NormalizedViewPortRect": {
+        "x": 0.0,
+        "y": 0.0,
+        "width": 1.0,
+        "height": 1.0
+      },
+      "near clip plane": 0.30000001192092896,
+      "far clip plane": 10.0,
+      "field of view": 45.0,
+      "orthographic": false,
+      "orthographic size": 5.0,
+      "m_Depth": 1.0,
+      "m_CullingMask": {
+        "m_Bits": 256
+      },
+      "m_RenderingPath": 3,
+      "m_TargetTexture": {
+        "m_FileID": 2,
+        "m_PathID": 140
+      },
+      "m_TargetDisplay": 0,
+      "m_TargetEye": 3,
+      "m_HDR": false,
+      "m_AllowMSAA": false,
+      "m_AllowDynamicResolution": false,
+      "m_ForceIntoRT": true,
+      "m_OcclusionCulling": true,
+      "m_StereoConvergence": 10.0,
+      "m_StereoSeparation": 0.02199999988079071
+    },
+    "components": [
+      {
+        "type": "Transform",
+        "id": 3084,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 1886
+          },
+          "m_LocalRotation": {
+            "x": -0.0,
+            "y": -0.0,
+            "z": -0.0,
+            "w": 1.0
+          },
+          "m_LocalPosition": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "m_LocalScale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+          },
+          "m_Children": [],
+          "m_Father": {
+            "m_FileID": 0,
+            "m_PathID": 2622
+          }
+        }
+      },
+      {
+        "type": "Camera",
+        "id": 3237,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 1886
+          },
+          "m_Enabled": 1,
+          "m_ClearFlags": 2,
+          "m_BackGroundColor": {
+            "r": 0.0,
+            "g": 0.0,
+            "b": 0.0,
+            "a": 0.0
+          },
+          "m_projectionMatrixMode": 1,
+          "m_GateFitMode": 2,
+          "m_Iso": 200,
+          "m_ShutterSpeed": 0.004999999888241291,
+          "m_Aperture": 16.0,
+          "m_FocusDistance": 10.0,
+          "m_FocalLength": 50.0,
+          "m_BladeCount": 5,
+          "m_Curvature": {
+            "x": 2.0,
+            "y": 11.0
+          },
+          "m_BarrelClipping": 0.25,
+          "m_Anamorphism": 0.0,
+          "m_SensorSize": {
+            "x": 36.0,
+            "y": 24.0
+          },
+          "m_LensShift": {
+            "x": 0.0,
+            "y": 0.0
+          },
+          "m_NormalizedViewPortRect": {
+            "x": 0.0,
+            "y": 0.0,
+            "width": 1.0,
+            "height": 1.0
+          },
+          "near clip plane": 0.30000001192092896,
+          "far clip plane": 10.0,
+          "field of view": 45.0,
+          "orthographic": false,
+          "orthographic size": 5.0,
+          "m_Depth": 1.0,
+          "m_CullingMask": {
+            "m_Bits": 256
+          },
+          "m_RenderingPath": 3,
+          "m_TargetTexture": {
+            "m_FileID": 2,
+            "m_PathID": 140
+          },
+          "m_TargetDisplay": 0,
+          "m_TargetEye": 3,
+          "m_HDR": false,
+          "m_AllowMSAA": false,
+          "m_AllowDynamicResolution": false,
+          "m_ForceIntoRT": true,
+          "m_OcclusionCulling": true,
+          "m_StereoConvergence": 10.0,
+          "m_StereoSeparation": 0.02199999988079071
+        }
+      },
+      {
+        "type": "MonoBehaviour",
+        "id": 8328,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 1886
+          },
+          "m_Enabled": 0,
+          "m_Script": {
+            "m_FileID": 0,
+            "m_PathID": 0
+          },
+          "m_Name": ""
+        }
+      }
+    ]
+  },
+  {
+    "type": "VideoPlayer",
+    "name": "VideoPlayer",
+    "tree": {
+      "m_GameObject": {
+        "m_FileID": 0,
+        "m_PathID": 1630
+      },
+      "m_Enabled": 1,
+      "m_VideoClip": {
+        "m_FileID": 0,
+        "m_PathID": 0
+      },
+      "m_TargetCameraAlpha": 0.5647059082984924,
+      "m_TargetCamera3DLayout": 0,
+      "m_TargetCamera": {
+        "m_FileID": 0,
+        "m_PathID": 3236
+      },
+      "m_TargetTexture": {
+        "m_FileID": 3,
+        "m_PathID": 54
+      },
+      "m_TimeReference": 0,
+      "m_TargetMaterialRenderer": {
+        "m_FileID": 0,
+        "m_PathID": 0
+      },
+      "m_TargetMaterialProperty": "_MainTex",
+      "m_RenderMode": 2,
+      "m_AspectRatio": 1,
+      "m_DataSource": 0,
+      "m_TimeUpdateMode": 2,
+      "m_PlaybackSpeed": 1.0,
+      "m_AudioOutputMode": 0,
+      "m_TargetAudioSources": [],
+      "m_DirectAudioVolumes": [],
+      "m_Url": "",
+      "m_EnabledAudioTracks": [],
+      "m_DirectAudioMutes": [],
+      "m_ControlledAudioTrackCount": 0,
+      "m_PlayOnAwake": true,
+      "m_SkipOnDrop": true,
+      "m_Looping": true,
+      "m_WaitForFirstFrame": true,
+      "m_FrameReadyEventEnabled": false,
+      "m_VideoShaders": []
+    },
+    "components": [
+      {
+        "type": "Transform",
+        "id": 3004,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 1630
+          },
+          "m_LocalRotation": {
+            "x": -0.0,
+            "y": -0.0,
+            "z": -0.0,
+            "w": 1.0
+          },
+          "m_LocalPosition": {
+            "x": -640.3124389648438,
+            "y": -359.9999694824219,
+            "z": 0.0
+          },
+          "m_LocalScale": {
+            "x": 0.9374999403953552,
+            "y": 0.9374999403953552,
+            "z": 0.9374999403953552
+          },
+          "m_Children": [],
+          "m_Father": {
+            "m_FileID": 0,
+            "m_PathID": 5178
+          }
+        }
+      },
+      {
+        "type": "VideoPlayer",
+        "id": 6044,
+        "tree": {
+          "m_GameObject": {
+            "m_FileID": 0,
+            "m_PathID": 1630
+          },
+          "m_Enabled": 1,
+          "m_VideoClip": {
+            "m_FileID": 0,
+            "m_PathID": 0
+          },
+          "m_TargetCameraAlpha": 0.5647059082984924,
+          "m_TargetCamera3DLayout": 0,
+          "m_TargetCamera": {
+            "m_FileID": 0,
+            "m_PathID": 3236
+          },
+          "m_TargetTexture": {
+            "m_FileID": 3,
+            "m_PathID": 54
+          },
+          "m_TimeReference": 0,
+          "m_TargetMaterialRenderer": {
+            "m_FileID": 0,
+            "m_PathID": 0
+          },
+          "m_TargetMaterialProperty": "_MainTex",
+          "m_RenderMode": 2,
+          "m_AspectRatio": 1,
+          "m_DataSource": 0,
+          "m_TimeUpdateMode": 2,
+          "m_PlaybackSpeed": 1.0,
+          "m_AudioOutputMode": 0,
+          "m_TargetAudioSources": [],
+          "m_DirectAudioVolumes": [],
+          "m_Url": "",
+          "m_EnabledAudioTracks": [],
+          "m_DirectAudioMutes": [],
+          "m_ControlledAudioTrackCount": 0,
+          "m_PlayOnAwake": true,
+          "m_SkipOnDrop": true,
+          "m_Looping": true,
+          "m_WaitForFirstFrame": true,
+          "m_FrameReadyEventEnabled": false,
+          "m_VideoShaders": []
+        }
+      },
+      {
+        "type": "MonoBehaviour",
+        "id": 7996,
+        "tree": {}
+      }
+    ]
+  }
+]

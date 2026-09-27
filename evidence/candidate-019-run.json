@@ -1,0 +1,17 @@
+{
+  "log": "P06Quest-20260926-203905-856.log.txt",
+  "sha256": "a2fe21b8274ae6471fac4d0ed5be16420fecb603d8fbd4722316ec3573fd7a71",
+  "headset_report": "0.1.8 starts, immersive VR works, haptics work great; movement/gestures/gloves and right-eye main-menu flicker require refinement",
+  "water_events": [
+    "[14807.267] P06Quest: WaterSlide entry: player=0x7e85b36800 state=26 trigger=1 speed=0.000 old_speed=0.000 progress=0.00000",
+    "09-26 20:40:07.956  4480  4535 I P06Quest: WaterSlide entry: player=0x7e85b36800 state=26 trigger=1 speed=0.000 old_speed=0.000 progress=0.00000",
+    "[14808.324] P06Quest: WaterSlide entry: player=0x7e85b36800 state=18 trigger=0 speed=35.000 old_speed=23.625 progress=0.24277",
+    "09-26 20:40:09.014  4480  4535 I P06Quest: WaterSlide entry: player=0x7e85b36800 state=18 trigger=0 speed=35.000 old_speed=23.625 progress=0.24277",
+    "[14810.024] P06Quest: WaterSlide entry: player=0x7e85b36800 state=18 trigger=0 speed=35.000 old_speed=22.250 progress=0.65103",
+    "09-26 20:40:10.713  4480  4535 I P06Quest: WaterSlide entry: player=0x7e85b36800 state=18 trigger=0 speed=35.000 old_speed=22.250 progress=0.65103",
+    "[14811.421] P06Quest: WaterSlide exit: next_state=0 speed_before=24.625 speed_after=24.500 progress_before=0.99704 progress_after=1.00047 position=(-120.256,0.711,-138.830)",
+    "09-26 20:40:12.110  4480  4535 I P06Quest: WaterSlide exit: next_state=0 speed_before=24.625 speed_after=24.500 progress_before=0.99704 progress_after=1.00047 position=(-120.256,0.711,-138.830)"
+  ],
+  "gl_errors": 20,
+  "new_candidate_headset_tested": false
+}
