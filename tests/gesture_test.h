@@ -44,14 +44,33 @@ inline void testGestures(){
     // Turning off a gesture or losing focus cancels a held charge; never launches.
     c.ground=true;c.charge=false;for(int i=0;i<40;++i)step();f.head.p[1]-=.4f;for(int i=0;i<15;++i)r=step();assert(r.charge);
     c.charge=true;c.ground=false;f.focused=false;r=step();assert(r.cancel&&!r.release&&!r.charge);
-    f.focused=true;f.head.p[1]=1.6f;step();step();c.charge=false;c.homing=true;c.target=123;c.pointing[0]=true;
-    f.hand[0].p[0]=-.15f;f.hand[0].p[1]=1.45f;f.hand[0].p[2]=f.head.p[2]+.65f;
-    for(int i=0;i<10;++i){r=step();assert(!r.homing);} // Arm extension alone is not an attack.
-    for(int i=0;i<6;++i){f.hand[0].p[2]-=.04f;r=step();if(r.homing)break;}assert(r.homing);
-    r=step();assert(!r.homing); // One pulse and cooldown.
-    c.target=0;for(int i=0;i<60;++i){r=step();assert(!r.homing);} // Never air-dash without native target.
+    f.focused=true;f.head.p[1]=1.6f;step();step();c.charge=false;
     ++f.origin;r=step();assert(r.run==0&&!r.homing&&!r.release);
     r=engine.step(f,c,o,f.time+1);assert(r.run==0&&!r.homing); // Stale tracking rejected.
+    // Both hands independently support outward strokes. Replay at headset rates;
+    // reject inward pull, whole-body translation, head-only motion and pose jumps.
+    for(int hz:{72,90,120})for(int hand=0;hand<2;++hand)for(int scenario=0;scenario<9;++scenario){
+        GestureEngine swing;VROptions opt;opt.gestureHoming=true;
+        GestureContext ctx;ctx.allowed=ctx.homing=true;ctx.player=4;ctx.target=123;
+        if(scenario==4)ctx.target=0;if(scenario==5)ctx.manual=true;if(scenario==6)ctx.homing=false;
+        MotionFrame motion;motion.time=20;motion.focused=motion.head.valid=true;motion.head.p[1]=1.6f;
+        for(int h=0;h<2;++h){motion.hand[h].valid=true;motion.hand[h].p[0]=h?.15f:-.15f;motion.hand[h].p[1]=1.45f;motion.hand[h].p[2]=scenario==1?.7f:.25f;}
+        swing.step(motion,ctx,opt,motion.time);int pulses=0;
+        for(int i=0;i<hz/5;++i){motion.time+=1.0/hz;float d=1.6f/hz;
+            if(scenario==0||scenario>=4)motion.hand[hand].p[2]+=d;
+            if(scenario==1)motion.hand[hand].p[2]-=d;
+            if(scenario==2){motion.head.p[2]+=d;for(auto& h:motion.hand)h.p[2]+=d;}
+            if(scenario==3)motion.head.p[2]-=d;
+            if(scenario==7)motion.hand[hand].valid=i<3;
+            if(scenario==8)motion.hand[hand].p[2]+=1; // Discontinuous tracking.
+            auto result=swing.step(motion,ctx,opt,motion.time);pulses+=result.homing;
+            auto duplicate=swing.step(motion,ctx,opt,motion.time+.0001);assert(!duplicate.homing);
+        }
+        assert(pulses==(scenario==0?1:0));
+        // Pose reacquisition/origin replacement cannot complete an old stroke.
+        ++motion.origin;motion.hand[hand].valid=true;motion.time+=1.0/hz;
+        assert(!swing.step(motion,ctx,opt,motion.time).homing);
+    }
     // An unsupported character must never receive a synthetic spin button.
     GestureEngine noSpin;c={};c.allowed=c.ground=true;c.player=4;c.spinSupported=false;
     f.time=50;f.head.p[1]=1.6f;noSpin.step(f,c,o,f.time);f.time+=.02;noSpin.step(f,c,o,f.time);

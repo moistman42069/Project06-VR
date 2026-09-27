@@ -71,5 +71,25 @@ int main(){
     c.buttons=A;UpdateVRMenu(c,8.3);c.buttons=0;UpdateVRMenu(c,8.4);c.buttons=X;out=UpdateVRMenu(c,8.5);assert(out.blocked&&VRMenuOpen());
     RasterMenu(pixels.data(),1024,1024);file=fopen("out/vr-menu-root.ppm","wb");assert(file);fprintf(file,"P6\n1024 1024\n255\n");
     for(auto px:pixels){unsigned char rgb[]={static_cast<unsigned char>(px),static_cast<unsigned char>(px>>8),static_cast<unsigned char>(px>>16)};fwrite(rgb,1,3,file);}fclose(file);
+    // VR contains all physical controls, including rows below the visible page.
+    double now=9;auto update=[&](){now+=.3;return UpdateVRMenu(c,now);};
+    auto press=[&](uint32_t button){c.buttons=0;update();c.buttons=button;update();c.buttons=0;update();};
+    auto down=[&](int count){c.ly=-1;for(int i=0;i<count;++i)update();c.ly=0;update();};
+    press(A);down(6);press(A);assert(GetOptions().motionRun);
+    down(3);press(A);assert(GetOptions().gestureHoming);
+    down(2);press(A);assert(GetOptions().crouchSpin);
+    down(2);press(A);assert(ConsumeRecenter());
+    RasterMenu(pixels.data(),1024,1024);file=fopen("out/vr-menu-scrolled.ppm","wb");assert(file);fprintf(file,"P6\n1024 1024\n255\n");
+    for(auto px:pixels){unsigned char rgb[]={static_cast<unsigned char>(px),static_cast<unsigned char>(px>>8),static_cast<unsigned char>(px>>16)};fwrite(rgb,1,3,file);}fclose(file);
+    press(X);assert(VRMenuOpen());down(1);press(A); // Graphics remains a separate category.
+    c.lx=-1;update();c.lx=0;update();assert(GetOptions().renderScale<.7f);
+    press(B);assert(!VRMenuOpen());InitOptions("out/menu-test-state");
+    assert(GetOptions().motionRun&&GetOptions().gestureHoming&&GetOptions().crouchSpin);
+    // Upgrade preserves accepted preferences but replaces obsolete pull distance.
+    file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);
+    fprintf(file,"4 0 0.8 1.2 2.5 3 1 2 1 1 0.9 1 1 1 2.3 2.5 0.35 0.4 1 0.6\n");fclose(file);
+    InitOptions("out/menu-test-state");auto migrated=GetOptions();
+    assert(migrated.firstPerson&&migrated.motionRun&&migrated.gestureHoming&&migrated.crouchSpin);
+    assert(migrated.homingTravel==.10f&&migrated.crouchDepth==.4f&&migrated.runSensitivity==2.3f&&migrated.hapticStrength==.6f);
     std::cout<<"PASS: eye handedness/IPD, world scale, rotation-only tracking, stereo/mono screen poses, FOV signs, chord debounce, category navigation, staggered clicks, mode selection, input capture, focus loss, persistence, menu raster\n";
 }

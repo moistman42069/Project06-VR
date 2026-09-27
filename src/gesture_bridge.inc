@@ -1,7 +1,7 @@
 // Included in bridge.cpp's anonymous namespace: Unity access remains main-thread only.
 Controls applyGestures(Controls c){
     if(!managedReady||gettid()!=unityThread)return c;
-    gestureRunPlayer=nullptr;gestureRunAmount=0;
+    gestureRunPlayer=nullptr;gestureRunAmount=0;fpHeadStick=false;
     const auto o=GetOptions();
     MotionFrame f;{std::lock_guard<std::mutex> lock(motionMutex);f=motionFrame;}
     const double now=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -28,11 +28,9 @@ Controls applyGestures(Controls c){
     context.homing=homingSupported&&is("Jump")&&field<bool>(player,"ReleasedKey");
     if(sonic)context.homing=(context.homing&&field<int>(player,"JumpLimit")<1&&!field<bool>(player,"UsingPurpleGem"))||(is("Air")&&field<bool>(player,"CanFallJumpdash"));
     if(homingSupported&&(is("AfterHoming")||is("Spring")||is("WideSpring")||is("Rope")))context.homing=true;
-    // Pre-arm while pointing on the ground; fire only in a native eligible attack state.
+    // Only native eligible attack states with a live target accept outward swings.
     auto target=homingSupported?field<void*>(player,"HomingTarget"):nullptr;
-    static auto goTransform=icall<void*(*)(void*)>("UnityEngine.GameObject::get_transform");
     static auto compTransform=icall<void*(*)(void*)>("UnityEngine.Component::get_transform");
-    static auto getPos=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_position_Injected");
     static auto getRot=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_rotation_Injected");
     static auto setRotation=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_rotation_Injected");
     float camRot[4]{0,0,0,1},baseRot[4]{0,0,0,1},headWorld[4]{0,0,0,1};
@@ -52,20 +50,9 @@ Controls applyGestures(Controls c){
     bool standardMotor=present&&playerClass!=fastClass&&playerClass!=boardClass;
     bool freeMove=standardMotor&&(is("Ground")||is("Brake")||is("Jump")||is("Air")||is("SlowFall")||is("AfterHoming")||is("SpinDash"));
     bool steering=freeMove||(standardMotor&&(is("Fly")||is("Glide")||is("Levitate")||is("Hover")||is("HammerJump")||is("AccelJump")));
-    if(o.firstPerson&&firstPersonWasActive&&context.allowed&&steering&&movementBasis&&f.head.valid)
-        P06RemapStick(c.lx,c.ly,headYaw,nativeYaw);
-    if(context.allowed&&alive(target)&&goTransform&&getPos&&getRot){
-        context.target=reinterpret_cast<uintptr_t>(target);float targetPos[3],camPos[3];getPos(goTransform(target),targetPos);getPos(firstPersonAnchor.cameraTransform,camPos);
-        for(int h=0;h<2;++h)if(f.aim[h].valid){float local[3];for(int j=0;j<3;++j)local[j]=f.aim[h].p[j]/o.worldScale;
-            float posePos[3];
-            // Compose tracking pose into the game camera's coordinate system.
-            if(o.firstPerson){quatRotate(firstPersonAnchor.rotation,local,posePos);for(int j=0;j<3;++j)posePos[j]+=firstPersonAnchor.position[j];}
-            else std::copy(local,local+3,posePos);
-            float worldPos[3],aimRot[4],aimDir[3];quatRotate(camRot,posePos,worldPos);quatMultiply(baseRot,f.aim[h].q,aimRot);quatRotate(aimRot,forward,aimDir);
-            float dot=0,length=0;for(int j=0;j<3;++j){float d=targetPos[j]-(worldPos[j]+camPos[j]);dot+=d*aimDir[j];length+=d*d;}
-            context.pointing[h]=length>.01f&&dot/std::sqrt(length)>.9063078f;
-        }
-    }
+    fpHeadStick=o.firstPerson&&firstPersonWasActive&&context.allowed&&movementBasis&&f.head.valid;fpHeadYaw=headYaw;
+    if(fpHeadStick&&!nativeSteeringInstalled&&steering)P06RemapStick(c.lx,c.ly,headYaw,nativeYaw);
+    if(context.allowed&&alive(target))context.target=reinterpret_cast<uintptr_t>(target);
     auto result=gestures.step(f,context,o,now);
     if(!oldAcceleration)result.run=0;
     if(result.cancel&&alive(gesturePlayer)&&eq(call(object_class(gesturePlayer),"GetState",gesturePlayer,nullptr,0),"SpinDash")&&field<int>(gesturePlayer,"SpinDashState")==0){
@@ -81,9 +68,9 @@ Controls applyGestures(Controls c){
             float turn=std::atan2(flat[0],flat[2])-std::atan2(oldForward[0],oldForward[2]);float yaw[4]={0,std::sin(turn*.5f),0,std::cos(turn*.5f)};quatMultiply(yaw,q,resultQ);setRotation(tr,resultQ);}
         LOG("Gesture spindash released in headset direction");
     }
-    if(result.homing){c.buttons|=A;LOG("Gesture homing pulse: native selected target=%p",target);}
+    if(result.homing){c.buttons|=A;LOG("Outward-swing homing pulse: native selected target=%p",target);}
     if(result.run>0&&!context.manual&&freeMove&&movementBasis&&std::fabs(c.lx)<.1f&&std::fabs(c.ly)<.1f){
-        float yaw=headYaw-nativeYaw;
+        float yaw=fpHeadStick&&nativeSteeringInstalled?0.f:headYaw-nativeYaw;
         c.lx=std::sin(yaw);c.ly=std::cos(yaw);
         if(context.ground){gestureRunPlayer=player;gestureRunAmount=result.run;}
     }

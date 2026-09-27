@@ -1,6 +1,21 @@
 // Menu-only compatibility. Do not alter gameplay cameras, water shaders or post FX.
 void (*oldMenuStart)(void*,const Method*)=nullptr;
 void (*oldBackgroundUpdate)(void*,const Method*)=nullptr;
+void configureTitleCamera(){
+    if(!managedReady||gettid()!=unityThread)return;
+    auto ck=klass("UnityEngine","Camera");
+    static auto find=icall<void*(*)(void*,bool)>("UnityEngine.Object::FindObjectsOfType");
+    static auto name=icall<void*(*)(void*)>("UnityEngine.Object::GetName");
+    static auto path=icall<void(*)(void*,int)>("UnityEngine.Camera::set_renderingPath");
+    static auto hdr=icall<void(*)(void*,bool)>("UnityEngine.Camera::set_allowHDR");
+    static auto force=icall<void(*)(void*,bool)>("UnityEngine.Camera::set_forceIntoRenderTexture");
+    static auto eye=icall<void(*)(void*,int)>("UnityEngine.Camera::set_stereoTargetEye");
+    if(!ck||!find||!name||!path||!hdr||!force||!eye)return;
+    auto cameras=find(type_object(class_type(ck)),false);if(!cameras||array_length(cameras)>64)return;
+    for(uintptr_t i=0;i<array_length(cameras);++i){auto camera=*reinterpret_cast<void**>(array_address(cameras,sizeof(void*),i));
+        if(alive(camera)&&eq(name(camera),"Camera")){path(camera,1);hdr(camera,false);force(camera,false);eye(camera,3);
+            LOG("Title screen camera: forward LDR stereo, no forced intermediate; applied on each title entry");}}
+}
 void configureMenuCameras(){
     static auto find=icall<void*(*)(void*,bool)>("UnityEngine.Object::FindObjectsOfType");
     static auto name=icall<void*(*)(void*)>("UnityEngine.Object::GetName");

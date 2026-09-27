@@ -9,7 +9,7 @@ struct MotionFrame { MotionPose head,hand[2],aim[2];double time=0;uint64_t origi
 struct GestureContext {
     bool allowed=false,ground=false,charge=false,homing=false,manual=false;
     bool spinSupported=true;
-    uintptr_t player=0,target=0;bool pointing[2]{};
+    uintptr_t player=0,target=0;
 };
 struct GestureOutput { float run=0;bool homing=false,charge=false,release=false,cancel=false; };
 // All distances are tracking metres and all derivatives use monotonic seconds.
@@ -17,8 +17,7 @@ struct GestureOutput { float run=0;bool homing=false,charge=false,release=false,
 class GestureEngine {
     MotionFrame last{};bool have=false,owned=false,armedStanding=false;
     float standing=0,height=0,run=0;double crouchedAt=0,cooldown=0,chargeAt=0;
-    int pointed=-1;uintptr_t target=0,player=0;float extension=0;
-    double pointAt=0;bool pointArmed=false;
+    uintptr_t player=0;float outward[2]{};double outwardAt[2]{};
     int swingSign[2]{};double lastSwing[2]{};
     float swingEnvelope[2]{};double lastMotion=0;
     static float distance(const MotionPose& a,const MotionPose& b){float v=0;for(int i=0;i<3;++i)v+=(a.p[i]-b.p[i])*(a.p[i]-b.p[i]);return std::sqrt(v);}
@@ -33,7 +32,7 @@ public:
             out.run=o.motionRun?run:0;out.charge=owned;return out;
         }
         if(!valid||changed||dt<=0||dt>.1){
-            out.cancel=owned;owned=false;run=0;crouchedAt=0;pointed=-1;pointArmed=false;
+            out.cancel=owned;owned=false;run=0;crouchedAt=0;outward[0]=outward[1]=0;outwardAt[0]=outwardAt[1]=0;
             swingSign[0]=swingSign[1]=0;lastSwing[0]=lastSwing[1]=0;
             swingEnvelope[0]=swingEnvelope[1]=0;lastMotion=0;
             last=f;have=valid;player=c.player;return out;
@@ -62,15 +61,18 @@ public:
             float rate=wanted>run?o.runAcceleration:2.5f;
             run+=std::clamp(wanted-run,-rate*float(dt),rate*float(dt));out.run=run;
         }else run=0;
-        if(o.gestureHoming&&c.target&&now>=cooldown){
-            if(pointed<0||target!=c.target){pointed=-1;pointArmed=false;for(int h=0;h<2;++h)if(f.hand[h].valid&&f.aim[h].valid&&c.pointing[h]&&distance(f.hand[h],f.head)>.35f){pointed=h;target=c.target;pointAt=now;extension=distance(f.hand[h],f.head);break;}}
-            if(pointed>=0){int h=pointed;float reach=distance(f.hand[h],f.head);
-                if(!f.hand[h].valid||!f.aim[h].valid||now-pointAt>1.5){pointed=-1;pointArmed=false;}
-                else {if(c.pointing[h]&&now-pointAt>=.12){pointArmed=true;extension=std::max(extension,reach);}
-                    float inward=float((distance(last.hand[h],last.head)-reach)/dt);
-                    if(!c.manual&&c.homing&&pointArmed&&extension-reach>=o.homingPull&&inward>.2f&&inward<4.f){out.homing=true;cooldown=now+.6;pointed=-1;pointArmed=false;}}
+        if(o.gestureHoming&&c.homing&&c.target&&!c.manual&&!owned&&now>=cooldown){
+            for(int h=0;h<2;++h){
+                if(!f.hand[h].valid||!last.hand[h].valid){outward[h]=0;outwardAt[h]=0;continue;}
+                float growth=distance(f.hand[h],f.head)-distance(last.hand[h],last.head);
+                float speed=growth/float(dt);
+                float handSpeed=distance(f.hand[h],last.hand[h])/float(dt);
+                if(!std::isfinite(speed)||!std::isfinite(handSpeed)||speed<.25f||speed>6.f||handSpeed<.35f||handSpeed>8.f){outward[h]=0;outwardAt[h]=0;continue;}
+                if(!outwardAt[h]||now-outwardAt[h]>.4){outwardAt[h]=now;outward[h]=0;}
+                outward[h]+=growth;
+                if(outward[h]>=o.homingTravel&&speed>.5f){out.homing=true;cooldown=now+.4;outward[0]=outward[1]=0;outwardAt[0]=outwardAt[1]=0;break;}
             }
-        }else{pointed=-1;pointArmed=false;}
+        }else{outward[0]=outward[1]=0;outwardAt[0]=outwardAt[1]=0;}
         if(owned){
             if(!o.crouchSpin||c.manual||(!c.charge&&now-chargeAt>.3)){out.cancel=true;owned=false;}
             else if(drop<o.crouchDepth*.45f&&c.charge&&now-chargeAt>.2){out.release=true;owned=false;armedStanding=false;cooldown=now+.5;}

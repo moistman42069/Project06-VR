@@ -1,0 +1,26 @@
+{
+  "log": "P06Quest-20260926-211947-444.log.txt",
+  "sha256": "9691416ad9321ed3c4073278d1d64fff1af7677b1f58e56a9b6cc3df940680ba",
+  "tested_candidate": "0.1.9",
+  "headset_report": "Crouch spindash perfect, glove orientation good, first person head-follow view great, blue menu great; TitleScreen pink, airborne steering and world visibility need refinement; water fall persists.",
+  "null_reference_exception_lines": 591,
+  "gl_invalid_operation_lines": 190,
+  "water_events": [
+    "[16659.506] P06Quest: WaterSlide entry: player=0x7c60cfd800 state=26 trigger=1 speed=0.000 old_speed=0.000 progress=0.00000",
+    "[16660.557] P06Quest: WaterSlide entry: player=0x7c60cfd800 state=18 trigger=0 speed=35.000 old_speed=23.625 progress=0.24277",
+    "[16662.269] P06Quest: WaterSlide entry: player=0x7c60cfd800 state=18 trigger=0 speed=35.000 old_speed=22.250 progress=0.65103",
+    "[16663.661] P06Quest: WaterSlide exit: next_state=0 speed_before=24.625 speed_after=24.500 progress_before=0.99704 progress_after=1.00047 position=(-120.088,0.711,-138.963)",
+    "[16688.648] P06Quest: WaterSlide entry: player=0x7c60cfd800 state=26 trigger=1 speed=0.000 old_speed=24.500 progress=1.00047",
+    "[16690.816] P06Quest: WaterSlide entry: player=0x7c60cfd800 state=18 trigger=0 speed=40.000 old_speed=21.250 progress=0.46268",
+    "[16692.185] P06Quest: WaterSlide entry: player=0x7c60cfd800 state=18 trigger=0 speed=35.000 old_speed=29.625 progress=0.81288",
+    "[16693.006] P06Quest: WaterSlide exit: next_state=0 speed_before=29.000 speed_after=28.875 progress_before=0.99902 progress_after=1.00252 position=(-220.121,0.850,-448.962)",
+    "[16750.239] P06Quest: WaterSlide entry: player=0x7c60cfd800 state=26 trigger=1 speed=0.000 old_speed=28.875 progress=1.00252",
+    "[16935.011] P06Quest: WaterSlide entry: player=0x7c6042e000 state=26 trigger=1 speed=0.000 old_speed=0.000 progress=0.00000",
+    "[16935.787] P06Quest: WaterSlide entry: player=0x7c6042e000 state=18 trigger=0 speed=35.000 old_speed=25.625 progress=0.13280",
+    "[16937.669] P06Quest: WaterSlide entry: player=0x7c6042e000 state=18 trigger=0 speed=32.500 old_speed=20.875 progress=0.44509",
+    "[16939.979] P06Quest: WaterSlide entry: player=0x7c6042e000 state=18 trigger=0 speed=35.000 old_speed=15.250 progress=0.77089",
+    "[16941.254] P06Quest: WaterSlide exit: next_state=0 speed_before=25.500 speed_after=25.375 progress_before=0.99835 progress_after=1.00087 position=(419.240,0.754,-865.316)"
+  ],
+  "new_candidate_headset_tested": false,
+  "water_conclusion": "No concrete cause for the reported fall established. Preserve previous water hooks and stock physics."
+}

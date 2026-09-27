@@ -9,7 +9,12 @@ spec += [('AnimatedUV','AnimatedUV','private void Update()'),('SonicFixed','Soni
  ('WaterEnter','SonicNew','public override void OnWaterSlideEnter(string Spline = "", bool TriggerState = True, float Speed = 0)'),
  ('AddRing','PlayerBase','public void AddRing(int Amount = 1, AudioSource ThisRingSource)'),
  ('Acceleration','PlayerBase','internal void AccelerationSystem(float AccFloat)'),
+ ('RotatePlayer','PlayerBase','internal void RotatePlayer(float AirRotSpeed, bool Override = False, bool DontLockOnAir = False, float OverrideValue = 0)'),
+ ('SlopePhysics','PlayerBase','internal void SlopePhysics(bool Use = False)'),
  ('MenuStart','MainMenu','private void Start()'),
+ ('GaugeStart','GaugeController','private void Start()'),
+ ('GaugeUpdate','GaugeController','private void Update()'),
+ ('SkyboxStart','SkyboxModel','private void Start()'),
  ('BackgroundUpdate','BackgroundVideo','public void UpdateVideo()')]
 
 f=open('original/libil2cpp.so','rb');e=ELFFile(f);out=['#pragma once','#include <cstdint>','struct Binding { uintptr_t rva; unsigned char bytes[16]; };'];record=[]

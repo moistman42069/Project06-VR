@@ -1,0 +1,66 @@
+GaugeController.private void Start()
+11b6cf0: stp x30, x19, [sp, #-0x10]!
+11b6cf4: mov x19, x0
+11b6cf8: mov x0, xzr
+11b6cfc: bl #0x24c4bc4 public static Camera get_main() { }
+11b6d00: cbz x0, #0x11b6d18
+11b6d04: mov x1, xzr
+11b6d08: bl #0x24ea7ec public Transform get_transform() { }
+11b6d0c: str x0, [x19, #0x30]
+11b6d10: ldp x30, x19, [sp], #0x10
+11b6d14: ret
+11b6d18: bl #0x10bda40
+GaugeController.private void Update()
+11b6d1c: str x30, [sp, #-0x20]!
+11b6d20: stp x20, x19, [sp, #0x10]
+11b6d24: adrp x20, #0x2a07000
+11b6d28: ldrb w8, [x20, #0x98a]
+11b6d2c: mov x19, x0
+11b6d30: tbnz w8, #0, #0x11b6d48
+11b6d34: adrp x0, #0x283e000
+11b6d38: ldr x0, [x0, #0x8e8]
+11b6d3c: bl #0x10bd824
+11b6d40: mov w8, #1
+11b6d44: strb w8, [x20, #0x98a]
+11b6d48: mov x0, x19
+11b6d4c: mov x1, xzr
+11b6d50: bl #0x24ea7ec public Transform get_transform() { }
+11b6d54: ldr x8, [x19, #0x30]
+11b6d58: cbz x8, #0x11b6dbc
+11b6d5c: mov x20, x0
+11b6d60: mov x0, x8
+11b6d64: mov x1, xzr
+11b6d68: bl #0x24f710c public Vector3 get_forward() { }
+11b6d6c: cbz x20, #0x11b6dbc
+11b6d70: fneg s2, s2
+11b6d74: fneg s1, s1
+11b6d78: fneg s0, s0
+11b6d7c: mov x0, x20
+11b6d80: mov x1, xzr
+11b6d84: bl #0x24f7188 public void set_forward(Vector3 value) { }
+11b6d88: ldr x0, [x19, #0x28]
+11b6d8c: cbz x0, #0x11b6dbc
+11b6d90: mov x1, xzr
+11b6d94: bl #0x24d13b4 public Material get_material() { }
+11b6d98: cbz x0, #0x11b6dbc
+11b6d9c: adrp x8, #0x283e000
+11b6da0: ldr x8, [x8, #0x8e8]
+11b6da4: ldr s0, [x19, #0x20]
+11b6da8: ldp x20, x19, [sp, #0x10]
+11b6dac: mov x2, xzr
+11b6db0: ldr x1, [x8]
+11b6db4: ldr x30, [sp], #0x20
+11b6db8: b #0x24d2db8 public void SetFloat(string name, float value) { }
+11b6dbc: bl #0x10bda40
+SkyboxModel.private void Start()
+12aba00: stp x30, x19, [sp, #-0x10]!
+12aba04: mov x19, x0
+12aba08: mov x0, xzr
+12aba0c: bl #0x24c4bc4 public static Camera get_main() { }
+12aba10: cbz x0, #0x12aba28
+12aba14: mov x1, xzr
+12aba18: bl #0x24ea7ec public Transform get_transform() { }
+12aba1c: str x0, [x19, #0x20]
+12aba20: ldp x30, x19, [sp], #0x10
+12aba24: ret
+12aba28: bl #0x10bda40

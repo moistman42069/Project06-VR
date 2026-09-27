@@ -3,12 +3,13 @@ import hashlib,io,json,pathlib,sys,zipfile
 root=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(root/'vendor/python'))
 from elftools.elf.elffile import ELFFile
-receipt=json.loads((root/'out/p06-quest-0.1.9-receipt.json').read_text())
+receipt=json.loads((root/'out/p06-quest-0.1.10-receipt.json').read_text())
 apk=root/'out'/receipt['apk'];original=pathlib.Path(r'C:\Users\Shadow\Downloads\p-06RELEASE64.apk')
 def sha_file(path):
     with path.open('rb') as f:return hashlib.file_digest(f,'sha256').hexdigest()
 assert sha_file(apk)==receipt['apk_sha256']
 assert sha_file(original)==receipt['base_apk_sha256']
+assert sha_file(root/'out/generated/sonic_gloves.inc')==receipt['generated_gloves_sha256']
 report={'apk_sha256':receipt['apk_sha256'],'headset_tested':False,'preserved_game_entries_sha256_match':True,'preserved_game_entry_count':len(receipt['preserved_entries']),'native_libraries':[]}
 with zipfile.ZipFile(apk) as final,zipfile.ZipFile(original) as base:
     for entry in receipt['preserved_entries']:

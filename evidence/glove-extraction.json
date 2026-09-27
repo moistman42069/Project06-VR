@@ -1,0 +1,17 @@
+{
+  "asset_sha256": "1eafa099d184161d8e750f89862023f79721faecd7b039b129383c4ea4d47640",
+  "mesh_path_id": 3590,
+  "submesh": 9,
+  "material": "ch_sonic_cloth",
+  "generated_sha256": "affbbb6019c005746bb73e45908bc529266ef5a0de284a60e5a7368704582b2f",
+  "hands": [
+    {
+      "vertices": 1909,
+      "triangles": 3792
+    },
+    {
+      "vertices": 1909,
+      "triangles": 3792
+    }
+  ]
+}

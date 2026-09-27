@@ -1,8 +1,9 @@
 # Project 06 VR project plan
 
-Status: 0.1.8 startup, immersive VR and haptics were headset-confirmed.
-0.1.9 refines movement, gestures, first-person visuals and menus; awaiting Quest
-verification, with no public release. See CANDIDATE-019.md.
+Status: 0.1.9 first-person head-follow, hand orientation, crouch spindash and blue
+menu were headset-confirmed, alongside earlier startup/VR/haptics. 0.1.10 refines
+title rendering, air steering, outward homing, gloves and visibility; awaiting
+Quest verification, no public release. See CANDIDATE-0110.md.
 
 ## Current foundation
 
@@ -11,12 +12,12 @@ verification, with no public release. See CANDIDATE-019.md.
 - Quest Touch mapping for sticks, buttons, triggers, grips and stick clicks.
 - Both-stick-click VR menu with immersive, 3D screen and 2D theatre modes.
 - Separate HUD camera path, active `OutlineCamera` fallback, system recenter reserved.
-- Categorized VR menu (UI, VR, Graphics, Running, Homing, Spindash, Haptics, System); immediate screen-overlay redirect.
+- Categorized VR menu (UI, VR, Graphics, Haptics, System; physical controls inside VR); immediate screen-overlay redirect.
 - Experimental first person: player-relative adjustable eye anchor, Sonic renderer hide, and
   render-only glove meshes following Touch grip positions and aim rotations. Disabled by default; the
   user must verify camera alignment, model proportions and visibility in headset.
 - Guarded water-entry/booster trigger sweeps and WaterSlide exit telemetry. The SonicFast ground-grace experiment is disabled.
-- Opt-in arm-swing running, native-target pull homing, crouch spindash and configurable game-action haptics in candidate 0.1.8.
+- Opt-in arm-swing running, native-target outward-swing homing, crouch spindash and configurable game-action haptics.
 - Per-run logs in `Downloads/P06Quest`, with app-private fallback.
 - Static build, package, archive and menu/view-math checks passing.
 

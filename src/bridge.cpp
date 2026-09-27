@@ -6,6 +6,7 @@
 #include "trigger_sweep.h"
 #include "hand_model.h"
 #include "locomotion_math.h"
+#include "sonic_gloves.inc"
 #include "dobby.h"
 #include <android/dlext.h>
 #include <dlfcn.h>
@@ -75,10 +76,9 @@ uint32_t gesturePlayerRoot=0;
 struct HiddenRenderer { void* renderer=nullptr;bool wasEnabled=true;uint32_t root=0; };
 std::vector<HiddenRenderer> hiddenRenderers;
 struct GlovePiece { void* gameObject=nullptr;void* transform=nullptr;float offset[3]{},scale[3]{},rotation[4]{0,0,0,1};bool active=false;uint32_t root=0,transformRoot=0; };
-struct Glove { std::array<GlovePiece,7> pieces; };
+struct Glove { std::array<GlovePiece,1> pieces; };
 Glove gloves[2];
 bool glovesCreated=false,gloveBuildFailed=false,firstPersonWasActive=false;
-void* gloveParentTransform=nullptr;
 void* rootedPlayerBase=nullptr;
 uint32_t hudLayerMask=1u<<5;
 std::atomic<bool> installed{false};
@@ -86,6 +86,8 @@ std::atomic<uint64_t> axisQueries{0},buttonQueries{0};
 std::atomic<bool> gameHapticsAllowed{false};
 std::mutex inputMutex;
 Controls controls;
+bool nativeSteeringInstalled=false,fpHeadStick=false,steeringScope=false;
+float fpHeadYaw=0,steeringX=0,steeringY=0;
 uint32_t previous=0;
 bool haveXR=false,tryingXR=false,xrStartAttempted=false;
 void* xrStartedSubsystem=nullptr;
@@ -225,45 +227,55 @@ bool hideSonic(bool hide){
     for(auto& saved:hiddenRenderers)setRendererEnabled(saved.renderer,false);
     return !hiddenRenderers.empty();
 }
+bool invokeChecked(void* k,const char* name,void* self,void** args,int count){
+    if(!k)return false;auto method=class_method(k,name,count);if(!method){LOG("Missing managed glove method: %s",name);return false;}
+    void* exception=nullptr;invoke(method,self,args,&exception);if(exception){LOG("Glove method failed: %s",name);return false;}return true;
+}
 bool buildGloves(){
-    auto gameObjectClass=klass("UnityEngine","GameObject"),transformClass=klass("UnityEngine","Transform"),materialClass=klass("UnityEngine","Material");
-    auto colliderType=klass("UnityEngine","Collider"),rendererType=klass("UnityEngine","Renderer");
-    if(!gameObjectClass||!transformClass||!materialClass||!colliderType||!rendererType)return false;
+    auto gameObjectClass=klass("UnityEngine","GameObject"),meshClass=klass("UnityEngine","Mesh"),materialClass=klass("UnityEngine","Material");
+    auto colliderType=klass("UnityEngine","Collider"),rendererType=klass("UnityEngine","Renderer"),filterType=klass("UnityEngine","MeshFilter");
+    auto vectorClass=klass("UnityEngine","Vector3"),intClass=klass("System","Int32"),shaderClass=klass("UnityEngine","Shader");
+    if(!gameObjectClass||!meshClass||!materialClass||!colliderType||!rendererType||!filterType||!vectorClass||!intClass||!shaderClass)return false;
     static auto getTransform=icall<void*(*)(void*)>("UnityEngine.GameObject::get_transform");
-    static auto setScale=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localScale_Injected");
-    static auto setPosition=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localPosition_Injected");
-    static auto setRotation=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localRotation_Injected");
     static auto setCollider=icall<void(*)(void*,bool)>("UnityEngine.Collider::set_enabled");
     static auto material=icall<void*(*)(void*)>("UnityEngine.Renderer::GetMaterial");
-    if(!getTransform||!setScale||!setPosition||!setRotation||!setCollider||!material)return false;
     static auto persist=icall<void(*)(void*)>("UnityEngine.Object::DontDestroyOnLoad");
     static auto propertyId=icall<int(*)(void*)>("UnityEngine.Shader::PropertyToID");
-    if(!persist||!propertyId)return false;
-    int colorId=propertyId(string_new("_Color"));
     static auto setShader=icall<void(*)(void*,void*)>("UnityEngine.Material::set_shader");
-    static auto getShader=icall<void*(*)(void*)>("UnityEngine.Material::get_shader");
     static auto supported=icall<bool(*)(void*)>("UnityEngine.Shader::get_isSupported");
-    auto shaderClass=klass("UnityEngine","Shader");void* gloveShader=nullptr;
-    if(!setShader||!getShader||!supported||!shaderClass)return false;
-    for(const char* name:{"Unlit/Color","Legacy Shaders/Diffuse","Standard"}){void* args[]={string_new(name)};auto candidate=call(shaderClass,"Find",nullptr,args,1);if(alive(candidate)&&supported(candidate)){gloveShader=candidate;break;}}
-    const int primitiveTypes[7]={0,1,1,1,1,1,2};
-    for(int hand=0;hand<2;++hand)for(int i=0;i<7;++i){auto& piece=gloves[hand].pieces[i];int primitive=primitiveTypes[i];void* args[]={&primitive};piece.gameObject=call(gameObjectClass,"CreatePrimitive",nullptr,args,1);if(!piece.gameObject)return false;
+    if(!getTransform||!setCollider||!material||!persist||!propertyId||!setShader||!supported)return false;
+    void* gloveShader=nullptr;
+    for(const char* name:{"Legacy Shaders/Diffuse","Standard","Unlit/Color"}){void* args[]={string_new(name)};auto candidate=call(shaderClass,"Find",nullptr,args,1);if(alive(candidate)&&supported(candidate)){gloveShader=candidate;LOG("Authored glove shader: %s",name);break;}}
+    if(!gloveShader)return false;
+    for(int hand=0;hand<2;++hand){auto& piece=gloves[hand].pieces[0];int primitive=3;void* args[]={&primitive};
+        piece.gameObject=call(gameObjectClass,"CreatePrimitive",nullptr,args,1);if(!alive(piece.gameObject))return false;
         piece.root=gc_root(piece.gameObject,false);setGameObjectActive(piece.gameObject,false);persist(piece.gameObject);
-        piece.transform=getTransform(piece.gameObject);void* colliderArgs[]={type_object(class_type(colliderType))};auto collider=call(gameObjectClass,"GetComponent",piece.gameObject,colliderArgs,1);void* rendererArgs[]={type_object(class_type(rendererType))};auto renderer=call(gameObjectClass,"GetComponent",piece.gameObject,rendererArgs,1);
-        if(!piece.transform||!renderer)return false;piece.transformRoot=gc_root(piece.transform,false);if(collider)setCollider(collider,false);
-        auto* scale=piece.scale;auto* offset=piece.offset;piece.rotation[3]=1.f;
-        if(i==0){scale[0]=.095f;scale[1]=.075f;scale[2]=.065f;}
-        else if(i>=1&&i<=4){scale[0]=.023f;scale[1]=.038f;scale[2]=.023f;offset[0]=(float(i)-2.5f)*.024f;offset[1]=.005f;offset[2]=.050f;piece.rotation[0]=.70710678f;piece.rotation[3]=.70710678f;}
-        else if(i==5){scale[0]=.047f;scale[1]=.05f;scale[2]=.04f;offset[0]=(hand==0?.05f:-.05f);offset[1]=-.018f;offset[2]=.005f;}
-        else{scale[0]=.105f;scale[1]=.035f;scale[2]=.08f;offset[2]=-.04f;piece.rotation[0]=.70710678f;piece.rotation[3]=.70710678f;}
-        auto mat=material(renderer);if(!alive(mat))return false;if(gloveShader)setShader(mat,gloveShader);
-        if(!alive(getShader(mat))||!supported(getShader(mat)))return false;
-        // Slight tonal separation keeps the unlit fallback's cuff and fingers legible.
-        float shade=i==6?.70f:(i==0?.9f:1.f);float white[4]={shade,shade,shade,1.f};
-        void* colorArgs[]={&colorId,white};call(materialClass,"SetColorImpl",mat,colorArgs,2);
-        setScale(piece.transform,scale);setPosition(piece.transform,offset);setRotation(piece.transform,piece.rotation);setGameObjectActive(piece.gameObject,false);
+        piece.transform=getTransform(piece.gameObject);if(!alive(piece.transform))return false;piece.transformRoot=gc_root(piece.transform,false);
+        void* colliderArgs[]={type_object(class_type(colliderType))};auto collider=call(gameObjectClass,"GetComponent",piece.gameObject,colliderArgs,1);
+        if(!alive(collider))return false;setCollider(collider,false);
+        void* rendererArgs[]={type_object(class_type(rendererType))};auto renderer=call(gameObjectClass,"GetComponent",piece.gameObject,rendererArgs,1);
+        void* filterArgs[]={type_object(class_type(filterType))};auto filter=call(gameObjectClass,"GetComponent",piece.gameObject,filterArgs,1);
+        if(!alive(renderer)||!alive(filter))return false;
+        const auto* vertices=hand?kGlove1Vertices:kGlove0Vertices;const auto* normals=hand?kGlove1Normals:kGlove0Normals;
+        const auto* triangles=hand?kGlove1Triangles:kGlove0Triangles;
+        size_t count=hand?std::size(kGlove1Vertices):std::size(kGlove0Vertices),indexCount=hand?std::size(kGlove1Triangles):std::size(kGlove0Triangles);
+        auto mesh=object_new(meshClass);if(!mesh)return false;auto meshRoot=gc_root(mesh,false);
+        bool ok=invokeChecked(meshClass,".ctor",mesh,nullptr,0);
+        auto v=array_new(vectorClass,count);auto vr=v?gc_root(v,false):0;
+        auto n=array_new(vectorClass,count);auto nr=n?gc_root(n,false):0;
+        auto t=array_new(intClass,indexCount);auto tr=t?gc_root(t,false):0;
+        if(!v||!n||!t){if(vr)gc_free(vr);if(nr)gc_free(nr);if(tr)gc_free(tr);gc_free(meshRoot);return false;}
+        memcpy(array_address(v,12,0),vertices,count*12);memcpy(array_address(n,12,0),normals,count*12);memcpy(array_address(t,4,0),triangles,indexCount*4);
+        void* va[]={v};void* na[]={n};void* ta[]={t};void* ma[]={mesh};
+        ok=ok&&invokeChecked(meshClass,"set_vertices",mesh,va,1)&&invokeChecked(meshClass,"set_normals",mesh,na,1)&&invokeChecked(meshClass,"set_triangles",mesh,ta,1)&&invokeChecked(meshClass,"RecalculateBounds",mesh,nullptr,0)&&invokeChecked(filterType,"set_sharedMesh",filter,ma,1);
+        gc_free(vr);gc_free(nr);gc_free(tr);gc_free(meshRoot);if(!ok)return false;
+        auto mat=material(renderer);if(!alive(mat))return false;setShader(mat,gloveShader);
+        int color=propertyId(string_new("_Color"));float white[4]={.96f,.97f,1.f,1.f};void* colors[]={&color,white};
+        if(!invokeChecked(materialClass,"SetColorImpl",mat,colors,2))return false;
+        piece.scale[0]=piece.scale[1]=piece.scale[2]=1;piece.rotation[3]=1;
+        LOG("Authored Sonic glove %d ready: %zu vertices, %zu triangles, smooth normals, collider disabled",hand,count,indexCount/3);
     }
-    gloveParentTransform=firstPersonAnchor.cameraTransform;LOG("Experimental first-person glove meshes created (render-only; controller-pose driven)");return true;
+    return true;
 }
 bool updateGloves(bool active){
     if(!glovesCreated){if(!active)return true;if(gloveBuildFailed)return false;glovesCreated=buildGloves();if(!glovesCreated){gloveBuildFailed=true;
@@ -394,6 +406,7 @@ float axis(void* name,const Method* m,AxisFn original){
     if(!haveXR)startXR();
     Controls c;{std::lock_guard<std::mutex> lock(inputMutex);c=controls;}
     if(!c.focused)return original(name,m);
+    if(steeringScope){c.lx=steeringX;c.ly=steeringY;}
     // Hold right stick click for D-pad, suppressing camera input while selecting.
     bool dpad=(c.buttons&RClick)!=0;
     if(eq(name,"Left Stick X"))return c.lx;if(eq(name,"Left Stick Y"))return c.ly;
@@ -416,8 +429,10 @@ bool button(void* n,const Method* m,ButtonFn original,int mode){
 bool heldHook(void* n,const Method* m){return button(n,m,oldHeld,0);}
 bool downHook(void* n,const Method* m){return button(n,m,oldDown,1);}
 bool upHook(void* n,const Method* m){return button(n,m,oldUp,2);}
+void configureTitleCamera();
 void titleStartHook(void* self,const Method* m){
     installCrashRecorder();oldTitleStart(self,m);LOG("TitleScreen.Start completed; starting XR");startXR();
+    configureTitleCamera();
 }
 bool hook(uintptr_t base,const Binding& b,void* fn,void** orig,const char* name){
     void* p=reinterpret_cast<void*>(base+b.rva);
@@ -445,6 +460,7 @@ void* selectGameCamera(){
 #include "animated_uv.inc"
 #include "gesture_bridge.inc"
 #include "menu_rendering.inc"
+#include "visibility.inc"
 void* (*oldDlopen)(const char*,int)=nullptr;
 void* (*oldExt)(const char*,int,const android_dlextinfo*)=nullptr;
 void loaded(const char* name,void* h){if(h&&name&&strstr(name,"libil2cpp.so"))InstallGameHooks(h);}
@@ -466,6 +482,7 @@ void SyncFirstPersonVisuals(){if(resolve&&gettid()==unityThread){syncFirstPerson
 void LogBridgeStats(){LOG("Game input queries: axes=%llu buttons=%llu",(unsigned long long)axisQueries.load(),(unsigned long long)buttonQueries.load());}
 void SyncHudCamera(){
     if(!resolve||!hudCamera||gettid()!=unityThread)return;
+    syncWorldVisibility();
     static auto copy=icall<void(*)(void*,void*)>("UnityEngine.Camera::CopyFrom");
     static auto transform=icall<void*(*)(void*)>("UnityEngine.Component::get_transform");
     static auto getPos=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_position_Injected");
@@ -566,8 +583,15 @@ void InstallGameHooks(void* lib){
     hook(base,kWaterEnter,(void*)waterEnterHook,(void**)&oldWaterEnter,"SonicNew.OnWaterSlideEnter");
     hook(base,kAddRing,(void*)addRingHook,(void**)&oldAddRing,"PlayerBase.AddRing");
     hook(base,kAcceleration,(void*)accelerationHook,(void**)&oldAcceleration,"PlayerBase.AccelerationSystem");
+    bool rotateReady=hook(base,kRotatePlayer,(void*)rotatePlayerHook,(void**)&oldRotatePlayer,"PlayerBase.RotatePlayer");
+    bool slopeReady=hook(base,kSlopePhysics,(void*)slopePhysicsHook,(void**)&oldSlopePhysics,"PlayerBase.SlopePhysics");
+    nativeSteeringInstalled=rotateReady&&slopeReady;
+    LOG("Native-consumer head steering: %s",nativeSteeringInstalled?"installed":"previous state-gated steering retained");
     hook(base,kMenuStart,(void*)menuStartHook,(void**)&oldMenuStart,"MainMenu.Start");
     hook(base,kBackgroundUpdate,(void*)backgroundUpdateHook,(void**)&oldBackgroundUpdate,"BackgroundVideo.UpdateVideo");
+    hook(base,kGaugeStart,(void*)gaugeStartHook,(void**)&oldGaugeStart,"GaugeController.Start");
+    hook(base,kGaugeUpdate,(void*)gaugeUpdateHook,(void**)&oldGaugeUpdate,"GaugeController.Update");
+    hook(base,kSkyboxStart,(void*)skyboxStartHook,(void**)&oldSkyboxStart,"SkyboxModel.Start");
     hook(base,kAnimatedUV,(void*)animatedUVHook,(void**)&oldAnimatedUV,"AnimatedUV.Update");
     LOG("Pinned APK hooks installed: %s",ok?"all":"INCOMPLETE");
 }
@@ -581,7 +605,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm,void*){g_vm=vm;return JNI_VERSIO
 extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativePrepare(JNIEnv* env,jclass,jobject activity,jstring directory,jint fd){
     if(fd>=0)logFd=dup(fd);
     g_activity=env->NewGlobalRef(activity);const char* dir=env->GetStringUTFChars(directory,nullptr);InitOptions(dir);env->ReleaseStringUTFChars(directory,dir);
-    LOG("P06 Quest candidate 0.1.9 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
+    LOG("P06 Quest candidate 0.1.10 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
     LOG("System library loading is untouched; waiting for Unity activity creation");
 }
 

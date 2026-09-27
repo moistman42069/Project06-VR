@@ -78,10 +78,40 @@
     "prologue": "eb2bbc6de923016dfe5702a9f44f03a9"
   },
   {
+    "name": "RotatePlayer",
+    "method": "PlayerBase.internal void RotatePlayer(float AirRotSpeed, bool Override = False, bool DontLockOnAir = False, float OverrideValue = 0)",
+    "rva": "0x1222124",
+    "prologue": "ff8304d1ef3b086ded33096deb2b0a6d"
+  },
+  {
+    "name": "SlopePhysics",
+    "method": "PlayerBase.internal void SlopePhysics(bool Use = False)",
+    "rva": "0x1221700",
+    "prologue": "ffc302d1ef3b036ded33046deb2b056d"
+  },
+  {
     "name": "MenuStart",
     "method": "MainMenu.private void Start()",
     "rva": "0x11db814",
     "prologue": "fe0f1cf8f85f01a9f65702a9f44f03a9"
+  },
+  {
+    "name": "GaugeStart",
+    "method": "GaugeController.private void Start()",
+    "rva": "0x11b6cf0",
+    "prologue": "fe4fbfa9f30300aae0031faab2374c94"
+  },
+  {
+    "name": "GaugeUpdate",
+    "method": "GaugeController.private void Update()",
+    "rva": "0x11b6d1c",
+    "prologue": "fe0f1ef8f44f01a994c200b0882a6639"
+  },
+  {
+    "name": "SkyboxStart",
+    "method": "SkyboxModel.private void Start()",
+    "rva": "0x12aba00",
+    "prologue": "fe4fbfa9f30300aae0031faa6e644894"
   },
   {
     "name": "BackgroundUpdate",

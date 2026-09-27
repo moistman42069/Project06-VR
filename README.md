@@ -1,15 +1,15 @@
 # Project 06 Quest VR
 
-Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.9 is a test
-candidate, not a public release.** The user confirmed 0.1.8 starts, renders
-immersive VR and has working haptics. Its first-person steering, swing speed,
-glove orientation and main-menu right-eye flicker needed further work.
+Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.10 is a test
+candidate, not a public release.** The user confirmed 0.1.9's crouch spindash,
+glove orientation, first-person head-follow view and blue menu. Startup,
+immersive VR and haptics were already confirmed in earlier candidates.
 
-0.1.9 corrects movement heading and swing-speed filtering, expands character
-capability checks and body hiding, aligns gloves to controller aim, and adds a
-blue category-list menu with X-to-back navigation. A menu-only rendering
-compatibility path uses the authored static background and forward rendering.
-[Evidence, changes and limits](docs/CANDIDATE-019.md). This candidate has not yet
+0.1.10 adds a title-specific forward/LDR camera path, head-relative steering at
+the native movement consumers, outward-swing homing, smooth authored Sonic
+gloves, conservative world visibility and local gauge/skybox camera fixes.
+Physical controls now live inside the scrollable VR category.
+[Evidence, changes and limits](docs/CANDIDATE-0110.md). This candidate has not yet
 been tested on Quest; host checks cannot guarantee headset rendering.
 
 ## Project status
@@ -38,7 +38,7 @@ a private or unindexed Discord test build could still exist.
 
 ## Install and play
 
-Sideload `out/p06-quest-0.1.9.apk` using your existing Quest sideload method.
+Sideload `out/p06-quest-0.1.10.apk` using your existing Quest sideload method.
 This replacement uses the same signing key and a higher version code; install it
 over the previous candidate to retain settings. See [latest XR startup investigation](docs/EGL-SESSION-STARTUP-20260926.md).
 Launch **Project 06 Quest** from Unknown Sources. Package `com.p06.quest` installs
@@ -48,10 +48,11 @@ The default mode is immersive third-person VR. The original gameplay camera
 remains the third-person anchor by default; the native XR provider supplies
 tracked left and right eye views. Experimental first person uses a player-relative
 eye-height anchor, with stable yaw, head tracking, right-stick turning and body
-hiding. Simple white five-digit gloves use each controller's grip position and aim orientation independently. Body hiding includes separate
+hiding. Smooth white Sonic gloves use each controller's grip position and aim orientation independently. Body hiding includes separate
 upgrade attachments; no floating replacement feet are added.
 Eye height is adjustable; losing one controller hides that glove and preserves
-the camera. These are procedural glove shapes, not rigged Sonic hands or IK.
+the camera. The glove geometry comes from this APK's Sonic mesh, with one
+subdivision pass and smooth normals; there is no finger animation or arm IK yet.
 Missing required player/render APIs leave third person active.
 
 | Quest input | Game action |
@@ -68,8 +69,9 @@ Missing required player/render APIs leave third person active.
 | Hold right Meta button | Quest system recenter; reserved button is not intercepted |
 
 In the VR menu, use left stick up/down to select and left/right to change;
-the root screen lists **UI**, **VR**, **GRAPHICS**, **RUNNING**, **HOMING**,
-**SPINDASH**, **HAPTICS**, and **SYSTEM**. Scroll with the stick, A opens a
+the root screen lists **UI**, **VR**, **GRAPHICS**, **HAPTICS**, and **SYSTEM**.
+Running, homing and crouch controls are inside **VR**; scroll down to reach them.
+Scroll with the stick, A opens a
 category/applies a setting, X returns to the category list and B closes. Game time is paused while this menu is open. Closing
 inputs remain captured until controls return to neutral.
 
@@ -83,8 +85,8 @@ marked WIP and leave the game's settings in effect.
 HUD/menu overlay canvases are moved onto a separate camera for stereo rendering.
 The bridge now redirects runtime requests for Screen Space Overlay immediately
 after the stereo HUD camera is available, with the periodic conversion retained
-as a fallback. The main-menu right-eye flicker fix and experimental first-person
-camera/hands and water-trigger recovery are not headset-verified.
+as a fallback. The user confirmed level select displays correctly; title-screen
+pink flicker remains the target of 0.1.10's separate camera correction.
 Touch-control canvases are hidden without disabling their input rig. The bridge
 handles the APK's active OutlineCamera when Camera.main is absent. Actual
 readability, scene transitions, effects, cutscenes and stereo correctness require
@@ -104,9 +106,10 @@ states, screen modes, tracking loss and after a reference-space change.
   Swing sensitivity and speed ramp are adjustable. Acceleration remains native; only the requested speed cap changes during
   gesture-owned ground running; native
   physics, slopes and maximum speed remain authoritative. Left-stick input wins.
-- **Homing:** extend either arm toward the game's selected, eligible homing
-  target, then pull inward. Adjustable pull distance, aim cone, dwell and cooldown
-  reject accidental gestures. It does not select a different enemy or bypass the
+- **Homing:** swing either hand outward while airborne with an eligible native
+  target. Adjustable travel distance (default 10 cm), velocity gates and cooldown
+  reject accidental gestures. No pointing dwell or inward pull is required.
+  It does not select a different enemy or bypass the
   game's homing rules. No target means no gesture attack.
 - **Spindash:** stand normally when enabling/calibrating, crouch past the chosen
   depth to hold native charge, then stand to release toward your head direction.
@@ -121,7 +124,8 @@ The water recovery only supplements complete crossings of live WaterSlider or
 WaterslideBooster sphere/box triggers that native overlap detection missed. It
 does not fabricate grounding or extend a water slide indefinitely. Logs capture
 entries, booster speeds and exits. Whether it fixes the exact filmed fall is
-not established by the existing logs/video and needs a repeat of that route.
+not established by the existing logs/video. The user reports it still happens;
+0.1.10 leaves water behavior unchanged because no concrete further fix was found.
 
 ## Per-run logs
 
@@ -163,7 +167,10 @@ assets/assemblies, SDK binaries and signing key. Supply your own original APK.
 
 Windows prerequisites: Python 3.11+, CMake 3.22+, Ninja, NDK r27c, Android
 build-tools 35, platform 35, JDK 17. `tools/download-toolchain.py` downloads the
-SDK/JDK archives into their expected vendor paths. Install Ninja with
+SDK/JDK archives into their expected vendor paths. Install UnityPy and NumPy with
+`python -m pip install --target vendor/unitypy UnityPy numpy`; the native build
+extracts only the pinned glove mesh locally into ignored `out/generated/`.
+Extracted game geometry is excluded from Git and the source ZIP. Install Ninja with
 `python -m pip install --target vendor/ninja ninja`, then configure using
 `python tools/configure.py` and run `python tools/build-apk.py --apk <base.apk>`.
 The build script creates a local development signing key if absent; retain that
@@ -182,6 +189,6 @@ Native dependencies included at these revisions:
 - Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
 - dhepper/font8x8 basic font, public domain; notice in its header.
 
-`out/p06-quest-0.1.9-receipt.json` identifies the exact APK, native plugin and mod source
+`out/p06-quest-0.1.10-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
 tree and records preserved game entries. The original APK and MCC workspace were
-not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup and haptics were confirmed by the user; 0.1.9 awaits headset verification.
+not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup/haptics and 0.1.9 first-person view, hand orientation, crouch spindash and menu are confirmed; 0.1.10 awaits headset verification.

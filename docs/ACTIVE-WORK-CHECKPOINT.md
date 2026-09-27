@@ -1,25 +1,27 @@
-﻿# Active work checkpoint
+# Active work checkpoint
 
-Date: 2026-09-26. Current candidate: **0.1.9 / versionCode 109**.
+Date: 2026-09-26. Current candidate: **0.1.10 / versionCode 110**.
 
-- User confirmed 0.1.8 launch, immersive VR and good haptics. Preserve its managed
-  startup guard, EGL/OpenXR submission and haptic implementation.
-- Latest log 203905 and 06bug.webp are preserved under ignored out/headset-logs.
-- 0.1.9 corrects first-person steering basis, swing-speed envelope/acceleration,
-  homing/crouch handling, aim-oriented gloves and accessory/singular-renderer hide.
-- Blue root-category menu: stick scroll, A enter/apply, X back, B close.
-- Menu-only forward/mono-preview/static-background compatibility path addresses
-  right-eye flicker. The exact failing GPU draw is unproven; do not claim a
-  guaranteed or headset-accepted fix.
-- Latest water run has successful entry, boosters and normal spline-end exit.
-  Preserve swept triggers/native exits; ground-grace remains disabled.
-- Details, primary references and limits: [CANDIDATE-019.md](CANDIDATE-019.md).
+- User accepted 0.1.9 crouch spindash, glove orientation, first-person head-follow
+  view and blue menu; startup, immersive VR and haptics also work.
+- Latest log 211947 is preserved in ignored out/headset-logs. Hash and findings
+  are in evidence/candidate-0110-run.json. 0.1.9 remains the tested fallback.
+- 0.1.10 applies the title-specific Forward/LDR/no-forced-RT camera correction on
+  every title entry; MainMenu's accepted path is preserved.
+- Native-consumer head steering covers RotatePlayer/SlopePhysics, including air.
+- Either-hand outward homing replaces point/pull, with native eligibility gates.
+- Smooth authored Sonic gloves replace primitives; no feet or arm IK. Geometry
+  is derived locally from the pinned APK and excluded from source distribution.
+- World cameras bypass baked occlusion; per-eye frustums remain. Local gauge and
+  skybox camera bindings address native Camera.main null dereferences.
+- Physical controls and sliders are inside the scrollable VR category; X backs out.
+- No further concrete water diagnosis: water code remains unchanged, as requested.
+- Details/references/limits: [CANDIDATE-0110.md](CANDIDATE-0110.md).
 
-Artifacts: out/p06-quest-0.1.9.apk, matching source ZIP, receipt and external
-checksums. The archive must not embed a stale checksum of itself. Preserve
-original APK, logs, source archives and receipts. Superseded generated APKs may
-be removed only after successful replacement packaging. MCC remains untouched.
+Artifacts: out/p06-quest-0.1.10.apk, source ZIP, receipt, compatibility audit and
+external checksums. Preserve original APK, logs, source archives, receipts and
+0.1.9 fallback. MCC remains untouched. No public release before user testing.
 
-Pending: user Quest verification of movement, gestures, body/gloves, menu eyes,
-character transitions, water route and general gameplay. No headset connection
-through Shadow PC. No public release before user testing.
+Pending headset verification: title fresh/return transitions, outward homing,
+airborne heading, authored gloves, visibility/performance and baseline regressions.
+Static checks cannot establish headset acceptance. No connected Quest on Shadow PC.

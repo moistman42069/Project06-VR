@@ -18,7 +18,13 @@ with (root/'original/libil2cpp.so').open('rb') as f:
 required=sorted(set(re.findall(r'API\(\w+,"([^"]+)"\)',bridge)))
 missing_exports=[s for s in required if s not in exports]
 assert '#include "ground_grace.h"' not in bridge
-report={'icalls':calls,'missing_icall_strings':missing,'exports':required,'missing_exports':missing_exports,'early_managed_lookup_guard':True,'headset_tested':False}
+dump=(root/'vendor/dumper/dump.cs').read_text(encoding='utf-8-sig')
+managed_methods={'Mesh':['public void .ctor()', 'public void set_vertices(Vector3[] value)', 'public void set_normals(Vector3[] value)', 'public void set_triangles(int[] value)', 'public void RecalculateBounds()'], 'MeshFilter':['public void set_sharedMesh(Mesh value)'], 'Material':['private void SetColorImpl(int name, Color value)']}
+for cls,signatures in managed_methods.items():
+    block=re.search(r'(?m)^public (?:sealed )?class '+cls+r'\b[^\n]*\n\{(.*?)(?=\n\})',dump,re.S)
+    assert block,cls
+    for signature in signatures:assert block.group(1).count(signature+' { }')==1,(cls,signature)
+report={'icalls':calls,'missing_icall_strings':missing,'exports':required,'missing_exports':missing_exports,'managed_glove_signatures':managed_methods,'early_managed_lookup_guard':True,'headset_tested':False}
 (root/'out/candidate-abi-audit.json').write_text(json.dumps(report,indent=2))
 print(json.dumps(report,indent=2))
 if missing or missing_exports:sys.exit(1)

@@ -14,6 +14,14 @@ set(DOBBY_BUILD_TEST OFF CACHE BOOL "" FORCE)
 add_subdirectory(vendor/OpenXR-SDK)
 add_subdirectory(vendor/Dobby-stable)
 add_library(p06quest SHARED src/bridge.cpp src/xr_provider.cpp src/vr_options.cpp)
+find_program(P06_PYTHON python REQUIRED)
+add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/out/generated/sonic_gloves.inc
+    COMMAND ${P06_PYTHON} tools/extract-gloves.py
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS tools/extract-gloves.py)
+add_custom_target(p06_gloves DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/out/generated/sonic_gloves.inc)
+add_dependencies(p06quest p06_gloves)
+target_include_directories(p06quest PRIVATE out/generated)
 target_include_directories(p06quest PRIVATE src vendor/font8x8 vendor/Dobby-stable/include vendor/OpenXR-SDK/include vendor/unity-xr-plugin/CommonHeaders/ProviderInterface)
 target_compile_definitions(p06quest PRIVATE XR_USE_PLATFORM_ANDROID XR_USE_GRAPHICS_API_OPENGL_ES)
 target_compile_options(p06quest PRIVATE -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -fvisibility=hidden)

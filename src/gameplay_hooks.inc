@@ -8,6 +8,32 @@ void (*oldWaterEnter)(void*,void*,bool,float,const Method*)=nullptr;
 void (*oldAddRing)(void*,int,void*,const Method*)=nullptr;
 void (*oldAcceleration)(void*,float,const Method*)=nullptr;
 float gestureRunAmount=0;void* gestureRunPlayer=nullptr;
+void (*oldRotatePlayer)(void*,float,bool,bool,float,const Method*)=nullptr;
+void (*oldSlopePhysics)(void*,bool,const Method*)=nullptr;
+struct HeadSteeringScope {
+    bool previousScope=steeringScope;float previousX=steeringX,previousY=steeringY;
+    explicit HeadSteeringScope(void* self){
+        if(!nativeSteeringInstalled||!fpHeadStick||self!=firstPersonAnchor.player||gettid()!=unityThread)return;
+        Controls c;{std::lock_guard<std::mutex> lock(inputMutex);c=controls;}
+        if(!c.focused||c.blocked)return;
+        static auto transform=icall<void*(*)(void*)>("UnityEngine.Component::get_transform");
+        static auto rotation=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_localRotation_Injected");
+        auto pc=field<void*>(self,"Camera");if(!alive(pc)||!transform||!rotation)return;
+        auto tr=transform(pc);if(!alive(tr))return;
+        float q[4],forward[3]={0,0,1},direction[3];rotation(tr,q);
+        for(float value:q)if(!std::isfinite(value))return;
+        quatRotate(q,forward,direction);
+        P06RemapStick(c.lx,c.ly,fpHeadYaw,std::atan2(direction[0],direction[2]));
+        steeringX=c.lx;steeringY=c.ly;steeringScope=true;
+    }
+    ~HeadSteeringScope(){steeringScope=previousScope;steeringX=previousX;steeringY=previousY;}
+};
+void rotatePlayerHook(void* self,float speed,bool overrideRotation,bool dontLock,float overrideValue,const Method* method){
+    HeadSteeringScope steering(self);oldRotatePlayer(self,speed,overrideRotation,dontLock,overrideValue,method);
+}
+void slopePhysicsHook(void* self,bool use,const Method* method){
+    HeadSteeringScope steering(self);oldSlopePhysics(self,use,method);
+}
 void markWaterTrigger(void* self){for(auto& t:waterTriggers)if(t.script==self)t.seen=physicsSequence;}
 void waterTriggerHook(void* self,void* collider,const Method* m){markWaterTrigger(self);oldWaterTrigger(self,collider,m);}
 void boosterTriggerHook(void* self,void* collider,const Method* m){markWaterTrigger(self);oldBoosterTrigger(self,collider,m);}

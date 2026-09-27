@@ -1,7 +1,7 @@
-import sys,struct,zipfile,json,pathlib
+import sys,struct,zipfile,json,pathlib,os
 sys.path.insert(0,'vendor/unitypy')
 import lz4.block
-with zipfile.ZipFile(r'C:\Users\Shadow\Downloads\p-06RELEASE64.apk') as z:
+with zipfile.ZipFile(os.environ.get('P06_BASE_APK',r'C:\Users\Shadow\Downloads\p-06RELEASE64.apk')) as z:
  f=z.open('assets/bin/Data/data.unity3d')
  def read(fmt):return struct.unpack(fmt,f.read(struct.calcsize(fmt)))
  def cstr():
@@ -28,5 +28,5 @@ with zipfile.ZipFile(r'C:\Users\Shadow\Downloads\p-06RELEASE64.apk') as z:
   else:f.seek(c,1)
   offset+=u
   if all(len(outputs[x['name']])==x['size'] for x in targets):break
- r=pathlib.Path('original/assets');r.mkdir(exist_ok=True)
+ r=pathlib.Path('original/assets');r.mkdir(parents=True,exist_ok=True)
  for x in targets:assert len(outputs[x['name']])==x['size'];(r/x['name']).write_bytes(outputs[x['name']]);print('Extracted',x['name'],x['size'])
