@@ -2,7 +2,7 @@
 
 > **Work in progress. First public release: 0.1.15.** The user has tested this
 > build on Quest 3 and considers it a good first release. Further fixes and
-> compatibility work remain planned. (JOIN FLAT2VR DISCORD FOR COMMUNICATION AND OTHER GREAT VR MODS/DETAILS. https://discord.gg/flat2vr)
+> compatibility work remain planned. **(JOIN FLAT2VR DISCORD FOR COMMUNICATION AND OTHER GREAT VR MODS/DETAILS. https://discord.gg/flat2vr)**
 
 A standalone Android/ARM64 VR mod for **Sonic Project 06** on Meta Quest 3. The
 project uses OpenXR for stereo rendering and maps Quest Touch controllers to the
