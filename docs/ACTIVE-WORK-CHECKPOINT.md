@@ -1,8 +1,13 @@
 # Active work checkpoint
 
-Date: 2026-09-27. New candidate: **0.1.13 / versionCode 113**.
+Date: 2026-09-27. New candidate: **0.1.14 / versionCode 114**.
 Accepted fallback: **0.1.12**, source e2f8a79baee89e357ebbe32708e2cd86b997bec7.
 
+- 0.1.14 adds UI > In-Game HUD Follows View, included in Immersive Mode (All).
+  Uses the current tracked head pose before the existing first-person/camera transform.
+  Applies only during immersive gameplay; title UI and anchored VR panel are unchanged.
+  Defaults off on migration; enabling the bundle sets it on. Settings schema 8
+  reads versions 1-7. Details: CANDIDATE-0114.md. 0.1.13 has no new headset result.
 - User calls 0.1.12 a fantastic build. Latest log is preserved in out/headset-logs;
   hash/report in evidence/candidate-0112-run.json. One existing game settings
   null reference remains; no reported startup/transition failure.
@@ -26,6 +31,6 @@ Accepted fallback: **0.1.12**, source e2f8a79baee89e357ebbe32708e2cd86b997bec7.
 - New controls and changed defaults await user Quest test. Host tests are not
   headset acceptance. Details: CANDIDATE-0113.md and HEADSET-TEST-CHECKLIST.md.
 
-Artifacts: out/p06-quest-0.1.13.apk, matching source ZIP, receipt and checksums.
+Artifacts: out/p06-quest-0.1.14.apk, matching source ZIP, receipt and checksums.
 Retain tested 0.1.12 fallback, original APK, source archives and run evidence.
 No public release. MCC untouched. Install over existing app; do not clear data.

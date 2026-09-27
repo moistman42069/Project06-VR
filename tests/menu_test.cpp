@@ -18,6 +18,10 @@ int main(){
     const char* invalidSaveVersions[]={nullptr,"","1.0","0.1.11-vr-candidate","0.1.999-vr-candidate","0.1.9","0.1.9-vr-candidate-extra"};
     for(const char* bad:invalidSaveVersions)assert(!CompatibleSaveVersion(bad));
     testGestures();
+    {float offset[3]={0,0,2},p[3]={2,4,6},q[4]={0,.70710678f,0,.70710678f},out[3];
+     P06HUDFromHead(offset,p,q,2,true,out);assert(std::fabs(out[0]-3)<.00001f&&out[1]==2&&std::fabs(out[2]-3)<.00001f);
+     P06HUDFromHead(offset,p,q,2,false,out);assert(std::fabs(out[0]-2)<.00001f&&out[1]==0&&std::fabs(out[2])<.00001f);}
+
     {P06MenuAnchor anchor;XrPosef a{{0,0,0,1},{1,2,3}},b{{0,.70710678f,0,.70710678f},{4,5,6}};
      assert(anchor.update(true,false,1,&a));auto p=anchor.pose(2);assert(p.position.x==1&&p.position.y==2&&p.position.z==1);
      assert(anchor.update(true,false,1,&b));p=anchor.pose(2);assert(p.position.x==1&&p.position.z==1); // Head motion does not drag open panel.
@@ -147,14 +151,17 @@ int main(){
     down(1);press(A);assert(GetOptions().menuFollowView);InitOptions("out/menu-test-state");assert(GetOptions().hudSize==.05f&&GetOptions().menuFollowView&&GetOptions().vrMenuDistance==10);
     down(1);press(A);assert(!GetOptions().menuFollowView&&GetOptions().vrMenuSize==1.05f&&GetOptions().vrMenuDistance==1.15f);
     press(X);down(1);press(A); // First VR row is the all-interactions switch.
-    press(A);assert(!GetOptions().firstPerson&&!GetOptions().motionRun&&!GetOptions().gestureHoming&&!GetOptions().crouchSpin);
+    press(A);assert(ImmersiveInteractions(GetOptions())&&GetOptions().hudFollowView);
+    press(A);assert(!GetOptions().hudFollowView);assert(!GetOptions().firstPerson&&!GetOptions().motionRun&&!GetOptions().gestureHoming&&!GetOptions().crouchSpin);
     press(A);assert(ImmersiveInteractions(GetOptions()));InitOptions("out/menu-test-state");assert(ImmersiveInteractions(GetOptions()));
     auto capture=[&](const char* path){RasterMenu(pixels.data(),1024,1024);FILE* f=fopen(path,"wb");assert(f);fprintf(f,"P6\n1024 1024\n255\n");for(auto px:pixels){unsigned char rgb[]={static_cast<unsigned char>(px),static_cast<unsigned char>(px>>8),static_cast<unsigned char>(px>>16)};fwrite(rgb,1,3,f);}fclose(f);};
     capture("out/vr-menu-immersive.ppm");press(X);down(4);press(A);down(8);capture("out/vr-menu-title.ppm");
+    down(9);press(A);assert(!GetOptions().hudFollowView&&!ImmersiveInteractions(GetOptions()));InitOptions("out/menu-test-state");assert(!GetOptions().hudFollowView);
+    press(A);InitOptions("out/menu-test-state");assert(GetOptions().hudFollowView&&ImmersiveInteractions(GetOptions()));
     // A calibrated hand survives schema-6 migration; untouched hands adopt natural defaults.
     file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);
     fprintf(file,"6 0 0.8 1.2 2.5 3 1 2 1 1 0.9 1 1 1 2.3 2.5 0.16 0.4 1 0.6 0 0 1 0 0 0 15 20 25\n");fclose(file);
     InitOptions("out/menu-test-state");assert(GetOptions().handAngles[0][0]==-10&&GetOptions().handAngles[1][0]==15&&GetOptions().handAngles[1][2]==25);
-    assert(GetOptions().titleSize==.65f&&!GetOptions().menuFollowView);
+    assert(GetOptions().titleSize==.65f&&!GetOptions().menuFollowView&&!GetOptions().hudFollowView);
     std::cout<<"PASS: anchored panel/recenter, UI ranges, schema migration, immersive preset,  eye handedness/IPD, world scale, rotation-only tracking, stereo/mono screen poses, FOV signs, chord debounce, category navigation, staggered clicks, mode selection, input capture, focus loss, persistence, menu raster\n";
 }

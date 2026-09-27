@@ -1,10 +1,13 @@
-# Quest 3 candidate 0.1.13 checks
+# Quest 3 candidate 0.1.14 checks
 
 Sideload over the previous candidate; preserve the log in Downloads/P06Quest.
 Expected startup milestones: `Managed runtime ready`, `XR graphics initialized`,
 `OpenXR session state=FOCUSED`, `First OpenXR frame submitted`, and visible game.
 Logs alone cannot prove visible pixels.
 
+- [ ] In-Game HUD Follows View: look up/down/sideways and move head in first/third person; HUD follows with saved offsets and size.
+- [ ] Disable HUD follow: prior placement restores; enable Immersive Mode (All): HUD follow turns on and persists after restart.
+- [ ] Title/menu UI and anchored VR panel retain independent behavior.
 - [ ] HUD size reaches 5%; offsets/depth remain independently adjustable and reset recovers visibility.
 - [ ] Title and main menu start smaller; separate UI controls work after stage-to-title transitions without pink flicker.
 - [ ] Open VR panel, rotate/move head: panel remains in place; close/reopen relocates it.

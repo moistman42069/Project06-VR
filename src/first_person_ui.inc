@@ -30,7 +30,7 @@ void syncFirstPersonHUD(bool firstPerson){
     const float size=frontEnd?options.titleSize:options.hudSize;
     const float offsetX=frontEnd?options.titleX:options.hudX,offsetY=frontEnd?options.titleY:options.hudY;
     if(frontEnd)firstPerson=false;
-    bool customHUD=options.hudX!=0||options.hudY!=0||options.hudSize!=1;
+    bool customHUD=options.hudX!=0||options.hudY!=0||options.hudSize!=1||options.hudFollowView;
     bool thirdPerson=options.mode==ViewMode::Immersive&&!firstPerson&&customHUD&&refreshFirstPersonAnchor();
     bool positioned=firstPerson||thirdPerson||frontEnd;
     float cameraPos[3]{},cameraRot[4]{0,0,0,1},worldPos[3]{},worldRot[4]{0,0,0,1};
@@ -38,8 +38,17 @@ void syncFirstPersonHUD(bool firstPerson){
         auto camera=firstPerson?firstPersonAnchor.cameraTransform:(alive(hudCamera)?transform(hudCamera):nullptr);if(!alive(camera))return;
         getPos(camera,cameraPos);getRot(camera,cameraRot);
         float forward[3]={offsetX,offsetY,distance},local[3];
+        float headRotation[4]{0,0,0,1};
+        if(!frontEnd&&options.hudFollowView&&options.mode==ViewMode::Immersive){
+            MotionFrame tracked;{std::lock_guard<std::mutex> lock(motionMutex);tracked=motionFrame;}
+            if(tracked.focused&&tracked.head.valid){
+                float shifted[3];P06HUDFromHead(forward,tracked.head.p,tracked.head.q,options.worldScale,options.positionalTracking,shifted);
+                std::copy(shifted,shifted+3,forward);std::copy(tracked.head.q,tracked.head.q+4,headRotation);
+            }
+        }
         if(firstPerson){quatRotate(firstPersonAnchor.rotation,forward,local);for(int i=0;i<3;++i)local[i]+=firstPersonAnchor.position[i];quatMultiply(cameraRot,firstPersonAnchor.rotation,worldRot);}
         else{std::copy(forward,forward+3,local);std::copy(cameraRot,cameraRot+4,worldRot);}
+        float followedRotation[4];quatMultiply(worldRot,headRotation,followedRotation);std::copy(followedRotation,followedRotation+4,worldRot);
         quatRotate(cameraRot,local,worldPos);for(int i=0;i<3;++i)worldPos[i]+=cameraPos[i];
     }
     for(auto it=hudCanvases.begin();it!=hudCanvases.end();){

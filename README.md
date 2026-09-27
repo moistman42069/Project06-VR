@@ -1,8 +1,13 @@
 # Project 06 Quest VR
 
-Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.13 is a test
+Standalone ARM64 Quest 3 VR project for Sonic Project 06. **0.1.14 is a test
 candidate, not a public release.** The user calls 0.1.12 a fantastic working
 build; it remains the retained headset-tested fallback.
+
+0.1.14 adds **UI > In-Game HUD Follows View**, also enabled by **Immersive Mode (All)**.
+It preserves HUD size/distance/offsets and follows tracked head rotation/position
+in first or third person. It defaults off when upgrading; title and VR-panel
+follow behavior remain separate. [Details](docs/CANDIDATE-0114.md).
 
 0.1.13 allows much smaller HUD/title UI, adds independent title/menu and VR-panel
 controls, anchors the VR panel where it opens, adjusts default glove angles and
@@ -35,7 +40,7 @@ a private or unindexed Discord test build could still exist.
 
 ## Install and play
 
-Sideload `out/p06-quest-0.1.13.apk` using your existing Quest sideload method.
+Sideload `out/p06-quest-0.1.14.apk` using your existing Quest sideload method.
 This replacement uses the same signing key and a higher version code; install it
 over the previous candidate to retain settings. See [latest XR startup investigation](docs/EGL-SESSION-STARTUP-20260926.md).
 Do not uninstall or clear app data to update. Save compatibility is now tied to
@@ -218,6 +223,6 @@ Native dependencies included at these revisions:
 - Valve unity-xr-plugin headers: `a30a0100daacef8c3f0290ce5b179c8a1148abb0`.
 - dhepper/font8x8 basic font, public domain; notice in its header.
 
-`out/p06-quest-0.1.13-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
+`out/p06-quest-0.1.14-receipt.json` identifies the exact APK, native plugin, generated glove geometry and mod source
 tree and records preserved game entries. The original APK and MCC workspace were
 not modified. 0.1.0 crashed on a resource lookup; 0.1.1 fixed that crash but did not enter the app; 0.1.2 ran Unity while the headset loading screen remained; 0.1.3 registered XR but failed before creating an OpenXR session. The user confirmed 0.1.4 reaches immersive VR and the settings panel. 0.1.8 startup/haptics, 0.1.9 first-person view/hand orientation/crouch/menu and 0.1.10 title rendering are confirmed. 0.1.10 then crashed after slot selection; the user reports 0.1.11 works well. The user reports 0.1.12 works well; 0.1.13 UI/panel/default refinements await headset verification.

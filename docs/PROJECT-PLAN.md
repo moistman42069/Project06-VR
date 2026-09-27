@@ -1,5 +1,8 @@
 # Project 06 VR project plan
 
+Current addition: 0.1.14 adds in-game head-follow HUD, included in the immersive
+interaction bundle. Awaiting headset test; see CANDIDATE-0114.md.
+
 Status: user reports 0.1.12 is a fantastic working build. 0.1.13 expands UI ranges,
 shrinks title/menu UI by default, anchors the VR panel, refines default glove
 angles and adds an all-interactions toggle. Awaiting Quest verification; no public
