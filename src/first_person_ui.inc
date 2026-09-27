@@ -18,22 +18,27 @@ void syncFirstPersonHUD(bool firstPerson){
     static auto setMode=icall<void(*)(void*,int)>("UnityEngine.Canvas::set_renderMode");
     static auto getDistance=icall<float(*)(void*)>("UnityEngine.Canvas::get_planeDistance");
     if(!transform||!getPos||!getRot||!getScale||!setPos||!setRot||!setScale||!getMode||!setMode||!getDistance)return;
-    float cameraPos[3]{},cameraRot[4]{0,0,0,1},worldPos[3]{},worldRot[4]{0,0,0,1};float distance=GetOptions().hudDistance;
-    if(firstPerson){
-        auto camera=firstPersonAnchor.cameraTransform;if(!alive(camera))return;
+    const auto options=GetOptions();const float distance=options.hudDistance;
+    bool customHUD=options.hudX!=0||options.hudY!=0||options.hudSize!=1;
+    bool thirdPerson=options.mode==ViewMode::Immersive&&!firstPerson&&customHUD&&refreshFirstPersonAnchor();
+    bool positioned=firstPerson||thirdPerson;
+    float cameraPos[3]{},cameraRot[4]{0,0,0,1},worldPos[3]{},worldRot[4]{0,0,0,1};
+    if(positioned){
+        auto camera=firstPerson?firstPersonAnchor.cameraTransform:(alive(hudCamera)?transform(hudCamera):nullptr);if(!alive(camera))return;
         getPos(camera,cameraPos);getRot(camera,cameraRot);
-        float forward[3]={0,0,distance},local[3];quatRotate(firstPersonAnchor.rotation,forward,local);
-        for(int i=0;i<3;++i)local[i]+=firstPersonAnchor.position[i];quatRotate(cameraRot,local,worldPos);
-        for(int i=0;i<3;++i)worldPos[i]+=cameraPos[i];quatMultiply(cameraRot,firstPersonAnchor.rotation,worldRot);
+        float forward[3]={options.hudX,options.hudY,distance},local[3];
+        if(firstPerson){quatRotate(firstPersonAnchor.rotation,forward,local);for(int i=0;i<3;++i)local[i]+=firstPersonAnchor.position[i];quatMultiply(cameraRot,firstPersonAnchor.rotation,worldRot);}
+        else{std::copy(forward,forward+3,local);std::copy(cameraRot,cameraRot+4,worldRot);}
+        quatRotate(cameraRot,local,worldPos);for(int i=0;i<3;++i)worldPos[i]+=cameraPos[i];
     }
     for(auto it=hudCanvases.begin();it!=hudCanvases.end();){
         auto& c=*it;if(!alive(c.canvas)){gc_free(c.root);it=hudCanvases.erase(it);continue;}
         auto tr=transform(c.canvas);if(!alive(tr)){++it;continue;}
-        if(firstPerson){
+        if(positioned){
             if(!c.world||getMode(c.canvas)!=2){getScale(tr,c.scale);c.distance=std::max(getDistance(c.canvas),.1f);setMode(c.canvas,2);c.world=true;}
-            float scale[3];for(int i=0;i<3;++i)scale[i]=c.scale[i]*distance/c.distance;
+            float scale[3];for(int i=0;i<3;++i)scale[i]=c.scale[i]*distance/c.distance*options.hudSize;
             setScale(tr,scale);setPos(tr,worldPos);setRot(tr,worldRot);
-        }else if(c.world){setMode(c.canvas,1);if(canvasSetCamera)canvasSetCamera(c.canvas,hudCamera);if(canvasSetDistance)canvasSetDistance(c.canvas,distance);c.world=false;}
+        }else if(c.world){setScale(tr,c.scale);setMode(c.canvas,1);if(canvasSetCamera)canvasSetCamera(c.canvas,hudCamera);if(canvasSetDistance)canvasSetDistance(c.canvas,distance);c.world=false;}
         ++it;
     }
 }

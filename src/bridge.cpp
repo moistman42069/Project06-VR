@@ -6,6 +6,7 @@
 #include "trigger_sweep.h"
 #include "hand_model.h"
 #include "locomotion_math.h"
+#include "visual_adjustments.h"
 #include "sonic_gloves.inc"
 #include "dobby.h"
 #include <android/dlext.h>
@@ -308,10 +309,11 @@ bool updateGloves(bool active){
     static auto getPos=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_position_Injected");
     static auto getRot=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_rotation_Injected");
     if(active){if(!getPos||!getRot||!alive(firstPersonAnchor.cameraTransform))return false;getPos(firstPersonAnchor.cameraTransform,camPos);getRot(firstPersonAnchor.cameraTransform,camRot);}
-    const float worldScale=std::clamp(GetOptions().worldScale,.25f,3.f);
+    const auto visualOptions=GetOptions();
+    const float worldScale=std::clamp(visualOptions.worldScale,.25f,3.f);
     MotionFrame pose;{std::lock_guard<std::mutex> lock(motionMutex);pose=motionFrame;}
     for(int hand=0;hand<2;++hand){bool visible=active&&pose.focused&&pose.hand[hand].valid&&pose.aim[hand].valid;auto& glove=gloves[hand];
-        if(visible){float handRotation[4];quatMultiply(firstPersonAnchor.rotation,pose.aim[hand].q,handRotation);float handPos[3],trackedPos[3]={pose.hand[hand].p[0]/worldScale,pose.hand[hand].p[1]/worldScale,pose.hand[hand].p[2]/worldScale};quatRotate(firstPersonAnchor.rotation,trackedPos,handPos);
+        if(visible){float handRotation[4],adjustment[4],adjustedAim[4];P06HandAdjustment(visualOptions.handAngles[hand],adjustment);quatMultiply(pose.aim[hand].q,adjustment,adjustedAim);quatMultiply(firstPersonAnchor.rotation,adjustedAim,handRotation);float handPos[3],trackedPos[3]={pose.hand[hand].p[0]/worldScale,pose.hand[hand].p[1]/worldScale,pose.hand[hand].p[2]/worldScale};quatRotate(firstPersonAnchor.rotation,trackedPos,handPos);
             for(auto& piece:glove.pieces){float relative[3],scale[3];quatRotate(handRotation,piece.offset,relative);for(int j=0;j<3;++j){relative[j]/=worldScale;scale[j]=piece.scale[j]/worldScale;}setScale(piece.transform,scale);float position[3]={firstPersonAnchor.position[0]+handPos[0]+relative[0],firstPersonAnchor.position[1]+handPos[1]+relative[1],firstPersonAnchor.position[2]+handPos[2]+relative[2]};
                 float rotation[4];quatMultiply(handRotation,piece.rotation,rotation);float worldPos[3],worldRot[4];quatRotate(camRot,position,worldPos);for(int j=0;j<3;++j)worldPos[j]+=camPos[j];quatMultiply(camRot,rotation,worldRot);setPosition(piece.transform,worldPos);setRotation(piece.transform,worldRot);if(!piece.active){setGameObjectActive(piece.gameObject,true);piece.active=true;}}}
         else for(auto& piece:glove.pieces)if(piece.active){setGameObjectActive(piece.gameObject,false);piece.active=false;}
@@ -627,7 +629,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm,void*){g_vm=vm;return JNI_VERSIO
 extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativePrepare(JNIEnv* env,jclass,jobject activity,jstring directory,jint fd){
     if(fd>=0)logFd=dup(fd);
     g_activity=env->NewGlobalRef(activity);const char* dir=env->GetStringUTFChars(directory,nullptr);InitOptions(dir);env->ReleaseStringUTFChars(directory,dir);
-    LOG("P06 Quest candidate 0.1.11 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
+    LOG("P06 Quest candidate 0.1.12 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
     LOG("System library loading is untouched; waiting for Unity activity creation");
 }
 

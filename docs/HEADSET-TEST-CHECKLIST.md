@@ -1,4 +1,4 @@
-# Quest 3 candidate 0.1.11 checks
+# Quest 3 candidate 0.1.12 checks
 
 Sideload over the previous candidate; preserve the log in Downloads/P06Quest.
 Expected startup milestones: `Managed runtime ready`, `XR graphics initialized`,
@@ -6,6 +6,12 @@ Expected startup milestones: `Managed runtime ready`, `XR graphics initialized`,
 Logs alone cannot prove visible pixels.
 
 - [ ] Install over current APK without uninstalling or clearing app data.
+- [ ] UI: HUD left/right, down/up, size and depth respond separately in a level.
+- [ ] Repeat HUD adjustments in first and third person; reset restores defaults.
+- [ ] VR: each hand pitch/yaw/roll changes only that glove; reset restores its accepted orientation.
+- [ ] Calibration persists after relaunch; old motion/haptic preferences and saves remain.
+- [ ] With hand rotations changed, physical running/homing/crouch still use the original tracked poses.
+- [ ] Return to title/level select after moving HUD; menus remain visible in both eyes.
 - [ ] Previously incompatible, intact slots show their progress and load without resetting.
 - [ ] After slot selection, reach level select and enter a stage without crashing.
 - [ ] Quit/relaunch, then reopen the same slot; progress and settings remain.

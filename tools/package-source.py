@@ -5,7 +5,7 @@ import subprocess
 import zipfile
 
 root = pathlib.Path(__file__).resolve().parents[1]
-version = '0.1.11'
+version = '0.1.12'
 files = set()
 for folder in ['src', 'tools', 'tests', 'docs']:
     files.update(p for p in (root / folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
@@ -17,7 +17,7 @@ for name in ['README.md', 'AGENTS.md', '.gitignore', 'CMakeLists.txt',
              'evidence/menu-camera-components.json',
              'evidence/title-camera-components.json', 'evidence/glove-extraction.json',
              'evidence/candidate-0110-run.json', 'evidence/billboard-native-audit.txt',
-             'evidence/crash-0110-runs.json', 'evidence/reference-abi-0111.json', 'evidence/save-version-0111.json',
+             'evidence/crash-0110-runs.json', 'evidence/reference-abi-0111.json', 'evidence/save-version-0111.json', 'evidence/candidate-0111-run.json',
              'out/candidate-abi-audit.json',
              f'out/p06-quest-{version}-receipt.json', 'out/compatibility-audit.json']:
     files.add(root / name)

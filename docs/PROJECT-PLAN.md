@@ -1,10 +1,8 @@
 # Project 06 VR project plan
 
-Status: 0.1.9 first-person head-follow, hand orientation, crouch and blue menu are
-confirmed, alongside earlier startup/VR/haptics. 0.1.10 fixes title pink flicker
-but crashes after slot selection. 0.1.11 corrects managed reference writes and
-separates save compatibility from APK versions. Awaiting Quest verification;
-no public release. See CANDIDATE-0111.md.
+Status: user reports 0.1.11 works well, including the hands and prior features.
+0.1.12 adds HUD placement/size and per-hand rotation calibration. The new controls
+await Quest verification; no public release. See CANDIDATE-0112.md.
 
 ## Current foundation
 
@@ -13,6 +11,7 @@ no public release. See CANDIDATE-0111.md.
 - Quest Touch mapping for sticks, buttons, triggers, grips and stick clicks.
 - Both-stick-click VR menu with immersive, 3D screen and 2D theatre modes.
 - Separate HUD camera path, active `OutlineCamera` fallback, system recenter reserved.
+- HUD offset/size controls and independent per-hand pitch/yaw/roll calibration.
 - Categorized VR menu (UI, VR, Graphics, Haptics, System; physical controls inside VR); immediate screen-overlay redirect.
 - Experimental first person: player-relative adjustable eye anchor, Sonic renderer hide, and
   render-only glove meshes following Touch grip positions and aim rotations. Disabled by default; the

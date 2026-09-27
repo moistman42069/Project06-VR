@@ -4,6 +4,7 @@
 #include "hand_model.h"
 #include "locomotion_math.h"
 #include "save_schema.h"
+#include "visual_adjustments.h"
 #include <cassert>
 #include <cstdio>
 #include <filesystem>
@@ -16,6 +17,9 @@ int main(){
     const char* invalidSaveVersions[]={nullptr,"","1.0","0.1.11-vr-candidate","0.1.999-vr-candidate","0.1.9","0.1.9-vr-candidate-extra"};
     for(const char* bad:invalidSaveVersions)assert(!CompatibleSaveVersion(bad));
     testGestures();
+    {float angles[3]{},q[4];P06HandAdjustment(angles,q);assert(q[0]==0&&q[1]==0&&q[2]==0&&q[3]==1);
+     for(int axis=0;axis<3;++axis){float a[3]{};a[axis]=90;P06HandAdjustment(a,q);assert(std::fabs(q[axis]-.70710678f)<.00001f&&std::fabs(q[3]-.70710678f)<.00001f);}
+     for(int pitch=-180;pitch<=180;pitch+=45)for(int yaw=-180;yaw<=180;yaw+=45)for(int roll=-180;roll<=180;roll+=45){float a[3]={float(pitch),float(yaw),float(roll)};P06HandAdjustment(a,q);float norm=0;for(float v:q)norm+=v*v;assert(std::fabs(norm-1)<.00001f);}}
     {float zero[3]{};UnityXRPose glove{};glove.rotation.w=1;glove.position={0,0,1};P06ApplyFirstPersonAnchor(glove,zero,P06GloveFromAim,1);
         assert(glove.position.x==0&&glove.position.y==0&&glove.position.z==1);}
     for(int camera=-180;camera<=180;camera+=45)for(int head=-180;head<=180;head+=45){
@@ -96,5 +100,31 @@ int main(){
     InitOptions("out/menu-test-state");auto migrated=GetOptions();
     assert(migrated.firstPerson&&migrated.motionRun&&migrated.gestureHoming&&migrated.crouchSpin);
     assert(migrated.homingTravel==.10f&&migrated.crouchDepth==.4f&&migrated.runSensitivity==2.3f&&migrated.hapticStrength==.6f);
+    assert(migrated.hudX==0&&migrated.hudY==0&&migrated.hudSize==1);
+    for(const auto& hand:migrated.handAngles)for(float angle:hand)assert(angle==0);
+    // Current accepted candidate uses schema 5; retain its tuned homing threshold.
+    file=fopen("out/menu-test-state/vr-settings.txt","w");assert(file);
+    fprintf(file,"5 0 0.8 1.2 2.5 3 1 2 1 1 0.9 1 1 1 2.3 2.5 0.16 0.4 1 0.6\n");fclose(file);
+    InitOptions("out/menu-test-state");migrated=GetOptions();
+    assert(migrated.homingTravel==.16f&&migrated.hudX==0&&migrated.hudY==0&&migrated.hudSize==1);
+    for(const auto& hand:migrated.handAngles)for(float angle:hand)assert(angle==0);
+    // Adjust both HUD axes, depth/size and each hand independently through actual menu input.
+    press(LClick|RClick);down(3);press(A); // Root was Graphics; wrap to UI.
+    c.lx=1;update();c.lx=0;update();assert(GetOptions().hudDistance==2.25f);
+    down(1);press(A);assert(GetOptions().hudX==.05f);
+    down(1);press(A);assert(GetOptions().hudY==.05f);
+    down(1);press(A);assert(GetOptions().hudSize==1.05f);
+    RasterMenu(pixels.data(),1024,1024);file=fopen("out/vr-menu-hud.ppm","wb");assert(file);fprintf(file,"P6\n1024 1024\n255\n");
+    for(auto px:pixels){unsigned char rgb[]={static_cast<unsigned char>(px),static_cast<unsigned char>(px>>8),static_cast<unsigned char>(px>>16)};fwrite(rgb,1,3,file);}fclose(file);
+    press(X);down(1);press(A);down(14);
+    for(int i=0;i<6;++i){press(A);assert(GetOptions().handAngles[i/3][i%3]==5);if(i<5)down(1);}
+    RasterMenu(pixels.data(),1024,1024);file=fopen("out/vr-menu-hands.ppm","wb");assert(file);fprintf(file,"P6\n1024 1024\n255\n");
+    for(auto px:pixels){unsigned char rgb[]={static_cast<unsigned char>(px),static_cast<unsigned char>(px>>8),static_cast<unsigned char>(px>>16)};fwrite(rgb,1,3,file);}fclose(file);
+    InitOptions("out/menu-test-state");auto saved=GetOptions();
+    assert(saved.hudX==.05f&&saved.hudY==.05f&&saved.hudSize==1.05f&&saved.hudDistance==2.25f);
+    for(auto& hand:saved.handAngles)for(float angle:hand)assert(angle==5);
+    down(1);press(A);for(auto& hand:GetOptions().handAngles)for(float angle:hand)assert(angle==0);
+    press(X);down(4);press(A);down(4);press(A);assert(GetOptions().hudX==0&&GetOptions().hudY==0&&GetOptions().hudSize==1&&GetOptions().hudDistance==2);
+    assert(GetOptions().crouchSpin&&GetOptions().gestureHoming&&GetOptions().firstPerson);press(B);
     std::cout<<"PASS: eye handedness/IPD, world scale, rotation-only tracking, stereo/mono screen poses, FOV signs, chord debounce, category navigation, staggered clicks, mode selection, input capture, focus loss, persistence, menu raster\n";
 }

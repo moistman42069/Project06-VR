@@ -21,19 +21,21 @@ std::string filename;
 constexpr int categoryCount=5;
 const char* categoryNames[]={"UI","VR","GRAPHICS","HAPTICS","SYSTEM"};
 struct MenuItem { const char* label; int option; };
-constexpr MenuItem menuItems[][14]={
-    {{"HUD DISTANCE",7},{"SCREEN DISTANCE",4},{"SCREEN WIDTH",5},{"SCREEN STEREO DEPTH",6}},
+constexpr MenuItem menuItems[][21]={
+    {{"HUD DISTANCE",7},{"HUD LEFT / RIGHT",24},{"HUD DOWN / UP",25},{"HUD SIZE",26},{"RESET HUD POSITION / SIZE",27},{"SCREEN DISTANCE",4},{"SCREEN WIDTH",5},{"SCREEN STEREO DEPTH",6}},
     {{"DISPLAY MODE",0},{"WORLD SCALE",2},{"HEAD POSITION",3},{"FIRST PERSON",13},{"RECENTER VIEW",11},{"FIRST PERSON EYE HEIGHT",14},
      {"PHYSICAL RUNNING",15},{"RUN SWING SENSITIVITY",16},{"RUN SPEED RAMP",17},{"OUTWARD SWING HOMING",18},{"HOMING SWING DISTANCE",19},
-     {"CROUCH SPINDASH",20},{"CROUCH DEPTH",21},{"CALIBRATE STANDING",11}},
+     {"CROUCH SPINDASH",20},{"CROUCH DEPTH",21},{"CALIBRATE STANDING",11},
+     {"LEFT HAND PITCH / TILT",28},{"LEFT HAND YAW / ANGLE",29},{"LEFT HAND ROLL / TWIST",30},
+     {"RIGHT HAND PITCH / TILT",31},{"RIGHT HAND YAW / ANGLE",32},{"RIGHT HAND ROLL / TWIST",33},{"RESET HAND ROTATIONS",34}},
     {{"RENDER SCALE (RESTART)",1},{"REFRESH RATE",8},{"SHADOWS",9},{"POST EFFECTS",10}},
     {{"GAME HAPTICS",22},{"HAPTIC STRENGTH",23}},
     {{"RESUME GAME",12}}
 };
-constexpr int categoryRows[]={4,14,4,2,1};
+constexpr int categoryRows[]={8,21,4,2,1};
 const char* modeName(){switch(options.mode){case ViewMode::StereoScreen:return "3D STEREO SCREEN";case ViewMode::Theatre:return "2D THEATRE";default:return options.firstPerson?"IMMERSIVE FIRST PERSON":"IMMERSIVE THIRD PERSON";}}
 void save(){if(filename.empty())return;if(auto f=fopen(filename.c_str(),"w")){
-    fprintf(f,"5 %d %.3f %.3f %.3f %.3f %.3f %.3f %d %d %f %d %d %d %f %f %f %f %d %f\n",int(options.mode),options.renderScale,options.worldScale,options.screenDistance,options.screenWidth,options.stereoStrength,options.hudDistance,int(options.positionalTracking),int(options.firstPerson),options.eyeHeight,int(options.motionRun),int(options.gestureHoming),int(options.crouchSpin),options.runSensitivity,options.runAcceleration,options.homingTravel,options.crouchDepth,int(options.haptics),options.hapticStrength);fclose(f);}}
+    fprintf(f,"6 %d %.3f %.3f %.3f %.3f %.3f %.3f %d %d %f %d %d %d %f %f %f %f %d %f %f %f %f %f %f %f %f %f %f\n",int(options.mode),options.renderScale,options.worldScale,options.screenDistance,options.screenWidth,options.stereoStrength,options.hudDistance,int(options.positionalTracking),int(options.firstPerson),options.eyeHeight,int(options.motionRun),int(options.gestureHoming),int(options.crouchSpin),options.runSensitivity,options.runAcceleration,options.homingTravel,options.crouchDepth,int(options.haptics),options.hapticStrength,options.hudX,options.hudY,options.hudSize,options.handAngles[0][0],options.handAngles[0][1],options.handAngles[0][2],options.handAngles[1][0],options.handAngles[1][1],options.handAngles[1][2]);fclose(f);}}
 float valid(float v,float lo,float hi,float fallback){return std::isfinite(v)?std::clamp(v,lo,hi):fallback;}
 void change(int direction){
     if(category<0){category=rootSelected;selected=0;++revision;return;}
@@ -46,7 +48,7 @@ void change(int direction){
         case 4:options.screenDistance=std::clamp(options.screenDistance+direction*.25f,1.f,6.f);break;
         case 5:options.screenWidth=std::clamp(options.screenWidth+direction*.25f,1.f,6.f);break;
         case 6:options.stereoStrength=std::clamp(options.stereoStrength+direction*.1f,0.f,2.f);break;
-        case 7:options.hudDistance=std::clamp(options.hudDistance+direction*.25f,.75f,5.f);break;
+        case 7:options.hudDistance=std::clamp(options.hudDistance+direction*.25f,.75f,8.f);break;
         case 11:recenterRequested=true;break;
         case 12:open=false;swallow=true;break;
         case 13:options.firstPerson=!options.firstPerson;break;
@@ -60,6 +62,12 @@ void change(int direction){
         case 21:options.crouchDepth=std::clamp(options.crouchDepth+direction*.025f,.15f,.65f);break;
         case 22:options.haptics=!options.haptics;break;
         case 23:options.hapticStrength=std::clamp(options.hapticStrength+direction*.1f,0.f,1.f);break;
+        case 24:options.hudX=std::clamp(options.hudX+direction*.05f,-2.f,2.f);break;
+        case 25:options.hudY=std::clamp(options.hudY+direction*.05f,-2.f,2.f);break;
+        case 26:options.hudSize=std::clamp(options.hudSize+direction*.05f,.5f,1.5f);break;
+        case 27:options.hudX=options.hudY=0;options.hudSize=1;options.hudDistance=2;break;
+        case 28:case 29:case 30:case 31:case 32:case 33:{int index=option-28;auto& angle=options.handAngles[index/3][index%3];angle=std::clamp(angle+direction*5.f,-180.f,180.f);break;}
+        case 34:for(auto& hand:options.handAngles)for(auto& angle:hand)angle=0;break;
         default:return; // Clearly labelled read-only placeholders.
     }++revision;save();
 }
@@ -69,8 +77,8 @@ void text(uint32_t* p,int w,int h,int x,int y,const char* s,int scale,uint32_t c
     for(;*s;++s,x+=8*scale){unsigned ch=static_cast<unsigned char>(*s);if(ch>=128)ch='?';for(int row=0;row<8;++row)for(int col=0;col<8;++col)if(font8x8_basic[ch][row]&(1<<col))rect(p,w,h,x+col*scale+(italic?(7-row)*scale/2:0),y+row*scale,scale,scale,c);}}
 }
 void InitOptions(const char* directory){std::lock_guard<std::mutex> lock(mutex);filename=std::string(directory)+"/vr-settings.txt";if(auto f=fopen(filename.c_str(),"r")){
-    VROptions read;int version=0,mode=0,pos=1,fp=0,mr=0,gh=0,cs=0,haptic=1;int n=fscanf(f,"%d %d %f %f %f %f %f %f %d %d %f %d %d %d %f %f %f %f %d %f",&version,&mode,&read.renderScale,&read.worldScale,&read.screenDistance,&read.screenWidth,&read.stereoStrength,&read.hudDistance,&pos,&fp,&read.eyeHeight,&mr,&gh,&cs,&read.runSensitivity,&read.runAcceleration,&read.homingTravel,&read.crouchDepth,&haptic,&read.hapticStrength);fclose(f);
-    if((n==9&&version==1)||(n==10&&version==2)||(n==18&&version==3)||(n==20&&(version==4||version==5))){read.mode=ViewMode(std::clamp(mode,0,2));read.renderScale=valid(read.renderScale,.4f,1.f,.7f);read.worldScale=valid(read.worldScale,.25f,3.f,1.f);read.screenDistance=valid(read.screenDistance,1.f,6.f,2.5f);read.screenWidth=valid(read.screenWidth,1.f,6.f,3.f);read.stereoStrength=valid(read.stereoStrength,0.f,2.f,1.f);read.hudDistance=valid(read.hudDistance,.75f,5.f,2.f);read.positionalTracking=pos!=0;read.firstPerson=version>=2&&fp!=0;read.eyeHeight=valid(read.eyeHeight,.4f,1.5f,.85f);read.motionRun=mr!=0;read.gestureHoming=gh!=0;read.crouchSpin=cs!=0;read.runSensitivity=valid(read.runSensitivity,.2f,3.f,1.f);read.runAcceleration=valid(read.runAcceleration,.5f,5.f,2.f);read.homingTravel=version<5?.10f:valid(read.homingTravel,.04f,.3f,.10f);read.crouchDepth=valid(read.crouchDepth,.15f,.65f,.3f);read.haptics=haptic!=0;read.hapticStrength=valid(read.hapticStrength,0.f,1.f,.7f);options=read;}}
+    VROptions read;int version=0,mode=0,pos=1,fp=0,mr=0,gh=0,cs=0,haptic=1;int n=fscanf(f,"%d %d %f %f %f %f %f %f %d %d %f %d %d %d %f %f %f %f %d %f %f %f %f %f %f %f %f %f %f",&version,&mode,&read.renderScale,&read.worldScale,&read.screenDistance,&read.screenWidth,&read.stereoStrength,&read.hudDistance,&pos,&fp,&read.eyeHeight,&mr,&gh,&cs,&read.runSensitivity,&read.runAcceleration,&read.homingTravel,&read.crouchDepth,&haptic,&read.hapticStrength,&read.hudX,&read.hudY,&read.hudSize,&read.handAngles[0][0],&read.handAngles[0][1],&read.handAngles[0][2],&read.handAngles[1][0],&read.handAngles[1][1],&read.handAngles[1][2]);fclose(f);
+    if((n==9&&version==1)||(n==10&&version==2)||(n==18&&version==3)||(n==20&&(version==4||version==5))||(n==29&&version==6)){read.mode=ViewMode(std::clamp(mode,0,2));read.renderScale=valid(read.renderScale,.4f,1.f,.7f);read.worldScale=valid(read.worldScale,.25f,3.f,1.f);read.screenDistance=valid(read.screenDistance,1.f,6.f,2.5f);read.screenWidth=valid(read.screenWidth,1.f,6.f,3.f);read.stereoStrength=valid(read.stereoStrength,0.f,2.f,1.f);read.hudDistance=valid(read.hudDistance,.75f,8.f,2.f);read.positionalTracking=pos!=0;read.firstPerson=version>=2&&fp!=0;read.eyeHeight=valid(read.eyeHeight,.4f,1.5f,.85f);read.motionRun=mr!=0;read.gestureHoming=gh!=0;read.crouchSpin=cs!=0;read.runSensitivity=valid(read.runSensitivity,.2f,3.f,1.f);read.runAcceleration=valid(read.runAcceleration,.5f,5.f,2.f);read.homingTravel=version<5?.10f:valid(read.homingTravel,.04f,.3f,.10f);read.crouchDepth=valid(read.crouchDepth,.15f,.65f,.3f);read.haptics=haptic!=0;read.hapticStrength=valid(read.hapticStrength,0.f,1.f,.7f);read.hudX=valid(read.hudX,-2.f,2.f,0.f);read.hudY=valid(read.hudY,-2.f,2.f,0.f);read.hudSize=valid(read.hudSize,.5f,1.5f,1.f);for(auto& hand:read.handAngles)for(auto& angle:hand)angle=valid(angle,-180.f,180.f,0.f);options=read;}}
 }
 VROptions GetOptions(){std::lock_guard<std::mutex> lock(mutex);return options;}
 bool VRMenuOpen(){std::lock_guard<std::mutex> lock(mutex);return open;}
@@ -119,7 +127,7 @@ void RasterMenu(uint32_t* p,int w,int h){
     rect(p,w,h,0,0,w,8,color(38,191,255));rect(p,w,h,0,127,w,4,color(255,205,55));
     text(p,w,h,52,46,"PROJECT 06 / VR",4,color(2,12,45),true);
     text(p,w,h,48,40,"PROJECT 06 / VR",4,color(242,249,255),true);
-    text(p,w,h,48,94,"QUEST 3   -   CANDIDATE 0.1.11",2,color(137,214,255));
+    text(p,w,h,48,94,"QUEST 3   -   CANDIDATE 0.1.12",2,color(137,214,255));
     text(p,w,h,48,158,category<0?"VR SETTINGS":categoryNames[category],3,color(255,217,85));
     const int count=category<0?categoryCount:categoryRows[category];
     int first=category>=0?std::max(0,selected-5):0;
@@ -135,10 +143,14 @@ void RasterMenu(uint32_t* p,int w,int h){
         case 21:snprintf(value,sizeof(value),"%.3fm",options.crouchDepth);break;
         case 22:strcpy(value,options.haptics?"ON":"OFF");break;
         case 23:snprintf(value,sizeof(value),"%d%%",int(options.hapticStrength*100));break;
+        case 24:snprintf(value,sizeof(value),"%+.2fm  (+ RIGHT)",options.hudX);break;
+        case 25:snprintf(value,sizeof(value),"%+.2fm  (+ UP)",options.hudY);break;
+        case 26:snprintf(value,sizeof(value),"%d%%",int(std::round(options.hudSize*100)));break;
+        case 28:case 29:case 30:case 31:case 32:case 33:snprintf(value,sizeof(value),"%+.0f DEGREES",options.handAngles[(option-28)/3][(option-28)%3]);break;
         case 13:strcpy(value,options.firstPerson?"ON / HEAD-ANCHORED":"OFF / THIRD PERSON");break;default:strcpy(value,"PRESS A");break;}
         text(p,w,h,52,y,menuItems[category][i].label,2,color(231,245,255));text(p,w,h,52,y+30,value,2,(option==8||option==9||option==10)?color(159,181,209):color(106,224,255));
     }
-    if(category==1){char hint[100];snprintf(hint,sizeof(hint),"ROWS %d-%d / %d   STICK DOWN FOR MORE",first+1,std::min(count,first+6),count);text(p,w,h,48,805,hint,2,color(255,217,85));}
+    if(category>=0&&count>6){char hint[100];snprintf(hint,sizeof(hint),"ROWS %d-%d / %d   STICK UP/DOWN TO SCROLL",first+1,std::min(count,first+6),count);text(p,w,h,48,805,hint,2,color(255,217,85));}
     text(p,w,h,48,862,category<0?"STICK: SCROLL   A: OPEN CATEGORY   B: CLOSE":"STICK: SELECT/CHANGE   A: APPLY   X: BACK   B: CLOSE",2,color(209,228,250));
     text(p,w,h,48,899,"BOTH STICK CLICKS: TOGGLE THIS MENU",2,color(182,196,218));
     text(p,w,h,48,936,"HOLD RIGHT META BUTTON: SYSTEM RECENTER",2,color(182,196,218));

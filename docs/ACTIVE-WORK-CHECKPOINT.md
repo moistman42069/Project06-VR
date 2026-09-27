@@ -1,32 +1,34 @@
 # Active work checkpoint
 
-Date: 2026-09-26. Current candidate: **0.1.11 / versionCode 111**.
+Date: 2026-09-27. New candidate: **0.1.12 / versionCode 112**.
+Headset-tested baseline: **0.1.11**, commit 252cb42c09fd226b898d3f87875c29cd933ff65b.
 
-- User is angry about recurring crashes and saves becoming incompatible. Acknowledge
-  the impact; do not promise headset guarantees from static checks.
-- User confirmed title pink flicker is fixed in 0.1.10; preserve that camera path.
-- Both latest runs (224650 and 224727) crash after slot selection. Logs preserved
-  under out/headset-logs; hashes and frames in evidence/crash-0110-runs.json.
-- Exact crash: IL2CPP liveness traversal at 0x109cb9c follows a stack address
-  stored in the managed XR descriptor field. field_set_value stores a reference
-  argument directly: passing &desc was wrong. Same issue existed in new camera
-  bindings. Both now use field_set_value_object with direct object and read-back.
-- tools/test-reference-abi.py executes the pinned ARM64 setters with Unicorn and
-  reproduces the old bug, verifies all 4 reference kinds and unchanged float writes.
-- Application.version is the game's save compatibility key. Freeze game-facing
-  schema identity at 0.1.10-vr-candidate while APK/menu/log versions advance.
-  Accept exact prior candidate labels in memory; no file rewrite on slot browsing.
-  Do not bump src/save_schema.h when bumping the package version.
-- Keep all previous features: authored smooth gloves, outward homing, head-relative
-  steering, blue grouped VR menu, crouch, haptics, visibility and title fixes.
+- User reports great progress, good hands and all other features working well.
+- Current request: HUD left/right/up/down adjustment and hand orientation calibration.
+- Added UI HUD distance (extended to 8), horizontal/vertical position, size and reset.
+- Added independent left/right pitch, yaw and roll plus hand rotation reset under VR.
+- New options default neutral and persist in VR settings schema 6; schemas 1-5 migrate.
+- Render-only hand calibration preserves controller pose input for gestures and movement.
+- HUD transforms apply to bridge-owned canvases during immersive gameplay; title and
+  world-space gameplay canvases keep their existing ownership behavior.
+- Latest log preserved in out/headset-logs/P06Quest-20260926-234747-097.log.txt;
+  evidence/candidate-0111-run.json records its hash, acceptance and remaining
+  Settings.SetLocalSettings null-reference records (unrelated path not changed).
+- Preserve the accepted XR submission, title fix, glove geometry, locomotion,
+  physical gestures, haptics and managed-reference corrections.
+- **Do not bump src/save_schema.h.** Game-facing identity stays 0.1.10-vr-candidate,
+  independent of APK/menu/log versions. Exact prior aliases are accepted in memory.
+- All reference writes must use il2cpp_field_set_value_object with direct object;
+  scalar writes use the arithmetic-only wrapper. The old address-of-reference
+  setter corrupted managed fields and caused 0.1.10's liveness crash.
 - Water remains unchanged: no concrete further diagnosis, per user instruction.
-- Details: [CANDIDATE-0111.md](CANDIDATE-0111.md).
+- Details and checks: CANDIDATE-0112.md and HEADSET-TEST-CHECKLIST.md.
 
-Artifacts: out/p06-quest-0.1.11.apk, matching source ZIP, receipt, compatibility
-audit and external checksums. Preserve original, logs, source archives, receipts
-and 0.1.9 playable fallback. Do not distribute 0.1.10 as a working candidate.
-No public release; MCC untouched. Install over existing app without clearing data.
+Artifacts: out/p06-quest-0.1.12.apk, matching source ZIP, receipt, compatibility
+report and external checksums. Preserve original APK, logs, sources, receipts
+and accepted 0.1.11 fallback. No public release; MCC untouched.
+Install over existing app without uninstalling or clearing data.
 
-Pending Quest acceptance: select an intact older slot, reach level select and
-stage, return to title, relaunch/reopen the slot, then check retained features.
+Pending Quest acceptance: new HUD offsets/size/depth in first and third person,
+per-hand calibration, persistence/reset, scene transitions and retained gestures.
 No connected Quest through Shadow PC. Host checks are not headset acceptance.

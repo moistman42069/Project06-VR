@@ -1,0 +1,13 @@
+{
+  "candidate": "0.1.11",
+  "log": "P06Quest-20260926-234747-097.log.txt",
+  "sha256": "6a8ebb41bf8901d225a16beec706b5da63fd34765b36049d98d022e0e3fb1f99",
+  "user_report": "Great progress; hands look great; all other things work wonderful so far. Requests HUD offsets and hand orientation calibration.",
+  "observed": [
+    "XR descriptor managed reference read-back succeeds",
+    "5 slots checked, 1 prior candidate accepted in memory without rewriting files",
+    "Both authored Sonic gloves created, 1909 vertices and 3792 triangles each",
+    "No current-run native crash record found; previous process exits belong to older runs"
+  ],
+  "known_issue": "Two Settings.SetLocalSettings NullReferenceException records remain. No unrelated settings/camera behavior changed for 0.1.12."
+}

@@ -10,6 +10,8 @@ struct VROptions {
     float eyeHeight=.85f,runSensitivity=1.f,runAcceleration=2.f,homingTravel=.10f,crouchDepth=.3f;
     bool haptics=true;
     float hapticStrength=.7f;
+    float hudX=0,hudY=0,hudSize=1;
+    float handAngles[2][3]{}; // Local visual pitch, yaw, roll in degrees; tracking stays unchanged.
 };
 void InitOptions(const char* directory);
 VROptions GetOptions();
