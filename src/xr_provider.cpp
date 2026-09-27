@@ -1,6 +1,7 @@
 #include "bridge.h"
 #include "vr_options.h"
 #include "view_math.h"
+#include "haptics.h"
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES3/gl3.h>
@@ -34,7 +35,14 @@ struct Eye { XrSwapchain swapchain=XR_NULL_HANDLE; uint32_t width=0,height=0,ind
 XrView views[2]={{XR_TYPE_VIEW},{XR_TYPE_VIEW}};
 XrActionSet actionSet=XR_NULL_HANDLE;
 XrPath hands[2]{};
-XrAction stick=XR_NULL_HANDLE,trigger=XR_NULL_HANDLE,grip=XR_NULL_HANDLE,click=XR_NULL_HANDLE;
+XrAction stick=XR_NULL_HANDLE,trigger=XR_NULL_HANDLE,grip=XR_NULL_HANDLE,click=XR_NULL_HANDLE,gripPose=XR_NULL_HANDLE,aimPose=XR_NULL_HANDLE;
+XrSpace gripSpaces[2]={XR_NULL_HANDLE,XR_NULL_HANDLE},aimSpaces[2]={XR_NULL_HANDLE,XR_NULL_HANDLE};
+uint64_t trackingOrigin=0;
+XrAction hapticAction=XR_NULL_HANDLE;
+std::mutex hapticMutex;
+struct PendingHaptic { float amplitude=0,seconds=0;double time=0; };
+PendingHaptic pendingHaptics[2];
+bool hapticsActive=false;
 XrAction buttonA=XR_NULL_HANDLE,buttonB=XR_NULL_HANDLE,buttonX=XR_NULL_HANDLE,buttonY=XR_NULL_HANDLE,menu=XR_NULL_HANDLE;
 Controls lastControls;
 XrSwapchain menuSwapchain=XR_NULL_HANDLE;
@@ -63,19 +71,58 @@ bool setupActions(){
        !makeAction(buttonA,"button_a",XR_ACTION_TYPE_BOOLEAN_INPUT,false) || !makeAction(buttonB,"button_b",XR_ACTION_TYPE_BOOLEAN_INPUT,false) ||
        !makeAction(buttonX,"button_x",XR_ACTION_TYPE_BOOLEAN_INPUT,false) || !makeAction(buttonY,"button_y",XR_ACTION_TYPE_BOOLEAN_INPUT,false) ||
        !makeAction(menu,"menu",XR_ACTION_TYPE_BOOLEAN_INPUT,false))return false;
+    const bool poseAvailable=makeAction(gripPose,"grip_pose",XR_ACTION_TYPE_POSE_INPUT,true);
+    const bool hapticAvailable=makeAction(hapticAction,"haptic",XR_ACTION_TYPE_VIBRATION_OUTPUT,true);
+    const bool aimAvailable=makeAction(aimPose,"aim_pose",XR_ACTION_TYPE_POSE_INPUT,true);
+    if(!poseAvailable)LOG("Controller grip-pose action unavailable; experimental hands remain hidden");
     std::vector<XrActionSuggestedBinding> b;
     auto bind=[&](XrAction a,const char* s){b.push_back({a,path(s)});};
     bind(stick,"/user/hand/left/input/thumbstick");bind(stick,"/user/hand/right/input/thumbstick");
     bind(trigger,"/user/hand/left/input/trigger/value");bind(trigger,"/user/hand/right/input/trigger/value");
     bind(grip,"/user/hand/left/input/squeeze/value");bind(grip,"/user/hand/right/input/squeeze/value");
+    if(poseAvailable){bind(gripPose,"/user/hand/left/input/grip/pose");bind(gripPose,"/user/hand/right/input/grip/pose");}
+    if(aimAvailable){bind(aimPose,"/user/hand/left/input/aim/pose");bind(aimPose,"/user/hand/right/input/aim/pose");}
+    if(hapticAvailable){bind(hapticAction,"/user/hand/left/output/haptic");bind(hapticAction,"/user/hand/right/output/haptic");}
     bind(click,"/user/hand/left/input/thumbstick/click");bind(click,"/user/hand/right/input/thumbstick/click");
     bind(buttonA,"/user/hand/right/input/a/click");bind(buttonB,"/user/hand/right/input/b/click");
     bind(buttonX,"/user/hand/left/input/x/click");bind(buttonY,"/user/hand/left/input/y/click");bind(menu,"/user/hand/left/input/menu/click");
     XrInteractionProfileSuggestedBinding suggested{XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING};
     suggested.interactionProfile=path("/interaction_profiles/oculus/touch_controller");suggested.countSuggestedBindings=uint32_t(b.size());suggested.suggestedBindings=b.data();
-    if(!XR_OK(xrSuggestInteractionProfileBindings(instance,&suggested)))return false;
+    XrResult bindingResult=xrSuggestInteractionProfileBindings(instance,&suggested);
+    if(XR_FAILED(bindingResult)&&hapticAvailable){
+        b.erase(std::remove_if(b.begin(),b.end(),[&](const XrActionSuggestedBinding& binding){return binding.action==hapticAction;}),b.end());hapticAction=XR_NULL_HANDLE;
+        suggested.countSuggestedBindings=uint32_t(b.size());suggested.suggestedBindings=b.data();bindingResult=xrSuggestInteractionProfileBindings(instance,&suggested);LOG("Retrying Touch bindings without optional haptics");}
+    if(XR_FAILED(bindingResult)&&(poseAvailable||aimAvailable)){check(bindingResult,"xrSuggestInteractionProfileBindings with optional grip pose");
+        b.erase(std::remove_if(b.begin(),b.end(),[&](const XrActionSuggestedBinding& binding){return binding.action==gripPose||binding.action==aimPose||binding.action==hapticAction;}),b.end());gripPose=aimPose=hapticAction=XR_NULL_HANDLE;
+        suggested.countSuggestedBindings=uint32_t(b.size());suggested.suggestedBindings=b.data();bindingResult=xrSuggestInteractionProfileBindings(instance,&suggested);LOG("Retrying Touch bindings without optional grip poses");}
+    if(!check(bindingResult,"xrSuggestInteractionProfileBindings"))return false;
     XrSessionActionSetsAttachInfo attach{XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO};attach.countActionSets=1;attach.actionSets=&actionSet;
-    return XR_OK(xrAttachSessionActionSets(session,&attach));
+    if(!XR_OK(xrAttachSessionActionSets(session,&attach)))return false;
+    if(gripPose){bool spacesReady=true;for(int i=0;i<2;++i){XrActionSpaceCreateInfo si{XR_TYPE_ACTION_SPACE_CREATE_INFO};si.action=gripPose;si.subactionPath=hands[i];si.poseInActionSpace.orientation.w=1;
+            if(!XR_OK(xrCreateActionSpace(session,&si,&gripSpaces[i]))){spacesReady=false;break;}}
+        if(spacesReady)LOG("Touch grip-pose action spaces created for both hands");else{for(auto& space:gripSpaces){if(space)xrDestroySpace(space);space=XR_NULL_HANDLE;}gripPose=XR_NULL_HANDLE;LOG("Controller poses unavailable; continuing with standard third-person input");}}
+    if(aimPose)for(int i=0;i<2;++i){XrActionSpaceCreateInfo si{XR_TYPE_ACTION_SPACE_CREATE_INFO};si.action=aimPose;si.subactionPath=hands[i];si.poseInActionSpace.orientation.w=1;
+        if(!XR_OK(xrCreateActionSpace(session,&si,&aimSpaces[i])))LOG("Aim pose unavailable for hand %d; homing gestures disabled for that hand",i);}
+    return true;
+}
+bool readPose(XrSpace space,XrAction action,int hand,MotionPose& out){
+    if(!space||predictedTime<=0||sessionState!=XR_SESSION_STATE_FOCUSED)return false;
+    if(action){XrActionStateGetInfo gi{XR_TYPE_ACTION_STATE_GET_INFO};gi.action=action;gi.subactionPath=hands[hand];XrActionStatePose state{XR_TYPE_ACTION_STATE_POSE};
+        if(!XR_OK(xrGetActionStatePose(session,&gi,&state))||!state.isActive)return false;}
+    XrSpaceLocation l{XR_TYPE_SPACE_LOCATION};constexpr XrSpaceLocationFlags required=XR_SPACE_LOCATION_POSITION_VALID_BIT|XR_SPACE_LOCATION_ORIENTATION_VALID_BIT|XR_SPACE_LOCATION_POSITION_TRACKED_BIT|XR_SPACE_LOCATION_ORIENTATION_TRACKED_BIT;
+    if(!XR_OK(xrLocateSpace(space,renderSpace,predictedTime,&l))||(l.locationFlags&required)!=required)return false;
+    out.p[0]=l.pose.position.x;out.p[1]=l.pose.position.y;out.p[2]=-l.pose.position.z;
+    out.q[0]=-l.pose.orientation.x;out.q[1]=-l.pose.orientation.y;out.q[2]=l.pose.orientation.z;out.q[3]=l.pose.orientation.w;
+    float norm=0;for(float v:out.p)if(!std::isfinite(v))return false;for(float v:out.q){if(!std::isfinite(v))return false;norm+=v*v;}
+    if(norm<.8f||norm>1.2f)return false;for(float& v:out.q)v/=std::sqrt(norm);out.valid=true;return true;
+}
+void updateTrackedHands(){
+    MotionFrame f;f.origin=trackingOrigin;f.focused=sessionState==XR_SESSION_STATE_FOCUSED;
+    f.time=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    readPose(viewSpace,XR_NULL_HANDLE,0,f.head);
+    for(int i=0;i<2;++i){readPose(gripSpaces[i],gripPose,i,f.hand[i]);readPose(aimSpaces[i],aimPose,i,f.aim[i]);
+        PublishTrackedControllerPose(i,f.hand[i].valid,f.hand[i].p,f.hand[i].q);}
+    PublishMotionFrame(f);
 }
 void deadzone(float& x,float& y){
     if(!std::isfinite(x)||!std::isfinite(y)){x=y=0;return;}float len=std::sqrt(x*x+y*y);
@@ -97,6 +144,20 @@ Controls readControls(){
     // Hysteresis prevents analog trigger/grip noise from producing button edges.
     auto analog=[&](float value,uint32_t bit){if(value>((lastControls.buttons&bit)?0.4f:0.55f))c.buttons|=bit;};
     analog(c.lt,LT);analog(c.rt,RT);analog(c.lg,LB);analog(c.rg,RB);return c;
+}
+void flushHaptics(){
+    const auto o=GetOptions();const bool allowed=running&&sessionState==XR_SESSION_STATE_FOCUSED&&!VRMenuOpen()&&GameAllowsHaptics()&&o.haptics&&o.hapticStrength>0;
+    PendingHaptic pulses[2];{std::lock_guard<std::mutex> lock(hapticMutex);for(int i=0;i<2;++i){pulses[i]=pendingHaptics[i];pendingHaptics[i]={};}}
+    if(!hapticAction)return;
+    const double now=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    for(int i=0;i<2;++i){XrHapticActionInfo hi{XR_TYPE_HAPTIC_ACTION_INFO};hi.action=hapticAction;hi.subactionPath=hands[i];
+        if(!allowed){if(hapticsActive)XR_OK(xrStopHapticFeedback(session,&hi));continue;}
+        if(now-pulses[i].time>.12)continue;
+        auto pulse=ClampHaptic(pulses[i].amplitude,pulses[i].seconds,o.hapticStrength);if(pulse.amplitude<=0)continue;
+        XrHapticVibration vibration{XR_TYPE_HAPTIC_VIBRATION};vibration.amplitude=pulse.amplitude;vibration.duration=XrDuration(pulse.seconds*1000000000);vibration.frequency=XR_FREQUENCY_UNSPECIFIED;
+        if(XR_OK(xrApplyHapticFeedback(session,&hi,reinterpret_cast<const XrHapticBaseHeader*>(&vibration))))hapticsActive=true;
+    }
+    if(!allowed)hapticsActive=false;
 }
 void pollEvents(){
     if(!instance)return;
@@ -268,6 +329,9 @@ void finishFrame(){
 void shutdown(){
     if(frameBegun)finishFrame();
     for(auto& e:eyes){for(auto t:e.textures)if(t)display->DestroyTexture(displayHandle,t);e.textures.clear();e.images.clear();if(e.swapchain)xrDestroySwapchain(e.swapchain);e=Eye{};}
+    for(auto& space:aimSpaces){if(space)xrDestroySpace(space);space=XR_NULL_HANDLE;}
+    for(auto& space:gripSpaces){if(space)xrDestroySpace(space);space=XR_NULL_HANDLE;}
+    PublishTrackedControllerPose(0,false,nullptr,nullptr);PublishTrackedControllerPose(1,false,nullptr,nullptr);
     if(menuSwapchain)xrDestroySwapchain(menuSwapchain);menuSwapchain=XR_NULL_HANDLE;menuImages.clear();menuImageRevision.clear();menuPixels.clear();menuUpload.clear();menuReady=false;
     if(viewSpace)xrDestroySpace(viewSpace);if(renderSpace)xrDestroySpace(renderSpace);if(localSpace)xrDestroySpace(localSpace);renderSpace=localSpace=viewSpace=XR_NULL_HANDLE;
     if(session)xrDestroySession(session);session=XR_NULL_HANDLE;
@@ -291,7 +355,7 @@ void recenter(){
     float yaw=std::atan2(2.f*(q.w*q.y+q.x*q.z),1.f-2.f*(q.y*q.y+q.x*q.x));
     XrReferenceSpaceCreateInfo ci{XR_TYPE_REFERENCE_SPACE_CREATE_INFO};ci.referenceSpaceType=XR_REFERENCE_SPACE_TYPE_LOCAL;ci.poseInReferenceSpace.orientation={0,std::sin(yaw/2),0,std::cos(yaw/2)};
     ci.poseInReferenceSpace.position={(views[0].pose.position.x+views[1].pose.position.x)*.5f,(views[0].pose.position.y+views[1].pose.position.y)*.5f,(views[0].pose.position.z+views[1].pose.position.z)*.5f};
-    XrSpace next=XR_NULL_HANDLE;if(XR_OK(xrCreateReferenceSpace(session,&ci,&next))){if(renderSpace)xrDestroySpace(renderSpace);renderSpace=next;recentered=true;LOG("Headset origin recentered; game third-person camera retained");}
+    XrSpace next=XR_NULL_HANDLE;if(XR_OK(xrCreateReferenceSpace(session,&ci,&next))){if(renderSpace)xrDestroySpace(renderSpace);renderSpace=next;recentered=true;++trackingOrigin;LOG("Headset origin recentered; game third-person camera retained");}
 }
 UnitySubsystemErrorCode UNITY_INTERFACE_API gfxStart(UnitySubsystemHandle h,void*,UnityXRRenderingCapabilities* caps){
     std::lock_guard<std::mutex> guard(xrMutex);graphicsReady=false;displayHandle=h;
@@ -311,8 +375,10 @@ UnitySubsystemErrorCode UNITY_INTERFACE_API populate(UnitySubsystemHandle,void*,
     if(pendingRecenterTime && predictedTime>=pendingRecenterTime){recentered=false;pendingRecenterTime=0;}
     bool recenterRequested=ConsumeRecenter();if(!recentered||recenterRequested)recenter();
     frameOptions=GetOptions();
+    updateTrackedHands();
     shouldRender=fs.shouldRender;
     if(!shouldRender||!locate(renderSpace))return kUnitySubsystemErrorCodeSuccess;
+    SyncFirstPersonVisuals();
     int passCount=frameOptions.mode==ViewMode::Theatre?1:2;
     for(int i=0;i<passCount;++i){auto& e=eyes[i];XrSwapchainImageAcquireInfo ai{XR_TYPE_SWAPCHAIN_IMAGE_ACQUIRE_INFO};
         if(!XR_OK(xrAcquireSwapchainImage(e.swapchain,&ai,&e.index)))return kUnitySubsystemErrorCodeSuccess;
@@ -323,6 +389,9 @@ UnitySubsystemErrorCode UNITY_INTERFACE_API populate(UnitySubsystemHandle,void*,
         // Entire tracked eye pose is relative to the untouched third-person anchor.
         // No XR input provider applies a duplicate head transform.
         params.deviceAnchorToEyePose=P06EyePose(views,i,frameOptions);
+        if(frameOptions.firstPerson&&frameOptions.mode==ViewMode::Immersive){float anchorPosition[3],anchorRotation[4];
+            if(GetFirstPersonCameraAnchor(anchorPosition,anchorRotation))P06ApplyFirstPersonAnchor(params.deviceAnchorToEyePose,anchorPosition,anchorRotation,frameOptions.worldScale);
+            else{frameOptions.firstPerson=false;static bool unavailableLogged=false;if(!unavailableLogged){unavailableLogged=true;LOG("First-person requested but Sonic camera anchor is unavailable; using third-person view");}}}
         params.projection=P06Projection(views[i].fov,frameOptions);
         params.viewportRect={0,0,1,1};params.textureArraySlice=0;
         frame->cullingPasses[i].deviceAnchorToCullingPose=params.deviceAnchorToEyePose;frame->cullingPasses[i].projection=params.projection;frame->cullingPasses[i].separation=0;
@@ -336,9 +405,10 @@ UnitySubsystemErrorCode UNITY_INTERFACE_API gfxStop(UnitySubsystemHandle,void*){
 UnitySubsystemErrorCode UNITY_INTERFACE_API update(UnitySubsystemHandle,void*,UnityXRDisplayState* state){
     {std::lock_guard<std::mutex> guard(xrMutex);pollEvents();auto next=readControls();
         if(next.focused!=lastControls.focused||next.buttons!=lastControls.buttons)LOG("Touch input: focused=%d buttons=0x%x left=(%.2f,%.2f) right=(%.2f,%.2f)",int(next.focused),next.buttons,next.lx,next.ly,next.rx,next.ry);
+        if(!next.focused){PublishTrackedControllerPose(0,false,nullptr,nullptr);PublishTrackedControllerPose(1,false,nullptr,nullptr);}
         lastControls=next;
         double now=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
-        PublishControls(UpdateVRMenu(lastControls,now));state->focusLost=sessionState!=XR_SESSION_STATE_FOCUSED;state->displayIsTransparent=false;state->reprojectionMode=kUnityXRReprojectionModePositionAndOrientation;}
+        PublishControls(UpdateVRMenu(lastControls,now));flushHaptics();state->focusLost=sessionState!=XR_SESSION_STATE_FOCUSED;state->displayIsTransparent=false;state->reprojectionMode=kUnityXRReprojectionModePositionAndOrientation;}
     GameMainTick();return kUnitySubsystemErrorCodeSuccess;
 }
 UnitySubsystemErrorCode UNITY_INTERFACE_API initialize(UnitySubsystemHandle h,void*){
@@ -361,3 +431,10 @@ extern "C" void UNITY_INTERFACE_EXPORT UNITY_INTERFACE_API UnityPluginLoad(IUnit
 }
 
 bool XRDisplayGraphicsReady(){std::lock_guard<std::mutex> guard(xrMutex);return graphicsReady;}
+
+void QueueGameHaptic(float amplitude,float seconds,int hand){
+    if(!std::isfinite(amplitude)||!std::isfinite(seconds)||amplitude<=0||seconds<=0)return;
+    std::lock_guard<std::mutex> lock(hapticMutex);
+    const double now=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    for(int i=0;i<2;++i)if(hand<0||hand==i){auto& p=pendingHaptics[i];if(now-p.time>.12)p={};p.amplitude=std::max(p.amplitude,std::clamp(amplitude,0.f,1.f));p.seconds=std::max(p.seconds,std::min(seconds,.3f));p.time=now;}
+}

@@ -1,6 +1,10 @@
 #include "bridge.h"
 #include "bindings.h"
 #include "vr_options.h"
+#include "gestures.h"
+#include "haptics.h"
+#include "trigger_sweep.h"
+#include "hand_model.h"
 #include "dobby.h"
 #include <android/dlext.h>
 #include <dlfcn.h>
@@ -16,6 +20,10 @@
 #include <ucontext.h>
 #include <time.h>
 #include <sys/syscall.h>
+#include <vector>
+#include <array>
+#include <chrono>
+#include <cstddef>
 
 JavaVM* g_vm=nullptr;
 jobject g_activity=nullptr;
@@ -47,9 +55,34 @@ void installCrashRecorder(){
 void* il=nullptr;
 pid_t unityThread=0;
 void* hudCamera=nullptr;
+bool managedReady=false;
+void* (*thread_current)();
+void (*gc_free)(uint32_t);
+uint32_t playerRoot=0;
+struct TrackedPose { bool valid=false;float position[3]{},rotation[4]{0,0,0,1}; };
+TrackedPose trackedHands[2];
+std::mutex trackedHandsMutex;
+struct FirstPersonAnchor { bool valid=false;float position[3]{},rotation[4]{0,0,0,1};void* cameraTransform=nullptr;void* player=nullptr; };
+FirstPersonAnchor firstPersonAnchor;
+void* rootedCameraTransform=nullptr;
+uint32_t cameraTransformRoot=0;
+MotionFrame motionFrame;
+std::mutex motionMutex;
+GestureEngine gestures;
+void* gesturePlayer=nullptr;
+uint32_t gesturePlayerRoot=0;
+struct HiddenRenderer { void* renderer=nullptr;bool wasEnabled=true;uint32_t root=0; };
+std::vector<HiddenRenderer> hiddenRenderers;
+struct GlovePiece { void* gameObject=nullptr;void* transform=nullptr;float offset[3]{},scale[3]{},rotation[4]{0,0,0,1};bool active=false;uint32_t root=0,transformRoot=0; };
+struct Glove { std::array<GlovePiece,7> pieces; };
+Glove gloves[2];
+bool glovesCreated=false,gloveBuildFailed=false,firstPersonWasActive=false;
+void* gloveParentTransform=nullptr;
+void* rootedPlayerBase=nullptr;
 uint32_t hudLayerMask=1u<<5;
 std::atomic<bool> installed{false};
 std::atomic<uint64_t> axisQueries{0},buttonQueries{0};
+std::atomic<bool> gameHapticsAllowed{false};
 std::mutex inputMutex;
 Controls controls;
 uint32_t previous=0;
@@ -82,13 +115,20 @@ void* (*object_new)(void*);
 void* (*string_new)(const char*);
 uint32_t (*gc_root)(void*,bool);
 void* (*array_new)(void*,uintptr_t);
+using CanvasModeSetter=void(*)(void*,int);
+CanvasModeSetter oldCanvasModeSetter=nullptr;
+void (*canvasSetCamera)(void*,void*)=nullptr;
+void (*canvasSetDistance)(void*,float)=nullptr;
+bool canvasModeHookInstalled=false,canvasModeHookAttempted=false;
 bool eq(void* str,const char* text) {
     if(!str || !string_length || !string_chars) return false;
     auto n=string_length(str); if(n<0 || n>128 || size_t(n)!=strlen(text))return false;
     auto s=string_chars(str);for(int i=0;i<n;++i)if(s[i]!=uint8_t(text[i]))return false;return true;
 }
 void* klass(const char* ns,const char* name) {
-    size_t n=0;auto a=domain_assemblies(domain_get(),&n);if(n>1024)return nullptr;
+    if(!managedReady||gettid()!=unityThread||!thread_current||!thread_current())return nullptr;
+    auto domain=domain_get();if(!domain)return nullptr;
+    size_t n=0;auto a=domain_assemblies(domain,&n);if(!a||n>1024)return nullptr;
     for(size_t i=0;i<n;++i)if(auto k=class_from_name(assembly_image(a[i]),ns,name))return k;
     return nullptr;
 }
@@ -99,7 +139,152 @@ void* call(void* k,const char* name,void* self,void** args,int argc) {
     if(!k)return nullptr;auto m=class_method(k,name,argc);if(!m)return nullptr;
     void* ex=nullptr;auto r=invoke(m,self,args,&ex);if(ex){LOG("Managed call failed: %s",name);return nullptr;}return r;
 }
+bool alive(void* obj){return obj&&field<void*>(obj,"m_CachedPtr");}
 template<typename T>T icall(const char* n){auto f=resolve(n);if(!f)LOG("Missing Unity icall: %s",n);return reinterpret_cast<T>(f);}
+void quatMultiply(const float a[4],const float b[4],float out[4]){
+    out[0]=a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1];out[1]=a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0];
+    out[2]=a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3];out[3]=a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2];
+}
+void quatRotate(const float q[4],const float v[3],float out[3]){
+    const float tx=2.f*(q[1]*v[2]-q[2]*v[1]),ty=2.f*(q[2]*v[0]-q[0]*v[2]),tz=2.f*(q[0]*v[1]-q[1]*v[0]);
+    out[0]=v[0]+q[3]*tx+(q[1]*tz-q[2]*ty);out[1]=v[1]+q[3]*ty+(q[2]*tx-q[0]*tz);out[2]=v[2]+q[3]*tz+(q[0]*ty-q[1]*tx);
+}
+bool hideSonic(bool hide);
+bool refreshFirstPersonAnchor(){
+    firstPersonAnchor.valid=false;firstPersonAnchor.cameraTransform=nullptr;
+    auto pcClass=klass("","PlayerCamera");auto objectClass=klass("UnityEngine","Object");if(!pcClass||!objectClass)return false;
+    static auto find=icall<void*(*)(void*,bool)>("UnityEngine.Object::FindObjectsOfType");
+    static void* pc=nullptr;static uint32_t pcRoot=0;
+    if(!alive(pc)){if(pcRoot){gc_free(pcRoot);pcRoot=0;}pc=nullptr;
+        if(!find)return false;auto pcs=find(type_object(class_type(pcClass)),false);
+        if(!pcs||array_length(pcs)<1||array_length(pcs)>16)return false;
+        pc=*reinterpret_cast<void**>(array_address(pcs,sizeof(void*),0));if(!alive(pc))return false;pcRoot=gc_root(pc,false);}
+    auto player=field<void*>(pc,"PlayerBase");auto camera=field<void*>(pc,"Camera");if(!player||!camera)return false;
+    if(!alive(player)||!alive(camera))return false;
+    static auto transform=icall<void*(*)(void*)>("UnityEngine.Component::get_transform");
+    static auto getPos=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_position_Injected");
+    static auto getRot=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_rotation_Injected");
+    if(!transform||!getPos||!getRot)return false;
+    auto camTransform=transform(camera),playerTransform=transform(player);if(!camTransform||!playerTransform)return false;
+    float camPos[3],targetPos[3],camRot[4],playerRot[4];getPos(camTransform,camPos);getPos(playerTransform,targetPos);targetPos[1]+=GetOptions().eyeHeight;getRot(camTransform,camRot);getRot(playerTransform,playerRot);
+    float invCam[4]={-camRot[0],-camRot[1],-camRot[2],camRot[3]},delta[4];// Preserve the game camera yaw, without feeding player heading back into the view.
+    float forward[3]={0,0,1},worldForward[3];quatRotate(camRot,forward,worldForward);
+    float yaw=std::atan2(worldForward[0],worldForward[2]);
+    static bool fpYawReady=false;static void* fpPlayer=nullptr;static float fpYaw=0,lastHeadYaw=0;static uint64_t fpOrigin=0;static double lastTime=0;
+    auto options=GetOptions();MotionFrame frame;{std::lock_guard<std::mutex> lock(motionMutex);frame=motionFrame;}
+    double now=std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    if(options.firstPerson&&options.mode==ViewMode::Immersive){
+        if(!fpYawReady||fpPlayer!=player){fpYaw=yaw;fpYawReady=true;fpPlayer=player;fpOrigin=frame.origin;lastHeadYaw=0;lastTime=now;}
+        if(fpOrigin!=frame.origin){fpYaw+=lastHeadYaw;fpOrigin=frame.origin;}
+        Controls input;{std::lock_guard<std::mutex> lock(inputMutex);input=controls;}
+        double dt=std::clamp(now-lastTime,0.0,.05);if(input.focused&&!input.blocked&&!(input.buttons&RClick))fpYaw+=input.rx*1.5707963f*float(dt);
+        if(frame.head.valid){float headForward[3];quatRotate(frame.head.q,forward,headForward);lastHeadYaw=std::atan2(headForward[0],headForward[2]);}
+        yaw=fpYaw;
+    }else fpYawReady=false;
+    lastTime=now;float flatRotation[4]={0,std::sin(yaw*.5f),0,std::cos(yaw*.5f)};quatMultiply(invCam,flatRotation,delta);
+    float worldOffset[3]={targetPos[0]-camPos[0],targetPos[1]-camPos[1],targetPos[2]-camPos[2]},localOffset[3];quatRotate(invCam,worldOffset,localOffset);
+    float length=std::sqrt(delta[0]*delta[0]+delta[1]*delta[1]+delta[2]*delta[2]+delta[3]*delta[3]);
+    if(!(length>0.01f)||length>10.f)return false;for(float& v:delta)v/=length;
+    for(int i=0;i<3;++i)if(!std::isfinite(localOffset[i]))return false;
+    firstPersonAnchor.valid=true;std::copy(localOffset,localOffset+3,firstPersonAnchor.position);std::copy(delta,delta+4,firstPersonAnchor.rotation);firstPersonAnchor.cameraTransform=camTransform;firstPersonAnchor.player=player;
+    if(rootedCameraTransform!=camTransform){if(cameraTransformRoot)gc_free(cameraTransformRoot);cameraTransformRoot=gc_root(camTransform,false);rootedCameraTransform=camTransform;}
+    if(rootedPlayerBase!=player){hideSonic(false);if(playerRoot)gc_free(playerRoot);playerRoot=gc_root(player,false);rootedPlayerBase=player;}
+    return true;
+}
+void setGameObjectActive(void* object,bool active){static auto set=icall<void(*)(void*,bool)>("UnityEngine.GameObject::SetActive");if(set&&object)set(object,active);}
+void setRendererEnabled(void* renderer,bool enabled){static auto set=icall<void(*)(void*,bool)>("UnityEngine.Renderer::set_enabled");if(set&&renderer)set(renderer,enabled);}
+bool getRendererEnabled(void* renderer){static auto get=icall<bool(*)(void*)>("UnityEngine.Renderer::get_enabled");return get&&renderer?get(renderer):true;}
+bool hideSonic(bool hide){
+    if(!hide){for(const auto& saved:hiddenRenderers){if(alive(saved.renderer))setRendererEnabled(saved.renderer,saved.wasEnabled);if(saved.root)gc_free(saved.root);}hiddenRenderers.clear();return true;}
+    for(auto it=hiddenRenderers.begin();it!=hiddenRenderers.end();){if(!alive(it->renderer)){gc_free(it->root);it=hiddenRenderers.erase(it);}else ++it;}
+    auto array=firstPersonAnchor.player?field<void*>(firstPersonAnchor.player,"PlayerRenderers"):nullptr;if(!array)return false;
+    auto count=array_length(array);if(count<1||count>64)return false;
+    if(hide){for(uintptr_t i=0;i<count;++i){auto renderer=*reinterpret_cast<void**>(array_address(array,sizeof(void*),i));if(!renderer)continue;
+            auto it=std::find_if(hiddenRenderers.begin(),hiddenRenderers.end(),[&](const HiddenRenderer& saved){return saved.renderer==renderer;});
+            if(it==hiddenRenderers.end()){hiddenRenderers.push_back({renderer,getRendererEnabled(renderer),gc_root(renderer,false)});it=hiddenRenderers.end()-1;}setRendererEnabled(renderer,false);}}
+    return true;
+}
+bool buildGloves(){
+    auto gameObjectClass=klass("UnityEngine","GameObject"),transformClass=klass("UnityEngine","Transform"),materialClass=klass("UnityEngine","Material");
+    auto colliderType=klass("UnityEngine","Collider"),rendererType=klass("UnityEngine","Renderer");
+    if(!gameObjectClass||!transformClass||!materialClass||!colliderType||!rendererType)return false;
+    static auto getTransform=icall<void*(*)(void*)>("UnityEngine.GameObject::get_transform");
+    static auto setScale=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localScale_Injected");
+    static auto setPosition=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localPosition_Injected");
+    static auto setRotation=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localRotation_Injected");
+    static auto setCollider=icall<void(*)(void*,bool)>("UnityEngine.Collider::set_enabled");
+    static auto material=icall<void*(*)(void*)>("UnityEngine.Renderer::GetMaterial");
+    if(!getTransform||!setScale||!setPosition||!setRotation||!setCollider||!material)return false;
+    static auto persist=icall<void(*)(void*)>("UnityEngine.Object::DontDestroyOnLoad");
+    static auto propertyId=icall<int(*)(void*)>("UnityEngine.Shader::PropertyToID");
+    if(!persist||!propertyId)return false;
+    int colorId=propertyId(string_new("_Color"));
+    static auto setShader=icall<void(*)(void*,void*)>("UnityEngine.Material::set_shader");
+    static auto getShader=icall<void*(*)(void*)>("UnityEngine.Material::get_shader");
+    static auto supported=icall<bool(*)(void*)>("UnityEngine.Shader::get_isSupported");
+    auto shaderClass=klass("UnityEngine","Shader");void* gloveShader=nullptr;
+    if(!setShader||!getShader||!supported||!shaderClass)return false;
+    for(const char* name:{"Unlit/Color","Legacy Shaders/Diffuse","Standard"}){void* args[]={string_new(name)};auto candidate=call(shaderClass,"Find",nullptr,args,1);if(alive(candidate)&&supported(candidate)){gloveShader=candidate;break;}}
+    const int primitiveTypes[7]={0,1,1,1,1,1,2};const float white[4]={1.f,1.f,1.f,1.f};
+    for(int hand=0;hand<2;++hand)for(int i=0;i<7;++i){auto& piece=gloves[hand].pieces[i];int primitive=primitiveTypes[i];void* args[]={&primitive};piece.gameObject=call(gameObjectClass,"CreatePrimitive",nullptr,args,1);if(!piece.gameObject)return false;
+        piece.root=gc_root(piece.gameObject,false);setGameObjectActive(piece.gameObject,false);persist(piece.gameObject);
+        piece.transform=getTransform(piece.gameObject);void* colliderArgs[]={type_object(class_type(colliderType))};auto collider=call(gameObjectClass,"GetComponent",piece.gameObject,colliderArgs,1);void* rendererArgs[]={type_object(class_type(rendererType))};auto renderer=call(gameObjectClass,"GetComponent",piece.gameObject,rendererArgs,1);
+        if(!piece.transform||!renderer)return false;piece.transformRoot=gc_root(piece.transform,false);if(collider)setCollider(collider,false);
+        auto* scale=piece.scale;auto* offset=piece.offset;piece.rotation[3]=1.f;
+        if(i==0){scale[0]=.095f;scale[1]=.075f;scale[2]=.065f;}
+        else if(i>=1&&i<=4){scale[0]=.023f;scale[1]=.038f;scale[2]=.023f;offset[0]=(float(i)-2.5f)*.024f;offset[1]=.005f;offset[2]=.050f;piece.rotation[0]=.70710678f;piece.rotation[3]=.70710678f;}
+        else if(i==5){scale[0]=.047f;scale[1]=.05f;scale[2]=.04f;offset[0]=(hand==0?.05f:-.05f);offset[1]=-.018f;offset[2]=.005f;}
+        else{scale[0]=.105f;scale[1]=.035f;scale[2]=.08f;offset[2]=-.04f;piece.rotation[0]=.70710678f;piece.rotation[3]=.70710678f;}
+        auto mat=material(renderer);if(!alive(mat))return false;if(gloveShader)setShader(mat,gloveShader);
+        if(!alive(getShader(mat))||!supported(getShader(mat)))return false;
+        void* colorArgs[]={&colorId,const_cast<float*>(white)};call(materialClass,"SetColorImpl",mat,colorArgs,2);
+        setScale(piece.transform,scale);setPosition(piece.transform,offset);setRotation(piece.transform,piece.rotation);setGameObjectActive(piece.gameObject,false);
+    }
+    gloveParentTransform=firstPersonAnchor.cameraTransform;LOG("Experimental first-person glove meshes created (render-only; controller-pose driven)");return true;
+}
+bool updateGloves(bool active){
+    if(!glovesCreated){if(!active)return true;if(gloveBuildFailed)return false;glovesCreated=buildGloves();if(!glovesCreated){gloveBuildFailed=true;
+        auto objectClass=klass("UnityEngine","Object");float delay=0;
+        for(auto& glove:gloves){for(auto& piece:glove.pieces){
+            if(alive(piece.gameObject)){setGameObjectActive(piece.gameObject,false);void* args[]={piece.gameObject,&delay};call(objectClass,"Destroy",nullptr,args,2);}
+            if(piece.root)gc_free(piece.root);if(piece.transformRoot)gc_free(piece.transformRoot);piece={};
+        }}
+        return false;
+    }}
+    static auto setPosition=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localPosition_Injected");
+    static auto setRotation=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localRotation_Injected");
+    static auto setScale=icall<void(*)(void*,const float*)>("UnityEngine.Transform::set_localScale_Injected");
+    if(!setPosition||!setRotation||!setScale)return false;
+    float camPos[3]{},camRot[4]{0,0,0,1};
+    static auto getPos=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_position_Injected");
+    static auto getRot=icall<void(*)(void*,float*)>("UnityEngine.Transform::get_rotation_Injected");
+    if(active){if(!getPos||!getRot||!alive(firstPersonAnchor.cameraTransform))return false;getPos(firstPersonAnchor.cameraTransform,camPos);getRot(firstPersonAnchor.cameraTransform,camRot);}
+    const float worldScale=std::clamp(GetOptions().worldScale,.25f,3.f);
+    TrackedPose poses[2];{std::lock_guard<std::mutex> lock(trackedHandsMutex);std::copy(trackedHands,trackedHands+2,poses);}
+    for(int hand=0;hand<2;++hand){bool visible=active&&poses[hand].valid;auto& glove=gloves[hand];
+        if(visible){float gripRotation[4],handRotation[4];quatMultiply(poses[hand].rotation,P06GloveFromGrip[hand],gripRotation);quatMultiply(firstPersonAnchor.rotation,gripRotation,handRotation);float handPos[3],trackedPos[3]={poses[hand].position[0]/worldScale,poses[hand].position[1]/worldScale,poses[hand].position[2]/worldScale};quatRotate(firstPersonAnchor.rotation,trackedPos,handPos);
+            for(auto& piece:glove.pieces){float relative[3],scale[3];quatRotate(handRotation,piece.offset,relative);for(int j=0;j<3;++j){relative[j]/=worldScale;scale[j]=piece.scale[j]/worldScale;}setScale(piece.transform,scale);float position[3]={firstPersonAnchor.position[0]+handPos[0]+relative[0],firstPersonAnchor.position[1]+handPos[1]+relative[1],firstPersonAnchor.position[2]+handPos[2]+relative[2]};
+                float rotation[4];quatMultiply(handRotation,piece.rotation,rotation);float worldPos[3],worldRot[4];quatRotate(camRot,position,worldPos);for(int j=0;j<3;++j)worldPos[j]+=camPos[j];quatMultiply(camRot,rotation,worldRot);setPosition(piece.transform,worldPos);setRotation(piece.transform,worldRot);if(!piece.active){setGameObjectActive(piece.gameObject,true);piece.active=true;}}}
+        else for(auto& piece:glove.pieces)if(piece.active){setGameObjectActive(piece.gameObject,false);piece.active=false;}
+    }return true;
+}
+#include "first_person_ui.inc"
+void syncFirstPerson(){
+    const auto options=GetOptions();const bool requested=options.firstPerson&&options.mode==ViewMode::Immersive;
+    if(!requested){if(firstPersonWasActive){hideSonic(false);updateGloves(false);LOG("Experimental first-person mode disabled; Sonic body renderers restored");}firstPersonWasActive=false;firstPersonAnchor.valid=false;return;}
+    refreshFirstPersonAnchor();
+    if(!firstPersonAnchor.valid){if(firstPersonWasActive){hideSonic(false);updateGloves(false);firstPersonWasActive=false;}return;}
+    if(!updateGloves(true)||!hideSonic(true)){if(firstPersonWasActive)hideSonic(false);updateGloves(false);firstPersonWasActive=false;static bool failedLogged=false;if(!failedLogged){failedLogged=true;LOG("First-person visuals unavailable; Sonic remains visible and third-person view stays active");}return;}
+    if(!firstPersonWasActive)LOG("Experimental first-person mode enabled; camera anchor, Sonic body hide and controller gloves active");firstPersonWasActive=true;
+}
+void canvasModeHook(void* canvas,int mode){
+    const bool redirected=mode==0&&hudCamera&&canvasSetCamera&&canvasSetDistance;
+    if(redirected){
+        canvasSetCamera(canvas,hudCamera);canvasSetDistance(canvas,GetOptions().hudDistance);mode=1;
+    }
+    if(oldCanvasModeSetter)oldCanvasModeSetter(canvas,mode);
+    if(redirected&&managedReady&&gettid()==unityThread){static auto root=icall<bool(*)(void*)>("UnityEngine.Canvas::get_isRootCanvas");if(root&&root(canvas))rememberHUDCanvas(canvas);}
+}
 bool bindApi(){
 #define API(name,symbol) name=reinterpret_cast<decltype(name)>(dlsym(il,symbol));if(!name){LOG("Missing export %s",symbol);return false;}
     API(domain_get,"il2cpp_domain_get") API(domain_assemblies,"il2cpp_domain_get_assemblies")
@@ -113,11 +298,15 @@ bool bindApi(){
     API(array_header_size,"il2cpp_array_object_header_size") API(string_length,"il2cpp_string_length")
     API(string_chars,"il2cpp_string_chars") API(resolve,"il2cpp_resolve_icall")
     API(object_new,"il2cpp_object_new") API(string_new,"il2cpp_string_new") API(gc_root,"il2cpp_gchandle_new")
-    API(array_new,"il2cpp_array_new")
+    API(array_new,"il2cpp_array_new") API(thread_current,"il2cpp_thread_current") API(gc_free,"il2cpp_gchandle_free")
 #undef API
     return true;
 }
 void startXR(){
+    // Entered only through verified managed game callbacks, never Android onCreate.
+    if(!thread_current||!thread_current())return;
+    if(!managedReady){unityThread=gettid();managedReady=true;LOG("Managed runtime ready on game thread %d",int(unityThread));}
+    if(gettid()!=unityThread)return;
     if(haveXR&&XRDisplayGraphicsReady())return;
     haveXR=false;
     if(tryingXR || !resolve)return;
@@ -229,13 +418,27 @@ void* selectGameCamera(){
         if(!fallback)fallback=c;
     }return fallback;
 }
+#include "gameplay_hooks.inc"
+#include "animated_uv.inc"
+#include "gesture_bridge.inc"
 void* (*oldDlopen)(const char*,int)=nullptr;
 void* (*oldExt)(const char*,int,const android_dlextinfo*)=nullptr;
 void loaded(const char* name,void* h){if(h&&name&&strstr(name,"libil2cpp.so"))InstallGameHooks(h);}
 void* dlopenHook(const char* p,int flags){auto h=oldDlopen(p,flags);loaded(p,h);return h;}
 void* extHook(const char* p,int flags,const android_dlextinfo* info){auto h=oldExt(p,flags,info);loaded(p,h);return h;}
 }
-void PublishControls(const Controls& c){std::lock_guard<std::mutex> lock(inputMutex);previous=controls.focused&&c.focused&&!controls.blocked&&!c.blocked?controls.buttons:c.buttons;controls=c;}
+void PublishMotionFrame(const MotionFrame& f){std::lock_guard<std::mutex> lock(motionMutex);motionFrame=f;}
+bool GameAllowsHaptics(){return gameHapticsAllowed.load();}
+void PublishControls(const Controls& raw){const Controls c=applyGestures(raw);std::lock_guard<std::mutex> lock(inputMutex);previous=controls.focused&&c.focused&&!controls.blocked&&!c.blocked?controls.buttons:c.buttons;controls=c;}
+void PublishTrackedControllerPose(int hand,bool valid,const float position[3],const float rotation[4]){
+    if(hand<0||hand>1)return;std::lock_guard<std::mutex> lock(trackedHandsMutex);auto& pose=trackedHands[hand];pose.valid=valid&&position&&rotation;
+    if(!pose.valid)return;std::copy(position,position+3,pose.position);std::copy(rotation,rotation+4,pose.rotation);
+}
+bool GetFirstPersonCameraAnchor(float position[3],float rotation[4]){
+    if(!firstPersonWasActive||!firstPersonAnchor.valid||!position||!rotation)return false;
+    std::copy(firstPersonAnchor.position,firstPersonAnchor.position+3,position);std::copy(firstPersonAnchor.rotation,firstPersonAnchor.rotation+4,rotation);return true;
+}
+void SyncFirstPersonVisuals(){if(resolve&&gettid()==unityThread){syncFirstPerson();syncFirstPersonHUD(firstPersonWasActive);syncFirstPersonNearClip(firstPersonWasActive);}}
 void LogBridgeStats(){LOG("Game input queries: axes=%llu buttons=%llu",(unsigned long long)axisQueries.load(),(unsigned long long)buttonQueries.load());}
 void SyncHudCamera(){
     if(!resolve||!hudCamera||gettid()!=unityThread)return;
@@ -263,7 +466,7 @@ void SyncHudCamera(){
     if(source&&target){getPos(source,pos);getRot(source,rot);setPos(target,pos);setRot(target,rot);}
 }
 void GameMainTick(){
-    if(!resolve)return;
+    if(!managedReady||gettid()!=unityThread||!resolve)return;
     static auto getTimeScale=icall<float(*)()>("UnityEngine.Time::get_timeScale");
     static auto setTimeScale=icall<void(*)(float)>("UnityEngine.Time::set_timeScale");
     static bool pausedByVR=false;static float savedTimeScale=1.f;
@@ -273,13 +476,22 @@ void GameMainTick(){
     }
     // Canvas discovery is deliberately infrequent, outside rendering callbacks.
     SyncHudCamera();
-    static int tick=0;if((tick++%60)!=0)return;
+    gameHapticTick();
+    static int tick=0;++tick;
+    if(tick%120==1)discoverWaterTriggers();
+    if(tick%600==0&&skippedUVRows)LOG("AnimatedUV invalid material/property rows skipped: %llu (valid rows still animate)",(unsigned long long)skippedUVRows);
+    if(tick!=1&&tick%60!=0)return;
     auto camera=icall<void*(*)()>("UnityEngine.Camera::get_main");
     auto find=icall<void*(*)(void*,bool)>("UnityEngine.Object::FindObjectsOfType");
     auto mode=icall<int(*)(void*)>("UnityEngine.Canvas::get_renderMode");
     auto setMode=icall<void(*)(void*,int)>("UnityEngine.Canvas::set_renderMode");
     auto setCamera=icall<void(*)(void*,void*)>("UnityEngine.Canvas::set_worldCamera");
     auto setDistance=icall<void(*)(void*,float)>("UnityEngine.Canvas::set_planeDistance");
+    if(setCamera)canvasSetCamera=setCamera;if(setDistance)canvasSetDistance=setDistance;
+    if(!canvasModeHookAttempted&&setMode){canvasModeHookAttempted=true;
+        canvasModeHookInstalled=DobbyHook(reinterpret_cast<void*>(setMode),reinterpret_cast<dobby_dummy_func_t>(canvasModeHook),reinterpret_cast<dobby_dummy_func_t*>(&oldCanvasModeSetter))==0;
+        LOG("Canvas overlay-to-stereo interception: %s",canvasModeHookInstalled?"installed":"unavailable; periodic conversion remains active");
+    }
     auto isRoot=icall<bool(*)(void*)>("UnityEngine.Canvas::get_isRootCanvas");
     auto gameObject=icall<void*(*)(void*)>("UnityEngine.Component::get_gameObject");
     auto getName=icall<void*(*)(void*)>("UnityEngine.Object::GetName");
@@ -304,8 +516,8 @@ void GameMainTick(){
         if(!canvas||!isRoot(canvas))continue;
         if(gameObject&&getName&&enabled){auto go=gameObject(canvas);auto name=go?getName(go):nullptr;
             if(eq(name,"CF2-Canvas")||eq(name,"CF2-Gamepad-Notifier")){enabled(canvas,false);continue;}}
-        if(mode(canvas)==0){setCamera(canvas,cam);setDistance(canvas,distance);setMode(canvas,1);++converted;}
-        else if(mode(canvas)==1){setCamera(canvas,cam);setDistance(canvas,distance);}}
+        if(mode(canvas)==0){setCamera(canvas,cam);setDistance(canvas,distance);setMode(canvas,1);rememberHUDCanvas(canvas);++converted;}
+        else if(mode(canvas)==1){setCamera(canvas,cam);setDistance(canvas,distance);rememberHUDCanvas(canvas);}}
     if(converted)LOG("Converted %d overlay canvases to stereo camera-space UI",converted);
 }
 void InstallGameHooks(void* lib){
@@ -314,6 +526,7 @@ void InstallGameHooks(void* lib){
     Dl_info info{};if(!dladdr(dlsym(il,"il2cpp_domain_get"),&info)||!info.dli_fbase)return;
     uintptr_t base=reinterpret_cast<uintptr_t>(info.dli_fbase);
     LOG("IL2CPP load base=%p",info.dli_fbase);
+    // Native address verification only here. Managed metadata is not initialized yet.
     bool ok=true;
     ok &= hook(base,kAxis,(void*)axisHook,(void**)&oldAxis,"CF2Input.GetAxis");
     ok &= hook(base,kAxisRaw,(void*)rawHook,(void**)&oldAxisRaw,"CF2Input.GetAxisRaw");
@@ -321,6 +534,13 @@ void InstallGameHooks(void* lib){
     ok &= hook(base,kDown,(void*)downHook,(void**)&oldDown,"CF2Input.GetButtonDown");
     ok &= hook(base,kUp,(void*)upHook,(void**)&oldUp,"CF2Input.GetButtonUp");
     ok &= hook(base,kTitleStart,(void*)titleStartHook,(void**)&oldTitleStart,"TitleScreen.Start");
+    hook(base,kSonicFixed,(void*)sonicFixedHook,(void**)&oldSonicFixed,"SonicNew.FixedUpdate");
+    hook(base,kWaterTrigger,(void*)waterTriggerHook,(void**)&oldWaterTrigger,"WaterSlider.OnTriggerEnter");
+    hook(base,kBoosterTrigger,(void*)boosterTriggerHook,(void**)&oldBoosterTrigger,"WaterslideBooster.OnTriggerEnter");
+    hook(base,kWaterEnter,(void*)waterEnterHook,(void**)&oldWaterEnter,"SonicNew.OnWaterSlideEnter");
+    hook(base,kAddRing,(void*)addRingHook,(void**)&oldAddRing,"PlayerBase.AddRing");
+    hook(base,kAcceleration,(void*)accelerationHook,(void**)&oldAcceleration,"PlayerBase.AccelerationSystem");
+    hook(base,kAnimatedUV,(void*)animatedUVHook,(void**)&oldAnimatedUV,"AnimatedUV.Update");
     LOG("Pinned APK hooks installed: %s",ok?"all":"INCOMPLETE");
 }
 void BeginLoaderHooks(){
@@ -333,7 +553,7 @@ extern "C" JNIEXPORT jint JNI_OnLoad(JavaVM* vm,void*){g_vm=vm;return JNI_VERSIO
 extern "C" JNIEXPORT void JNICALL Java_com_p06_quest_QuestActivity_nativePrepare(JNIEnv* env,jclass,jobject activity,jstring directory,jint fd){
     if(fd>=0)logFd=dup(fd);
     g_activity=env->NewGlobalRef(activity);const char* dir=env->GetStringUTFChars(directory,nullptr);InitOptions(dir);env->ReleaseStringUTFChars(directory,dir);
-    LOG("P06 Quest candidate 0.1.4 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
+    LOG("P06 Quest candidate 0.1.8 / Unity 2022.3.62f1 / ARM64");installCrashRecorder();
     LOG("System library loading is untouched; waiting for Unity activity creation");
 }
 

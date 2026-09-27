@@ -3,6 +3,13 @@ sys.path.insert(0,'vendor/python')
 from elftools.elf.elffile import ELFFile
 s=pathlib.Path('vendor/dumper/dump.cs').read_text(encoding='utf-8-sig')
 spec=[('TitleStart','TitleScreen','private void Start()'),('Axis','CF2Input','public static float GetAxis(string axisName)'),('AxisRaw','CF2Input','public static float GetAxisRaw(string axisName)'),('Held','CF2Input','public static bool GetButton(string axisName)'),('Down','CF2Input','public static bool GetButtonDown(string axisName)'),('Up','CF2Input','public static bool GetButtonUp(string axisName)')]
+spec += [('AnimatedUV','AnimatedUV','private void Update()'),('SonicFixed','SonicNew','public override void FixedUpdate()'),
+ ('WaterTrigger','WaterSlider','private void OnTriggerEnter(Collider collider)'),
+ ('BoosterTrigger','WaterslideBooster','private void OnTriggerEnter(Collider collider)'),
+ ('WaterEnter','SonicNew','public override void OnWaterSlideEnter(string Spline = "", bool TriggerState = True, float Speed = 0)'),
+ ('AddRing','PlayerBase','public void AddRing(int Amount = 1, AudioSource ThisRingSource)'),
+ ('Acceleration','PlayerBase','internal void AccelerationSystem(float AccFloat)')]
+
 f=open('original/libil2cpp.so','rb');e=ELFFile(f);out=['#pragma once','#include <cstdint>','struct Binding { uintptr_t rva; unsigned char bytes[16]; };'];record=[]
 for tag,cls,signature in spec:
  blocks=re.findall(r'(?m)^public (?:(?:sealed|static|abstract) )?class '+cls+r'\b[^\n]*\n\{(.*?)(?=\n\})',s,re.S)

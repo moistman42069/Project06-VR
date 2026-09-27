@@ -19,6 +19,15 @@ inline UnityXRPose P06EyePose(const XrView* views,int eye,const VROptions& optio
     }
     return result;
 }
+inline void P06ApplyFirstPersonAnchor(UnityXRPose& pose,const float position[3],const float rotation[4],float /*worldScale*/){
+    const float x=pose.position.x,y=pose.position.y,z=pose.position.z;
+    const float tx=2.f*(rotation[1]*z-rotation[2]*y),ty=2.f*(rotation[2]*x-rotation[0]*z),tz=2.f*(rotation[0]*y-rotation[1]*x);
+    pose.position={position[0]+x+rotation[3]*tx+(rotation[1]*tz-rotation[2]*ty),
+        position[1]+y+rotation[3]*ty+(rotation[2]*tx-rotation[0]*tz),
+        position[2]+z+rotation[3]*tz+(rotation[0]*ty-rotation[1]*tx)};
+    const auto q=pose.rotation;const float ax=rotation[0],ay=rotation[1],az=rotation[2],aw=rotation[3];
+    pose.rotation={aw*q.x+ax*q.w+ay*q.z-az*q.y,aw*q.y-ax*q.z+ay*q.w+az*q.x,aw*q.z+ax*q.y-ay*q.x+az*q.w,aw*q.w-ax*q.x-ay*q.y-az*q.z};
+}
 inline UnityXRProjection P06Projection(const XrFovf& fov,const VROptions& options){
     UnityXRProjection result{};result.type=kUnityXRProjectionTypeHalfAngles;
     if(options.mode==ViewMode::Immersive)result.data.halfAngles={std::tan(fov.angleLeft),std::tan(fov.angleRight),std::tan(fov.angleUp),std::tan(fov.angleDown)};

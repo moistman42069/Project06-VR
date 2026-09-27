@@ -1,21 +1,28 @@
 # Active work checkpoint
 
-Date: 2026-09-26
-Status: candidate 0.1.3 launches Unity and creates the OpenXR instance but the
-user's Quest log proves graphics startup fails at EGL config resolution. Candidate
-0.1.4 addresses that binding and adds startup/frame evidence. Quest 3 visibility
-acceptance remains pending.
+Date: 2026-09-26. Current candidate: **0.1.8 / versionCode 108**.
 
-APK: `out/p06-quest-0.1.4.apk` (versionCode 104).
-SHA-256: `54b6f34480e341eca4ecc4a595e199acfdc4425042fa1bb7b7c1e6e54677d66e`.
-Matching source ZIP: `out/p06-quest-0.1.4-source.zip`.
-Receipt: `out/p06-quest-0.1.4-receipt.json`.
+- User confirmed 0.1.4 immersive VR, controls and VR menu. This is the working
+  headset baseline; later features are not accepted yet.
+- 0.1.7 failed startup on all six supplied runs. The same IL2CPP null-class
+  dereference occurred before the verified input hooks were installed.
+- 0.1.8 removes all managed reflection from Android startup and guards runtime
+  lookup behind managed Unity callbacks. Optional hook addresses are generated
+  from pinned APK metadata and validated against 16 native prologue bytes.
+- Categorized menus, first-person body/glove/camera fixes, three opt-in gestures,
+  adjustable haptics, bounded water-trigger recovery and AnimatedUV row guards
+  are implemented. Details and known limits: [CANDIDATE-018.md](CANDIDATE-018.md).
+- Source remains separate from MCC. No release, device installation or headset
+  acceptance is authorized by a successful build. User sideloads through Shadow PC.
 
-Read [EGL and session startup investigation](EGL-SESSION-STARTUP-20260926.md).
-The user tested 0.1.3 through Shadow PC and cannot connect the Quest by USB.
-No headset acceptance or public release is recorded. Keep MCC untouched.
+Artifacts: `out/p06-quest-0.1.8.apk`, matching `-source.zip`, and `-receipt.json`.
+The receipt carries the APK/source-tree/native hashes and preserves the pinned
+base identity. The final source-archive checksum is in a separate checksums file,
+so the archive never contains a stale copy of its own checksum.
 
-On 0.1.4, check the EGL context/draw-surface config-query line, resolved config,
-`XR graphics initialized`, OpenXR session state transitions, and
-`First OpenXR frame submitted`. The headset loading view must actually clear;
-logs and static checks alone do not prove visible or correct stereo output.
+Still pending: Quest startup verification, right-eye menu flicker, first-person
+HUD/hand proportions and controller orientation, gesture tuning, haptic timing,
+repeat of the recorded water route, scene/death transitions and performance.
+No exact cause of the recorded water fall is claimed; missed trigger recovery is
+bounded and observable, and native low-speed/spline-end exits remain intact.
+Preserve logs and source archives. No public GitHub release until user testing.

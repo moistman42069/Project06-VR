@@ -1,8 +1,7 @@
 # Project 06 VR project plan
 
-Status: pre-test candidate. The first APK is packaged for Quest sideloading, but
-no headset acceptance has been recorded. Do not call it a release until the user
-has tested startup, input, camera, HUD and at least one playable stage.
+Status: 0.1.4 was headset-confirmed for immersive VR/input/menu. 0.1.7 regressed
+startup. Replacement 0.1.8 is awaiting headset testing; no public release.
 
 ## Current foundation
 
@@ -11,6 +10,12 @@ has tested startup, input, camera, HUD and at least one playable stage.
 - Quest Touch mapping for sticks, buttons, triggers, grips and stick clicks.
 - Both-stick-click VR menu with immersive, 3D screen and 2D theatre modes.
 - Separate HUD camera path, active `OutlineCamera` fallback, system recenter reserved.
+- Categorized VR menu (UI, VR, Graphics, Running, Homing, Spindash, Haptics, System); immediate screen-overlay redirect.
+- Experimental first person: player-relative adjustable eye anchor, Sonic renderer hide, and
+  render-only glove meshes following Touch grip poses. Disabled by default; the
+  user must verify camera alignment, model proportions and visibility in headset.
+- Guarded water-entry/booster trigger sweeps and WaterSlide exit telemetry. The SonicFast ground-grace experiment is disabled.
+- Opt-in arm-swing running, native-target pull homing, crouch spindash and configurable game-action haptics in candidate 0.1.8.
 - Per-run logs in `Downloads/P06Quest`, with app-private fallback.
 - Static build, package, archive and menu/view-math checks passing.
 
@@ -58,6 +63,10 @@ has tested startup, input, camera, HUD and at least one playable stage.
 - Add hand/controller offsets, elbow targets and comfort limits.
 - Avoid replacing authored animation until the native pose and transitions are
   verified in several stages.
+- Candidate 0.1.8 implements corrected procedural tracked gloves, body hiding and
+  an adjustable eye anchor. Full hand/arm IK, authored hand meshes, physical world
+  interaction and broader character support remain future work. Gesture running,
+  homing and crouch spindash are now implemented for SonicNew and await testing.
 
 ### 0.6 — world collision and physical interaction
 
@@ -72,7 +81,7 @@ has tested startup, input, camera, HUD and at least one playable stage.
 - Verify every reverse-engineering lead against the exact supplied APK.
 - Keep the original APK, extracted evidence and generated artifacts outside the
   tracked source tree or in ignored folders.
-- One behavior change per candidate; record the runtime result in `docs/`.
+- Record each behavior and runtime result in `docs/`; optional changes remain isolated from the stereo core.
 - A static build is not headset acceptance. Preserve logs from every test run.
 - Optional features degrade to stock behavior if their proof or runtime hook fails.
 - Never intercept the Quest right Meta/system button; it remains available for

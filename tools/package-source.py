@@ -5,13 +5,15 @@ import subprocess
 import zipfile
 
 root = pathlib.Path(__file__).resolve().parents[1]
-version = '0.1.4'
+version = '0.1.8'
 files = set()
 for folder in ['src', 'tools', 'tests', 'docs']:
     files.update(p for p in (root / folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
 for name in ['README.md', 'AGENTS.md', '.gitignore', 'CMakeLists.txt',
              'evidence/apk-identity.json', 'evidence/bindings.json',
              'evidence/bridge-api-audit.json', 'evidence/input-callers.json',
+             'evidence/startup-017-crashes.json',
+             'out/candidate-abi-audit.json',
              f'out/p06-quest-{version}-receipt.json', 'out/compatibility-audit.json']:
     files.add(root / name)
 for folder in ['vendor/OpenXR-SDK', 'vendor/Dobby-stable']:

@@ -34,5 +34,47 @@
     "method": "CF2Input.public static bool GetButtonUp(string axisName)",
     "rva": "0x13db5c8",
     "prologue": "fe57bea9f44f01a974b100b015a300d0"
+  },
+  {
+    "name": "AnimatedUV",
+    "method": "AnimatedUV.private void Update()",
+    "rva": "0x118ed64",
+    "prologue": "e923bc6dfe5f01a9f65702a9f44f03a9"
+  },
+  {
+    "name": "SonicFixed",
+    "method": "SonicNew.public override void FixedUpdate()",
+    "rva": "0x12c99c4",
+    "prologue": "ffc301d1ef3b016ded33026deb2b036d"
+  },
+  {
+    "name": "WaterTrigger",
+    "method": "WaterSlider.private void OnTriggerEnter(Collider collider)",
+    "rva": "0x1308260",
+    "prologue": "fe0f1df8f65701a9f44f02a9f6b700f0"
+  },
+  {
+    "name": "BoosterTrigger",
+    "method": "WaterslideBooster.private void OnTriggerEnter(Collider collider)",
+    "rva": "0x1307ff4",
+    "prologue": "fe57bea9f44f01a915b80090a80e7d39"
+  },
+  {
+    "name": "WaterEnter",
+    "method": "SonicNew.public override void OnWaterSlideEnter(string Spline = \"\", bool TriggerState = True, float Speed = 0)",
+    "rva": "0x12cfc58",
+    "prologue": "e80f1dfcfe0700f9f65701a9f44f02a9"
+  },
+  {
+    "name": "AddRing",
+    "method": "PlayerBase.public void AddRing(int Amount = 1, AudioSource ThisRingSource)",
+    "rva": "0x121fb4c",
+    "prologue": "fe0f1bf8fa6701a9f85f02a9f65703a9"
+  },
+  {
+    "name": "Acceleration",
+    "method": "PlayerBase.internal void AccelerationSystem(float AccFloat)",
+    "rva": "0x122138c",
+    "prologue": "eb2bbc6de923016dfe5702a9f44f03a9"
   }
 ]

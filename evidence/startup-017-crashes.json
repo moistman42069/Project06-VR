@@ -1,0 +1,44 @@
+[
+  {
+    "log": "P06Quest-20260926-193132-304.log.txt",
+    "sha256": "ca7eb9601a7f247702690d4e9b908d925b146cd5775ca3e477199eccdb8a8a8a",
+    "fault": "0x135",
+    "pc_rva": "0x1073d3c",
+    "lr_rva": "0x10d19b4"
+  },
+  {
+    "log": "P06Quest-20260926-193132-867.log.txt",
+    "sha256": "d290052d258942cdc8064e9275cecec5d65453f1181d93394e4f69639f438d4f",
+    "fault": "0x135",
+    "pc_rva": "0x1073d3c",
+    "lr_rva": "0x10d19b4"
+  },
+  {
+    "log": "P06Quest-20260926-193133-235.log.txt",
+    "sha256": "4e9c5c7257dc4df8189ea6c6e850a523e1cacffdd15dfd9385bca06d81732dd9",
+    "fault": "0x135",
+    "pc_rva": "0x1073d3c",
+    "lr_rva": "0x10d19b4"
+  },
+  {
+    "log": "P06Quest-20260926-193200-279.log.txt",
+    "sha256": "9868e931799329af6b88e3891d026fc7179c45898efbd4cf5f5eb566a23f9f1b",
+    "fault": "0x135",
+    "pc_rva": "0x1073d3c",
+    "lr_rva": "0x10d19b4"
+  },
+  {
+    "log": "P06Quest-20260926-193200-795.log.txt",
+    "sha256": "2f2889fca42497ea62b62a2ca7de133a1f72045ce80fe704dce79ce09c54c947",
+    "fault": "0x135",
+    "pc_rva": "0x1073d3c",
+    "lr_rva": "0x10d19b4"
+  },
+  {
+    "log": "P06Quest-20260926-193201-110.log.txt",
+    "sha256": "ccce2ee896268988c6eb0e65e921d11b7ed6114d5d4c67515d8aa7541990c56a",
+    "fault": "0x135",
+    "pc_rva": "0x1073d3c",
+    "lr_rva": "0x10d19b4"
+  }
+]
